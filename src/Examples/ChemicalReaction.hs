@@ -3,7 +3,7 @@ module Examples.ChemicalReaction where
 import Simulation.Aivika.Dynamics
 
 specs = Specs { spcStartTime = 0, 
-                spcStopTime = 13, 
+                spcStopTime = 5, 
                 spcDT = 0.01,
                 spcMethod = RungeKutta4 }
 

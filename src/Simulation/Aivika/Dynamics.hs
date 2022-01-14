@@ -49,8 +49,10 @@
 module Simulation.Aivika.Dynamics 
        (-- * Dynamics
         Dynamics,
+        apply,
         Specs(..),
         Method(..),
+        Parameters(..),
         runDynamics1,
         runDynamics,
         runDynamicsIO,
@@ -143,13 +145,17 @@ import qualified Simulation.Aivika.PriorityQueue as PQ
 
 -- | A value in the 'Dynamics' monad represents a dynamic process, i.e.
 -- a polymorphic time varying function.
-newtype Dynamics a = Dynamics (Parameters -> IO a)
+newtype Dynamics a = Dynamics {apply :: Parameters -> IO a}
+
 
 -- | It defines the simulation time appended with additional information.
 data Parameters = Parameters { parSpecs :: Specs,    -- ^ the simulation specs
                                parTime :: Double,    -- ^ the current time
                                parIteration :: Int,  -- ^ the current iteration
                                parPhase :: Int }     -- ^ the current phase
+
+-- apply :: Dynamics a -> Parameters -> a
+-- apply (Dynamics m) ps = m ps
 
 -- | It defines the simulation specs.
 data Specs = Specs { spcStartTime :: Double,    -- ^ the start time
