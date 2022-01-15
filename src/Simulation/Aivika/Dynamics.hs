@@ -48,13 +48,15 @@
 --
 module Simulation.Aivika.Dynamics 
        (-- * Dynamics
-        Dynamics,
-        apply,
+        Dynamics(..),
+        iterationBnds,
+        basicTime,
         Specs(..),
         Method(..),
         Parameters(..),
         runDynamics1,
         runDynamics,
+        runDynamicsM,
         runDynamicsIO,
         -- ** Time parameters
         starttime,
@@ -69,6 +71,7 @@ module Simulation.Aivika.Dynamics
         newInteg,
         integInit,
         integValue,
+        integValueM,
         integDiff,
         -- ** Table Functions
         lookupD,
@@ -153,6 +156,7 @@ data Parameters = Parameters { parSpecs :: Specs,    -- ^ the simulation specs
                                parTime :: Double,    -- ^ the current time
                                parIteration :: Int,  -- ^ the current iteration
                                parPhase :: Int }     -- ^ the current phase
+                  deriving (Eq, Show)
 
 -- apply :: Dynamics a -> Parameters -> a
 -- apply (Dynamics m) ps = m ps
@@ -271,6 +275,17 @@ subrunDynamics (Dynamics m) sc =
                                        parPhase = 0 }
      map (m . parameterise) [nl .. nu]
 
+
+subrunDynamicsM :: Dynamics a -> Specs -> [IO a]
+subrunDynamicsM (Dynamics m) sc =
+  do let (nl, nu) = iterationBnds sc
+         parameterise n = Parameters { parSpecs = sc,
+                                       parTime = basicTime sc n 0,
+                                       parIteration = n,
+                                       parPhase = 0 }
+     map (m . parameterise) (reverse $ [nl .. nu])
+
+
 -- | Run the simulation and return the result in the last 
 -- time point using the specified simulation specs.
 runDynamics1 :: Dynamics (Dynamics a) -> Specs -> IO a
@@ -290,6 +305,18 @@ runDynamics (Dynamics m) sc =
                          parIteration = 0,
                          parPhase = 0 }
      sequence $ subrunDynamics d sc
+
+
+-- | Run the simulation and return the results in all 
+-- integration time points using the specified simulation specs.
+runDynamicsM :: Dynamics (Dynamics a) -> Specs -> IO [a]
+runDynamicsM (Dynamics m) sc = 
+  do d <- m Parameters { parSpecs = sc,
+                         parTime = spcStartTime sc,
+                         parIteration = 0,
+                         parPhase = 0 }
+     sequence $ subrunDynamicsM d sc
+
 
 -- | Run the simulation and return the results in all 
 -- integration time points using the specified simulation specs.
@@ -417,6 +444,14 @@ integValue integ =
   Dynamics $ \ps ->
   do (Dynamics m) <- readIORef (integExternal integ)
      m ps
+
+-- | Return the integral's value. MODIFIED
+integValueM :: Integ -> Dynamics Double
+integValueM integ = 
+  Dynamics $ \ps ->
+  do (Dynamics m) <- readIORef (integInternal integ)
+     m ps
+
 
 -- | Set the derivative for the integral.
 integDiff :: Integ -> Dynamics Double -> Dynamics ()
