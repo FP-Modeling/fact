@@ -50,28 +50,17 @@ module Simulation.Aivika.Dynamics
        (-- * Dynamics
         Dynamics(..),
         iterationBnds,
-        basicTime,
+        iterToTime,
         Specs(..),
         Method(..),
         Parameters(..),
         runDynamics1,
         runDynamics,
-        runDynamicsM,
-        runDynamicsIO,
-        -- ** Time parameters
-        starttime,
-        stoptime,
-        dt,
-        time,
-        -- ** Maximum and Minimum
-        maxD,
-        minD,
         -- ** Integrals
         Integ,
         newInteg,
-        integInit,
+        initial,
         integValue,
-        integValueM,
         integDiff,
         -- ** Table Functions
         lookupD,
@@ -100,30 +89,26 @@ import Control.Monad.Trans
 -- The Dynamics Monad
 --
 -- A value of the Dynamics monad represents an abstract dynamic 
--- process, i.e. a time varying polymorphic function. This is 
+-- process, i.e. a time varying polymorstic function. This is 
 -- a key point of the Aivika simulation library.
 --
 
 -- | A value in the 'Dynamics' monad represents a dynamic process, i.e.
--- a polymorphic time varying function.
+-- a polymorstic time varying function.
 newtype Dynamics a = Dynamics {apply :: Parameters -> IO a}
 
-
 -- | It defines the simulation time appended with additional information.
-data Parameters = Parameters { parSpecs :: Specs,    -- ^ the simulation specs
-                               parTime :: Double,    -- ^ the current time
-                               parIteration :: Int,  -- ^ the current iteration
-                               parPhase :: Int }     -- ^ the current phase
+data Parameters = Parameters { specs :: Specs,    -- ^ the simulation specs
+                               time :: Double,    -- ^ the current time
+                               iteration :: Int,  -- ^ the current iteration
+                               stage :: Int }     -- ^ the current stage
                   deriving (Eq, Show)
 
--- apply :: Dynamics a -> Parameters -> a
--- apply (Dynamics m) ps = m ps
-
 -- | It defines the simulation specs.
-data Specs = Specs { spcStartTime :: Double,    -- ^ the start time
-                     spcStopTime :: Double,     -- ^ the stop time
-                     spcDT :: Double,           -- ^ the integration time step
-                     spcMethod :: Method        -- ^ the integration method
+data Specs = Specs { startTime :: Double,    -- ^ the start time
+                     stopTime  :: Double,    -- ^ the stop time
+                     dt        :: Double,    -- ^ the integration time step
+                     method :: Method        -- ^ the integration method
                    } deriving (Eq, Ord, Show)
 
 -- | It defines the integration method.
@@ -131,68 +116,6 @@ data Method = Euler          -- ^ Euler's method
             | RungeKutta2    -- ^ the 2nd order Runge-Kutta method
             | RungeKutta4    -- ^ the 4th order Runge-Kutta method
             deriving (Eq, Ord, Show)
-
-iterations :: Specs -> [Int]
-iterations sc = [i1 .. i2] where
-  i1 = 0
-  i2 = round ((spcStopTime sc - 
-               spcStartTime sc) / spcDT sc)
-
-iterationBnds :: Specs -> (Int, Int)
-iterationBnds sc = (0, round ((spcStopTime sc - 
-                               spcStartTime sc) / spcDT sc))
-
-iterationLoBnd :: Specs -> Int
-iterationLoBnd sc = 0
-
-iterationHiBnd :: Specs -> Int
-iterationHiBnd sc = round ((spcStopTime sc - 
-                            spcStartTime sc) / spcDT sc)
-
-phases :: Specs -> [Int]
-phases sc = 
-  case spcMethod sc of
-    Euler -> [0]
-    RungeKutta2 -> [0, 1]
-    RungeKutta4 -> [0, 1, 2, 3]
-
-phaseBnds :: Specs -> (Int, Int)
-phaseBnds sc = 
-  case spcMethod sc of
-    Euler -> (0, 0)
-    RungeKutta2 -> (0, 1)
-    RungeKutta4 -> (0, 3)
-
-phaseLoBnd :: Specs -> Int
-phaseLoBnd sc = 0
-                  
-phaseHiBnd :: Specs -> Int
-phaseHiBnd sc = 
-  case spcMethod sc of
-    Euler -> 0
-    RungeKutta2 -> 1
-    RungeKutta4 -> 3
-
-basicTime :: Specs -> Int -> Int -> Double
-basicTime sc n ph =
-  if ph < 0 then 
-    error "Incorrect phase: basicTime"
-  else
-    spcStartTime sc + n' * spcDT sc + delta (spcMethod sc) ph 
-      where n' = fromInteger (toInteger n)
-            delta Euler       0 = 0
-            delta RungeKutta2 0 = 0
-            delta RungeKutta2 1 = spcDT sc
-            delta RungeKutta4 0 = 0
-            delta RungeKutta4 1 = spcDT sc / 2
-            delta RungeKutta4 2 = spcDT sc / 2
-            delta RungeKutta4 3 = spcDT sc
-
-neighborhood :: Specs -> Double -> Double -> Bool
-neighborhood sc t t' = 
-  abs (t - t') <= spcDT sc / 1.0e6
-
--- newtype Dynamics a = Dynamics (Parameters -> IO a)
 
 instance Functor Dynamics where
   fmap f (Dynamics da) = Dynamics $ \ps -> fmap f (da ps)
@@ -206,7 +129,7 @@ instance Monad Dynamics where
   m >>= k = bindD m k
 
 returnD :: a -> Dynamics a
-returnD a = Dynamics (\ps -> return a)
+returnD a = Dynamics $ const (return a)
 
 bindD :: Dynamics a -> (a -> Dynamics b) -> Dynamics b
 bindD (Dynamics m) k = 
@@ -215,80 +138,6 @@ bindD (Dynamics m) k =
      let Dynamics m' = k a
      m' ps
 
-subrunDynamics1 :: Dynamics a -> Specs -> IO a
-subrunDynamics1 (Dynamics m) sc =
-  do let n = iterationHiBnd sc
-         t = basicTime sc n 0
-     m Parameters { parSpecs = sc,
-                    parTime = t,
-                    parIteration = n,
-                    parPhase = 0 }
-
-subrunDynamics :: Dynamics a -> Specs -> [IO a]
-subrunDynamics (Dynamics m) sc =
-  do let (nl, nu) = iterationBnds sc
-         parameterise n = Parameters { parSpecs = sc,
-                                       parTime = basicTime sc n 0,
-                                       parIteration = n,
-                                       parPhase = 0 }
-     map (m . parameterise) [nl .. nu]
-
-
-subrunDynamicsM :: Dynamics a -> Specs -> [IO a]
-subrunDynamicsM (Dynamics m) sc =
-  do let (nl, nu) = iterationBnds sc
-         parameterise n = Parameters { parSpecs = sc,
-                                       parTime = basicTime sc n 0,
-                                       parIteration = n,
-                                       parPhase = 0 }
-     map (m . parameterise) (reverse $ [nl .. nu])
-
-
--- | Run the simulation and return the result in the last 
--- time point using the specified simulation specs.
-runDynamics1 :: Dynamics (Dynamics a) -> Specs -> IO a
-runDynamics1 (Dynamics m) sc = 
-  do d <- m Parameters { parSpecs = sc,
-                         parTime = spcStartTime sc,
-                         parIteration = 0,
-                         parPhase = 0 }
-     subrunDynamics1 d sc
-
--- | Run the simulation and return the results in all 
--- integration time points using the specified simulation specs.
-runDynamics :: Dynamics (Dynamics a) -> Specs -> IO [a]
-runDynamics (Dynamics m) sc = 
-  do d <- m Parameters { parSpecs = sc,
-                         parTime = spcStartTime sc,
-                         parIteration = 0,
-                         parPhase = 0 }
-     sequence $ subrunDynamics d sc
-
-
--- | Run the simulation and return the results in all 
--- integration time points using the specified simulation specs.
-runDynamicsM :: Dynamics (Dynamics a) -> Specs -> IO [a]
-runDynamicsM (Dynamics m) sc = 
-  do d <- m Parameters { parSpecs = sc,
-                         parTime = spcStartTime sc,
-                         parIteration = 0,
-                         parPhase = 0 }
-     sequence $ subrunDynamicsM d sc
-
-
--- | Run the simulation and return the results in all 
--- integration time points using the specified simulation specs.
-runDynamicsIO :: Dynamics (Dynamics a) -> Specs -> IO [IO a]
-runDynamicsIO (Dynamics m) sc =
-  do d <- m Parameters { parSpecs = sc,
-                         parTime = spcStartTime sc,
-                         parIteration = 0,
-                         parPhase = 0 }
-     return $ subrunDynamics d sc
-
--- instance Functor Dynamics where
---   fmap f (Dynamics m) = 
---     Dynamics $ \ps -> do { a <- m ps; return $ f a }
 
 instance Eq (Dynamics a) where
   x == y = error "Can't compare dynamics." 
@@ -339,105 +188,168 @@ instance (Floating a) => Floating (Dynamics a) where
 
 instance MonadIO Dynamics where
   liftIO m = Dynamics $ const m
+     
 
---
--- Integration Parameters and Time
---
+-- | Make a list of all possible iterations from 0
+iterations :: Specs -> [Int]
+iterations sc = [i1 .. i2] where
+  i1 = 0
+  i2 = round ((stopTime sc - 
+               startTime sc) / dt sc)
 
--- | Return the start simulation time.
-starttime :: Dynamics Double
-starttime = Dynamics $ return . spcStartTime . parSpecs
+-- | Make a tuple with minium and maximum boundaries
+iterationBnds :: Specs -> (Int, Int)
+iterationBnds sc = (0, round ((stopTime sc - 
+                               startTime sc) / dt sc))
 
--- | Return the stop simulation time.
-stoptime :: Dynamics Double
-stoptime = Dynamics $ return . spcStopTime . parSpecs
+-- | Auxiliary functions for boundaries of iterations                   
+iterationLoBnd :: Specs -> Int
+iterationLoBnd sc = fst $ iterationBnds sc
 
--- | Return the integration time step.
-dt :: Dynamics Double
-dt = Dynamics $ return . spcDT . parSpecs
+iterationHiBnd :: Specs -> Int
+iterationHiBnd sc = snd $ iterationBnds sc                   
 
--- | Return the current simulation time.
-time :: Dynamics Double
-time = Dynamics $ return . parTime 
+-- | Make a list of all possible stages, based on the solver method
+stages :: Specs -> [Int]
+stages sc = 
+  case method sc of
+    Euler -> [0]
+    RungeKutta2 -> [0, 1]
+    RungeKutta4 -> [0, 1, 2, 3]
 
---
--- Maximum and Minimum
---
+-- | Make a tuple with minimum and maximum boundaries, based on the solver method
+stageBnds :: Specs -> (Int, Int)
+stageBnds sc = 
+  case method sc of
+    Euler -> (0, 0)
+    RungeKutta2 -> (0, 1)
+    RungeKutta4 -> (0, 3)
 
--- | Return the maximum.
-maxD :: (Ord a) => Dynamics a -> Dynamics a -> Dynamics a
-maxD = liftM2D max
+-- | Auxiliary functions for boundaries of stages
+staseLoBnd :: Specs -> Int
+staseLoBnd sc = fst $ stageBnds sc
+                  
+staseHiBnd :: Specs -> Int
+staseHiBnd sc = snd $ stageBnds sc
 
--- | Return the minimum.
-minD :: (Ord a) => Dynamics a -> Dynamics a -> Dynamics a
-minD = liftM2D min
+-- | Transforms iteration to time
+iterToTime :: Specs -> Int -> Int -> Double
+iterToTime sc n st =
+  if st < 0 then 
+    error "Incorrect stage: iterToTime"
+  else
+    (startTime sc) + n' * (dt sc) + delta (method sc) st
+      where n' = fromInteger (toInteger n)
+            delta Euler       0 = 0
+            delta RungeKutta2 0 = 0
+            delta RungeKutta2 1 = dt sc
+            delta RungeKutta4 0 = 0
+            delta RungeKutta4 1 = dt sc / 2
+            delta RungeKutta4 2 = dt sc / 2
+            delta RungeKutta4 3 = dt sc
+
+-- | Function to solve floating point approximations
+neighborhood :: Specs -> Double -> Double -> Bool
+neighborhood sc t t' = 
+  abs (t - t') <= dt sc / 1.0e6
+
+-- | Run the simulation and return the result in the last 
+-- time point using the specified simulation specs.
+runDynamics1 :: Dynamics (Dynamics a) -> Specs -> IO a
+runDynamics1 (Dynamics m) sc = 
+  do d <- m Parameters { specs = sc,
+                         time = startTime sc,
+                         iteration = 0,
+                         stage = 0 }
+     subrunDynamics1 d sc
+
+-- | Run the simulation and return the results in all 
+-- integration time points using the specified simulation specs.
+runDynamics :: Dynamics (Dynamics a) -> Specs -> IO [a]
+runDynamics (Dynamics m) sc = 
+  do d <- m Parameters { specs = sc,
+                         time = startTime sc,
+                         iteration = 0,
+                         stage = 0 }
+     sequence $ subrunDynamics d sc
+
+-- | Auxiliary functions to runDyanamics (individual computation and list of computations)
+subrunDynamics1 :: Dynamics a -> Specs -> IO a
+subrunDynamics1 (Dynamics m) sc =
+  do let n = iterationHiBnd sc
+         t = iterToTime sc n 0
+     m Parameters { specs = sc,
+                    time = t,
+                    iteration = n,
+                    stage = 0 }
+
+subrunDynamics :: Dynamics a -> Specs -> [IO a]
+subrunDynamics (Dynamics m) sc =
+  do let (nl, nu) = iterationBnds sc
+         parameterise n = Parameters { specs = sc,
+                                       time = iterToTime sc n 0,
+                                       iteration = n,
+                                       stage = 0 }
+     map (m . parameterise) [nl .. nu]
            
 --
--- System Dynamics
+-- Integral type
 --
 
 -- | The 'Integ' type represents an integral.
-data Integ = Integ { integInit     :: Dynamics Double,   -- ^ The initial value.
-                     integExternal :: IORef (Dynamics Double),
-                     integInternal :: IORef (Dynamics Double) }
+data Integ = Integ { initial     :: Dynamics Double,   -- ^ The initial value.
+                     cache :: IORef (Dynamics Double),
+                     result :: IORef (Dynamics Double) }
 
 -- | Create a new integral with the specified initial value.
 newInteg :: Dynamics Double -> Dynamics Integ
 newInteg i = 
   do r1 <- liftIO $ newIORef $ initD i 
      r2 <- liftIO $ newIORef $ initD i 
-     let integ = Integ { integInit     = i, 
-                         integExternal = r1,
-                         integInternal = r2 }
+     let integ = Integ { initial = i, 
+                         cache   = r1,
+                         result  = r2 }
          z = Dynamics $ \ps -> 
-           do (Dynamics m) <- readIORef (integInternal integ)
+           do (Dynamics m) <- readIORef (result integ)
               m ps
      y <- umemo interpolate z
-     liftIO $ writeIORef (integExternal integ) y
+     liftIO $ writeIORef (cache integ) y
      return integ
 
 -- | Return the integral's value.
 integValue :: Integ -> Dynamics Double
 integValue integ = 
   Dynamics $ \ps ->
-  do (Dynamics m) <- readIORef (integExternal integ)
+  do (Dynamics m) <- readIORef (cache integ)
      m ps
-
--- | Return the integral's value. MODIFIED
-integValueM :: Integ -> Dynamics Double
-integValueM integ = 
-  Dynamics $ \ps ->
-  do (Dynamics m) <- readIORef (integInternal integ)
-     m ps
-
 
 -- | Set the derivative for the integral.
 integDiff :: Integ -> Dynamics Double -> Dynamics ()
 integDiff integ diff =
   do let z = Dynamics $ \ps ->
-           do y <- readIORef (integExternal integ)
-              let i = integInit integ
-              case spcMethod (parSpecs ps) of
+           do y <- readIORef (cache integ)
+              let i = initial integ
+              case method (specs ps) of
                 Euler -> integEuler diff i y ps
                 RungeKutta2 -> integRK2 diff i y ps
                 RungeKutta4 -> integRK4 diff i y ps
-     liftIO $ writeIORef (integInternal integ) z
+     liftIO $ writeIORef (result integ) z
 
 integEuler :: Dynamics Double
              -> Dynamics Double 
              -> Dynamics Double 
              -> Parameters -> IO Double
 integEuler (Dynamics f) (Dynamics i) (Dynamics y) ps = 
-  case parIteration ps of
+  case iteration ps of
     0 -> 
       i ps
     n -> do 
-      let sc  = parSpecs ps
-          ty  = basicTime sc (n - 1) 0
-          psy = ps { parTime = ty, parIteration = n - 1, parPhase = 0 }
+      let sc  = specs ps
+          ty  = iterToTime sc (n - 1) 0
+          psy = ps { time = ty, iteration = n - 1, stage = 0 }
       a <- y psy
       b <- f psy
-      let !v = a + spcDT (parSpecs ps) * b
+      let !v = a + dt (specs ps) * b
       return v
 
 integRK2 :: Dynamics Double
@@ -445,100 +357,100 @@ integRK2 :: Dynamics Double
            -> Dynamics Double
            -> Parameters -> IO Double
 integRK2 (Dynamics f) (Dynamics i) (Dynamics y) ps =
-  case parPhase ps of
-    0 -> case parIteration ps of
+  case stage ps of
+    0 -> case iteration ps of
       0 ->
         i ps
       n -> do
-        let sc = parSpecs ps
-            ty = basicTime sc (n - 1) 0
+        let sc = specs ps
+            ty = iterToTime sc (n - 1) 0
             t1 = ty
-            t2 = basicTime sc (n - 1) 1
-            psy = ps { parTime = ty, parIteration = n - 1, parPhase = 0 }
+            t2 = iterToTime sc (n - 1) 1
+            psy = ps { time = ty, iteration = n - 1, stage = 0 }
             ps1 = psy
-            ps2 = ps { parTime = t2, parIteration = n - 1, parPhase = 1 }
+            ps2 = ps { time = t2, iteration = n - 1, stage = 1 }
         vy <- y psy
         k1 <- f ps1
         k2 <- f ps2
-        let !v = vy + spcDT sc / 2.0 * (k1 + k2)
+        let !v = vy + dt sc / 2.0 * (k1 + k2)
         return v
     1 -> do
-      let sc = parSpecs ps
-          n  = parIteration ps
-          ty = basicTime sc n 0
+      let sc = specs ps
+          n  = iteration ps
+          ty = iterToTime sc n 0
           t1 = ty
-          psy = ps { parTime = ty, parIteration = n, parPhase = 0 }
+          psy = ps { time = ty, iteration = n, stage = 0 }
           ps1 = psy
       vy <- y psy
       k1 <- f ps1
-      let !v = vy + spcDT sc * k1
+      let !v = vy + dt sc * k1
       return v
     _ -> 
-      error "Incorrect phase: integ"
+      error "Incorrect stase: integ"
 
 integRK4 :: Dynamics Double
            -> Dynamics Double
            -> Dynamics Double
            -> Parameters -> IO Double
 integRK4 (Dynamics f) (Dynamics i) (Dynamics y) ps =
-  case parPhase ps of
-    0 -> case parIteration ps of
+  case stage ps of
+    0 -> case iteration ps of
       0 -> 
         i ps
       n -> do
-        let sc = parSpecs ps
-            ty = basicTime sc (n - 1) 0
+        let sc = specs ps
+            ty = iterToTime sc (n - 1) 0
             t1 = ty
-            t2 = basicTime sc (n - 1) 1
-            t3 = basicTime sc (n - 1) 2
-            t4 = basicTime sc (n - 1) 3
-            psy = ps { parTime = ty, parIteration = n - 1, parPhase = 0 }
+            t2 = iterToTime sc (n - 1) 1
+            t3 = iterToTime sc (n - 1) 2
+            t4 = iterToTime sc (n - 1) 3
+            psy = ps { time = ty, iteration = n - 1, stage = 0 }
             ps1 = psy
-            ps2 = ps { parTime = t2, parIteration = n - 1, parPhase = 1 }
-            ps3 = ps { parTime = t3, parIteration = n - 1, parPhase = 2 }
-            ps4 = ps { parTime = t4, parIteration = n - 1, parPhase = 3 }
+            ps2 = ps { time = t2, iteration = n - 1, stage = 1 }
+            ps3 = ps { time = t3, iteration = n - 1, stage = 2 }
+            ps4 = ps { time = t4, iteration = n - 1, stage = 3 }
         vy <- y psy
         k1 <- f ps1
         k2 <- f ps2
         k3 <- f ps3
         k4 <- f ps4
-        let !v = vy + spcDT sc / 6.0 * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
+        let !v = vy + dt sc / 6.0 * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
         return v
     1 -> do
-      let sc = parSpecs ps
-          n  = parIteration ps
-          ty = basicTime sc n 0
+      let sc = specs ps
+          n  = iteration ps
+          ty = iterToTime sc n 0
           t1 = ty
-          psy = ps { parTime = ty, parIteration = n, parPhase = 0 }
+          psy = ps { time = ty, iteration = n, stage = 0 }
           ps1 = psy
       vy <- y psy
       k1 <- f ps1
-      let !v = vy + spcDT sc / 2.0 * k1
+      let !v = vy + dt sc / 2.0 * k1
       return v
     2 -> do
-      let sc = parSpecs ps
-          n  = parIteration ps
-          ty = basicTime sc n 0
-          t2 = basicTime sc n 1
-          psy = ps { parTime = ty, parIteration = n, parPhase = 0 }
-          ps2 = ps { parTime = t2, parIteration = n, parPhase = 1 }
+      let sc = specs ps
+          n  = iteration ps
+          ty = iterToTime sc n 0
+          t2 = iterToTime sc n 1
+          psy = ps { time = ty, iteration = n, stage = 0 }
+          ps2 = ps { time = t2, iteration = n, stage = 1 }
       vy <- y psy
       k2 <- f ps2
-      let !v = vy + spcDT sc / 2.0 * k2
+      let !v = vy + dt sc / 2.0 * k2
       return v
     3 -> do
-      let sc = parSpecs ps
-          n  = parIteration ps
-          ty = basicTime sc n 0
-          t3 = basicTime sc n 2
-          psy = ps { parTime = ty, parIteration = n, parPhase = 0 }
-          ps3 = ps { parTime = t3, parIteration = n, parPhase = 2 }
+      let sc = specs ps
+          n  = iteration ps
+          ty = iterToTime sc n 0
+          t3 = iterToTime sc n 2
+          psy = ps { time = ty, iteration = n, stage = 0 }
+          ps3 = ps { time = t3, iteration = n, stage = 2 }
       vy <- y psy
       k3 <- f ps3
-      let !v = vy + spcDT sc * k3
+      let !v = vy + dt sc * k3
       return v
     _ -> 
-      error "Incorrect phase: integ"
+      error "Incorrect stase: integ"
 
 -- smoothI :: Dynamics Double -> Dynamics Double -> Dynamics Double 
 --           -> Dynamics Double
@@ -672,18 +584,18 @@ lookupStepwiseD (Dynamics m) tbl =
 -- delayTrans (Dynamics x) (Dynamics d) (Dynamics i) tr = tr $ Dynamics r 
 --   where
 --     r ps = do 
---       let t  = parTime ps
---           sc = parSpecs ps
---           n  = parIteration ps
+--       let t  = time ps
+--           sc = specs ps
+--           n  = iteration ps
 --       a <- d ps
---       let t' = (t - a) - spcStartTime sc
---           n' = fromInteger $ toInteger $ floor $ t' / spcDT sc
---           y | n' < 0    = i $ ps { parTime = spcStartTime sc,
---                                    parIteration = 0, 
---                                    parPhase = 0 }
---             | n' < n    = x $ ps { parTime = t',
---                                    parIteration = n',
---                                    parPhase = -1 }
+--       let t' = (t - a) - startTime sc
+--           n' = fromInteger $ toInteger $ floor $ t' / dt sc
+--           y | n' < 0    = i $ ps { time = startTime sc,
+--                                    iteration = 0, 
+--                                    stage = 0 }
+--             | n' < n    = x $ ps { time = t',
+--                                    iteration = n',
+--                                    stage = -1 }
 --             | n' > n    = error "Cannot return the future data: delay"
 --             | otherwise = error "Cannot return the current data: delay"
 --       y    
@@ -713,54 +625,54 @@ lookupStepwiseD (Dynamics m) tbl =
 initD :: Dynamics a -> Dynamics a
 initD (Dynamics m) =
   Dynamics $ \ps ->
-  if parIteration ps == 0 && parPhase ps == 0 then
+  if iteration ps == 0 && stage ps == 0 then
     m ps
   else
-    let sc = parSpecs ps
-    in m $ ps { parTime = basicTime sc 0 0,
-                parIteration = 0,
-                parPhase = 0 } 
+    let sc = specs ps
+    in m $ ps { time = iterToTime sc 0 0,
+                iteration = 0,
+                stage = 0 } 
 
 -- | Discretize the computation in the integration time points.
 discrete :: Dynamics a -> Dynamics a
 discrete (Dynamics m) =
   Dynamics $ \ps ->
-  let ph = parPhase ps
-      r | ph == 0    = m ps
-        | ph > 0    = let sc = parSpecs ps
-                          n  = parIteration ps
-                      in m $ ps { parTime = basicTime sc n 0,
-                                  parPhase = 0 }
-        | otherwise = let sc = parSpecs ps
-                          t  = parTime ps
-                          n  = parIteration ps
-                          t' = spcStartTime sc + fromIntegral (n + 1) * spcDT sc
+  let st = stage ps
+      r | st == 0    = m ps
+        | st > 0    = let sc = specs ps
+                          n  = iteration ps
+                      in m $ ps { time = iterToTime sc n 0,
+                                  stage = 0 }
+        | otherwise = let sc = specs ps
+                          t  = time ps
+                          n  = iteration ps
+                          t' = startTime sc + fromIntegral (n + 1) * dt sc
                           n' = if neighborhood sc t t' then n + 1 else n
-                      in m $ ps { parTime = basicTime sc n' 0,
-                                  parIteration = n',
-                                  parPhase = 0 }
+                      in m $ ps { time = iterToTime sc n' 0,
+                                  iteration = n',
+                                  stage = 0 }
   in r
 
 -- | Interpolate the computation based on the integration time points only.
 interpolate :: Dynamics Double -> Dynamics Double
 interpolate (Dynamics m) = 
   Dynamics $ \ps -> 
-  if parPhase ps >= 0 then 
+  if stage ps >= 0 then 
     m ps
   else 
-    let sc = parSpecs ps
-        t  = parTime ps
-        x  = (t - spcStartTime sc) / spcDT sc
+    let sc = specs ps
+        t  = time ps
+        x  = (t - startTime sc) / dt sc
         n1 = max (floor x) (iterationLoBnd sc)
         n2 = min (ceiling x) (iterationHiBnd sc)
-        t1 = basicTime sc n1 0
-        t2 = basicTime sc n2 0
-        z1 = m $ ps { parTime = t1, 
-                      parIteration = n1, 
-                      parPhase = 0 }
-        z2 = m $ ps { parTime = t2,
-                      parIteration = n2,
-                      parPhase = 0 }
+        t1 = iterToTime sc n1 0
+        t2 = iterToTime sc n2 0
+        z1 = m $ ps { time = t1, 
+                      iteration = n1, 
+                      stage = 0 }
+        z2 = m $ ps { time = t2,
+                      iteration = n2,
+                      stage = 0 }
         r | t == t1   = z1
           | t == t2   = z2
           | otherwise = 
@@ -802,35 +714,35 @@ memo :: Memo e => (Dynamics e -> Dynamics e) -> Dynamics e
        -> Dynamics (Dynamics e)
 memo tr (Dynamics m) = 
   Dynamics $ \ps ->
-  do let sc = parSpecs ps
-         (phl, phu) = phaseBnds sc
+  do let sc = specs ps
+         (stl, stu) = stageBnds sc
          (nl, nu)   = iterationBnds sc
-     arr   <- newMemoArray_ ((phl, nl), (phu, nu))
+     arr   <- newMemoArray_ ((stl, nl), (stu, nu))
      nref  <- newIORef 0
-     phref <- newIORef 0
+     stref <- newIORef 0
      let r ps = 
-           do let sc  = parSpecs ps
-                  n   = parIteration ps
-                  ph  = parPhase ps
-                  phu = phaseHiBnd sc 
-                  loop n' ph' = 
-                    if (n' > n) || ((n' == n) && (ph' > ph)) 
+           do let sc  = specs ps
+                  n   = iteration ps
+                  st  = stage ps
+                  stu = staseHiBnd sc 
+                  loop n' st' = 
+                    if (n' > n) || ((n' == n) && (st' > st)) 
                     then 
-                      readArray arr (ph, n)
+                      readArray arr (st, n)
                     else 
-                      let ps' = ps { parIteration = n', parPhase = ph',
-                                     parTime = basicTime sc n' ph' }
+                      let ps' = ps { iteration = n', stage = st',
+                                     time = iterToTime sc n' st' }
                       in do a <- m ps'
-                            a `seq` writeArray arr (ph', n') a
-                            if ph' >= phu 
-                              then do writeIORef phref 0
+                            a `seq` writeArray arr (st', n') a
+                            if st' >= stu 
+                              then do writeIORef stref 0
                                       writeIORef nref (n' + 1)
                                       loop (n' + 1) 0
-                              else do writeIORef phref (ph' + 1)
-                                      loop n' (ph' + 1)
+                              else do writeIORef stref (st' + 1)
+                                      loop n' (st' + 1)
               n'  <- readIORef nref
-              ph' <- readIORef phref
-              loop n' ph'
+              st' <- readIORef stref
+              loop n' st'
      return $ tr $ Dynamics r
 
 -- | Memoize and order the computation in the integration time points using 
@@ -839,36 +751,36 @@ umemo :: UMemo e => (Dynamics e -> Dynamics e) -> Dynamics e
         -> Dynamics (Dynamics e)
 umemo tr (Dynamics m) = 
   Dynamics $ \ps ->
-  do let sc = parSpecs ps
-         (phl, phu) = phaseBnds sc
+  do let sc = specs ps
+         (stl, stu) = stageBnds sc
          (nl, nu)   = iterationBnds sc
-     arr   <- newMemoUArray_ ((phl, nl), (phu, nu))
+     arr   <- newMemoUArray_ ((stl, nl), (stu, nu))
      nref  <- newIORef 0
-     phref <- newIORef 0
+     stref <- newIORef 0
      let r ps =
-           do let sc  = parSpecs ps
-                  n   = parIteration ps
-                  ph  = parPhase ps
-                  phu = phaseHiBnd sc 
-                  loop n' ph' = 
-                    if (n' > n) || ((n' == n) && (ph' > ph)) 
+           do let sc  = specs ps
+                  n   = iteration ps
+                  st  = stage ps
+                  stu = staseHiBnd sc 
+                  loop n' st' = 
+                    if (n' > n) || ((n' == n) && (st' > st)) 
                     then 
-                      readArray arr (ph, n)
+                      readArray arr (st, n)
                     else 
-                      let ps' = ps { parIteration = n', 
-                                     parPhase = ph',
-                                     parTime = basicTime sc n' ph' }
+                      let ps' = ps { iteration = n', 
+                                     stage = st',
+                                     time = iterToTime sc n' st' }
                       in do a <- m ps'
-                            a `seq` writeArray arr (ph', n') a
-                            if ph' >= phu 
-                              then do writeIORef phref 0
+                            a `seq` writeArray arr (st', n') a
+                            if st' >= stu 
+                              then do writeIORef stref 0
                                       writeIORef nref (n' + 1)
                                       loop (n' + 1) 0
-                              else do writeIORef phref (ph' + 1)
-                                      loop n' (ph' + 1)
+                              else do writeIORef stref (st' + 1)
+                                      loop n' (st' + 1)
               n'  <- readIORef nref
-              ph' <- readIORef phref
-              loop n' ph'
+              st' <- readIORef stref
+              loop n' st'
      return $ tr $ Dynamics r
 
 -- | Memoize and order the computation in the integration time points using 
@@ -877,20 +789,20 @@ memo0 :: Memo e => (Dynamics e -> Dynamics e) -> Dynamics e
         -> Dynamics (Dynamics e)
 memo0 tr (Dynamics m) = 
   Dynamics $ \ps ->
-  do let sc   = parSpecs ps
+  do let sc   = specs ps
          bnds = iterationBnds sc
      arr   <- newMemoArray_ bnds
      nref  <- newIORef 0
      let r ps =
-           do let sc = parSpecs ps
-                  n  = parIteration ps
+           do let sc = specs ps
+                  n  = iteration ps
                   loop n' = 
                     if n' > n
                     then 
                       readArray arr n
                     else 
-                      let ps' = ps { parIteration = n', parPhase = 0,
-                                     parTime = basicTime sc n' 0 }
+                      let ps' = ps { iteration = n', stage = 0,
+                                     time = iterToTime sc n' 0 }
                       in do a <- m ps'
                             a `seq` writeArray arr n' a
                             writeIORef nref (n' + 1)
@@ -905,20 +817,20 @@ umemo0 :: UMemo e => (Dynamics e -> Dynamics e) -> Dynamics e
          -> Dynamics (Dynamics e)
 umemo0 tr (Dynamics m) = 
   Dynamics $ \ps ->
-  do let sc   = parSpecs ps
+  do let sc   = specs ps
          bnds = iterationBnds sc
      arr   <- newMemoUArray_ bnds
      nref  <- newIORef 0
      let r ps =
-           do let sc = parSpecs ps
-                  n  = parIteration ps
+           do let sc = specs ps
+                  n  = iteration ps
                   loop n' = 
                     if n' > n
                     then 
                       readArray arr n
                     else 
-                      let ps' = ps { parIteration = n', parPhase = 0,
-                                     parTime = basicTime sc n' 0 }
+                      let ps' = ps { iteration = n', stage = 0,
+                                     time = iterToTime sc n' 0 }
                       in do a <- m ps'
                             a `seq` writeArray arr n' a
                             writeIORef nref (n' + 1)
@@ -945,36 +857,4 @@ once (Dynamics m) =
                   do b <- m ps
                      writeIORef x $ Just b
                      return $! b
-     return $ Dynamics r
-
---
--- The Event Queue (The Dynamics Queue)
---
--- The most exciting thing is that any event is just some value in 
--- the Dynamics monad, i.e. a computation, or saying differently, 
--- a dynamic process that has a single purpose to perform some 
--- side effect. To pass the message, we actually use a closure.
---
-
---
--- Agent-based Modeling
---
-
--- Public functions:
---
---   agentQueue
---   agentState
---   activateState
---   initState
---   stateAgent     
---   stateParent
---   addTimeoutD
---   addTimeout
---   addTimerD
---   addTimer
---   stateActivation
---   stateDeactivation
---   newState     
---   newSubstate
---   newAgent  
-          
+     return $ Dynamics r          

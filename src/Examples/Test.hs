@@ -2,10 +2,10 @@ module Examples.Test where
 
 import Simulation.Aivika.Dynamics
 
-testSpecs = Specs { spcStartTime = 0,
-                    spcStopTime = 1,
-                    spcDT = 0.1,
-                    spcMethod = RungeKutta4 }
+testSpecs = Specs { startTime = 0,
+                    stopTime = 1,
+                    dt = 0.1,
+                    method = RungeKutta4 }
 
 -- model
 testModel =
@@ -15,31 +15,25 @@ testModel =
      integDiff integB (a)
      return $ sequence [a]
 
-testModel1 =
-  do integA <- newInteg 50
-     let a = integValueM integA
-     integDiff integA (a)
-     return $ sequence [a]
-
 edilModel =
   do integA <- newInteg 50
      let a = integValue integA
      return a
 
-parameterise' sc n = Parameters { parSpecs = sc,
-                              parTime = basicTime sc n 0,
-                              parIteration = n,
-                              parPhase = 0}
+parameterise' sc n = Parameters { specs = sc,
+                              time = iterToTime sc n 0,
+                              iteration = n,
+                              stage = 0}
 
 t index = map (parameterise' testSpecs) [0 .. 10] !! index                   
 
 justSubRun :: Dynamics a -> Specs -> IO a
 justSubRun (Dynamics m) sc =
   do let (nl, nu) = iterationBnds sc
-         parameterise n = Parameters { parSpecs = sc,
-                                       parTime = basicTime sc n 0,
-                                       parIteration = n,
-                                       parPhase = 0 }
+         parameterise n = Parameters { specs = sc,
+                                       time = iterToTime sc n 0,
+                                       iteration = n,
+                                       stage = 0 }
      (m . parameterise) ([nl .. nu] !! 5)
 
 

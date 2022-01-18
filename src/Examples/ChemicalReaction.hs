@@ -2,14 +2,14 @@ module Examples.ChemicalReaction where
 
 import Simulation.Aivika.Dynamics
 
-specs = Specs { spcStartTime = 0, 
-                spcStopTime = 1, 
-                spcDT = 0.1,
-                spcMethod = RungeKutta4 }
+spc = Specs { startTime = 0, 
+              stopTime = 10, 
+              dt = 1,
+              method = RungeKutta4 }
 
 model :: Dynamics (Dynamics [Double])
 model =
-  do integA <- newInteg 50
+  do integA <- newInteg 100
      integB <- newInteg 0
      integC <- newInteg 0
      let a = integValue integA
@@ -17,8 +17,7 @@ model =
          c = integValue integC
      let ka = 1
          kb = 1
-    -- integDiff integA (a)
-    -- integDiff integA (- ka * a )
-    -- integDiff integB (ka * a - kb * b)
-    -- integDiff integC (kb * b)
+     integDiff integA (- ka * a )
+     integDiff integB (ka * a - kb * b)
+     integDiff integC (kb * b)
      return $ sequence [a, b, c]

@@ -5,5 +5,5 @@ import Examples.Test
 import Simulation.Aivika.Dynamics
 
 main = 
-  do a <- runDynamics model specs
+  do a <- runDynamics model spc
      print a
