@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 714fe0741b5010e95da0d97752d737fcdd2a029752b1a92c8e228887b2c2f345
+-- hash: 5e904b440d12a6760ae8df38f90155ca2ca3af5cfd5fe7126d3406a9254cf1e7
 
 name:           mivika
 version:        0.1.0.0
@@ -30,8 +30,6 @@ library
       Examples.ChemicalReaction
       Examples.Test
       Simulation.Aivika.Dynamics
-      Simulation.Aivika.PriorityQueue
-      Simulation.Aivika.Queue
   other-modules:
       Paths_mivika
   hs-source-dirs:
