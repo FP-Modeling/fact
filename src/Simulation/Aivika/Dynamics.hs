@@ -226,11 +226,11 @@ stageBnds sc =
     RungeKutta4 -> (0, 3)
 
 -- | Auxiliary functions for boundaries of stages
-staseLoBnd :: Specs -> Int
-staseLoBnd sc = fst $ stageBnds sc
+stageLoBnd :: Specs -> Int
+stageLoBnd sc = fst $ stageBnds sc
                   
-staseHiBnd :: Specs -> Int
-staseHiBnd sc = snd $ stageBnds sc
+stageHiBnd :: Specs -> Int
+stageHiBnd sc = snd $ stageBnds sc
 
 -- | Transforms iteration to time
 iterToTime :: Specs -> Int -> Int -> Double
@@ -347,8 +347,8 @@ integEuler (Dynamics f) (Dynamics i) (Dynamics y) ps =
       let sc  = specs ps
           ty  = iterToTime sc (n - 1) 0
           psy = ps { time = ty, iteration = n - 1, stage = 0 }
-      a <- y psy
-      b <- f psy
+      a <- y psy -- This is yN
+      b <- f psy -- This is f(tN, yN)
       let !v = a + dt (specs ps) * b
       return v
 
@@ -724,7 +724,7 @@ memo tr (Dynamics m) =
            do let sc  = specs ps
                   n   = iteration ps
                   st  = stage ps
-                  stu = staseHiBnd sc 
+                  stu = stageHiBnd sc 
                   loop n' st' = 
                     if (n' > n) || ((n' == n) && (st' > st)) 
                     then 
@@ -761,7 +761,7 @@ umemo tr (Dynamics m) =
            do let sc  = specs ps
                   n   = iteration ps
                   st  = stage ps
-                  stu = staseHiBnd sc 
+                  stu = stageHiBnd sc 
                   loop n' st' = 
                     if (n' > n) || ((n' == n) && (st' > st)) 
                     then 
