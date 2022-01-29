@@ -1,2 +1,14 @@
+dist-newstyle
+auto
+_minted-mivika
+*.aux
+*.hi
+*.o
+*.log
+*.pdf
+*.ptb
+*.exe
+*.tex
+*.out
 .stack-work/
 *~

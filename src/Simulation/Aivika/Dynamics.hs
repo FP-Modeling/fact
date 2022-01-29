@@ -312,8 +312,8 @@ newInteg i =
          z = Dynamics $ \ps -> 
            do (Dynamics m) <- readIORef (result integ)
               m ps
-     y <- umemo interpolate z
-     liftIO $ writeIORef (cache integ) y
+     -- y <- umemo interpolate z
+     liftIO $ writeIORef (cache integ) z
      return integ
 
 -- | Return the integral's value.
@@ -334,12 +334,21 @@ integDiff integ diff =
                 RungeKutta2 -> integRK2 diff i y ps
                 RungeKutta4 -> integRK4 diff i y ps
      liftIO $ writeIORef (result integ) z
+-- TODO: rename result as computation
+--
+--
+--
+--
+--
+--
+--
 
 integEuler :: Dynamics Double
              -> Dynamics Double 
              -> Dynamics Double 
              -> Parameters -> IO Double
-integEuler (Dynamics f) (Dynamics i) (Dynamics y) ps = 
+integEuler (Dynamics f) (Dynamics i) (Dynamics y) ps =
+--                diff            i            y  ps
   case iteration ps of
     0 -> 
       i ps
@@ -452,80 +461,6 @@ integRK4 (Dynamics f) (Dynamics i) (Dynamics y) ps =
     _ -> 
       error "Incorrect stase: integ"
 
--- smoothI :: Dynamics Double -> Dynamics Double -> Dynamics Double 
---           -> Dynamics Double
--- smoothI x t i = y where
---   y = integ ((x - y) / t) i
-
--- smooth :: Dynamics Double -> Dynamics Double -> Dynamics Double
--- smooth x t = smoothI x t x
-
--- smooth3I :: Dynamics Double -> Dynamics Double -> Dynamics Double 
---            -> Dynamics Double
--- smooth3I x t i = y where
---   y  = integ ((s1 - y) / t') i
---   s1 = integ ((s0 - s1) / t') i
---   s0 = integ ((x - s0) / t') i
---   t' = t / 3.0
-
--- smooth3 :: Dynamics Double -> Dynamics Double -> Dynamics Double
--- smooth3 x t = smooth3I x t x
-
--- smoothNI :: Dynamics Double -> Dynamics Double -> Int -> Dynamics Double 
---            -> Dynamics Double
--- smoothNI x t n i = s ! n where
---   s   = array (1, n) [(k, f k) | k <- [1 .. n]]
---   f 0 = integ ((x - s ! 0) / t') i
---   f k = integ ((s ! (k - 1) - s ! k) / t') i
---   t'  = t / fromIntegral n
-
--- smoothN :: Dynamics Double -> Dynamics Double -> Int -> Dynamics Double
--- smoothN x t n = smoothNI x t n x
-
--- delay1I :: Dynamics Double -> Dynamics Double -> Dynamics Double 
---           -> Dynamics Double
--- delay1I x t i = y where
---   y = integ (x - y) (i * t) / t
-
--- delay1 :: Dynamics Double -> Dynamics Double -> Dynamics Double
--- delay1 x t = delay1I x t x
-
--- delay3I :: Dynamics Double -> Dynamics Double -> Dynamics Double 
---           -> Dynamics Double
--- delay3I x t i = y where
---   y  = integ (s1 - y) (i * t') / t'
---   s1 = integ (s0 - s1) (i * t') / t'
---   s0 = integ (x - s0) (i * t') / t'
---   t' = t / 3.0
-
--- delay3 :: Dynamics Double -> Dynamics Double -> Dynamics Double
--- delay3 x t = delay3I x t x
-
--- delayNI :: Dynamics Double -> Dynamics Double -> Int -> Dynamics Double 
---           -> Dynamics Double
--- delayNI x t n i = s ! n where
---   s   = array (1, n) [(k, f k) | k <- [1 .. n]]
---   f 0 = integ (x - s ! 0) (i * t') / t'
---   f k = integ (s ! (k - 1) - s ! k) (i * t') / t'
---   t'  = t / fromIntegral n
-
--- delayN :: Dynamics Double -> Dynamics Double -> Int -> Dynamics Double
--- delayN x t n = delayNI x t n x
-
--- forecast :: Dynamics Double -> Dynamics Double -> Dynamics Double 
---            -> Dynamics Double
--- forecast x at hz =
---   x * (1.0 + (x / smooth x at - 1.0) / at * hz)
-
--- trend :: Dynamics Double -> Dynamics Double -> Dynamics Double 
---         -> Dynamics Double
--- trend x at i =
---   (x / smoothI x at (x / (1.0 + i * at)) - 1.0) / at
-
---
--- Table Functions
---
-
 -- | Lookup @x@ in a table of pairs @(x, y)@ using linear interpolation.
 lookupD :: Dynamics Double -> Array Int (Double, Double) -> Dynamics Double
 lookupD (Dynamics m) tbl =
@@ -575,51 +510,6 @@ lookupStepwiseD (Dynamics m) tbl =
                    | otherwise    = error "Incorrect index: table"
              in y
 
--- --
--- -- Discrete Functions
--- --
-    
--- delayTrans :: Dynamics a -> Dynamics Double -> Dynamics a 
---               -> (Dynamics a -> Dynamics a) -> Dynamics a
--- delayTrans (Dynamics x) (Dynamics d) (Dynamics i) tr = tr $ Dynamics r 
---   where
---     r ps = do 
---       let t  = time ps
---           sc = specs ps
---           n  = iteration ps
---       a <- d ps
---       let t' = (t - a) - startTime sc
---           n' = fromInteger $ toInteger $ floor $ t' / dt sc
---           y | n' < 0    = i $ ps { time = startTime sc,
---                                    iteration = 0, 
---                                    stage = 0 }
---             | n' < n    = x $ ps { time = t',
---                                    iteration = n',
---                                    stage = -1 }
---             | n' > n    = error "Cannot return the future data: delay"
---             | otherwise = error "Cannot return the current data: delay"
---       y    
-
--- delay :: (Memo a) => Dynamics a -> Dynamics Double -> Dynamics a
--- delay x d = delayTrans x d x $ memo0 discrete
-
--- delay' :: (UMemo a) => Dynamics a -> Dynamics Double -> Dynamics a
--- delay' x d = delayTrans x d x $ memo0' discrete
-
--- delayI :: (Memo a) => Dynamics a -> Dynamics Double -> Dynamics a -> Dynamics a
--- delayI x d i = delayTrans x d i $ memo0 discrete         
-
--- delayI' :: (UMemo a) => Dynamics a -> Dynamics Double -> Dynamics a -> Dynamics a
--- delayI' x d i = delayTrans x d i $ memo0' discrete         
-
---
--- Interpolation and Initial Value
---
--- These functions complement the memoization, possibly except for 
--- the initial function which can be also useful to get an initial 
--- value of any dynamic process. See comments to the Memoization 
--- section.
---      
 
 -- | Return the initial value.
 initD :: Dynamics a -> Dynamics a
