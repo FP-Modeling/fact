@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Fixing a Windows problem with aliases. Just skip this, linux user
+# Fixing a WSL problem with aliases. Just skip this, linux user
 shopt -s expand_aliases
 source ~/.bash_aliases
 
