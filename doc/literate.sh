@@ -4,20 +4,32 @@
 shopt -s expand_aliases
 source ~/.bash_aliases
 
-# Generate .tex file from .lhs file
-lhs2Tex mivika.lhs > mivika.tex
-
-# Generate black and white pdf from the created .tex file
-pdflatex -shell-escape mivika.tex
-mv mivika.pdf mivikaGray.pdf
-
-# Generate colorful pdf from the .lhs file
-pdflatex -shell-escape mivika.lhs
-mv mivika.pdf mivikaColor.pdf
-
-#Check whether they are equal
-if [[ $1 == 'compile' ]]
+if [[ $1 == 'compile' ]] 
 then
+    # Compile the program
     ghc mivika.lhs
+else
+    if [[ $1 == 'gray' ]] 
+    then
+        # Generate .tex file from .lhs file
+        lhs2Tex mivika.lhs > mivika.tex
+
+        # Generate black and white pdf from created .tex file
+        pdflatex -shell-escape mivika.tex
+
+        # Renaming
+        mv mivika.pdf mivikaGray.pdf
+    else
+        if [[ $1 == 'color' ]]
+        then
+            # Generate colorful pdf from .lhs file
+            pdflatex -shell-escape mivika.lhs
+
+            # Renaming
+            mv mivika.pdf mivikaColor.pdf
+        else
+            echo "No available option! Use compile, color or gray!"
+        fi
+    fi
 fi
 

@@ -14,9 +14,12 @@
 This project is dedicated to explore the concepts of simulating the continuous, based on one of the earliest version of \href{https://github.com/dsorokin/aivika}{aivika}. In principle, the DSL works as the following example:
 
 \begin{code}
+{-# LANGUAGE FlexibleContexts, FlexibleInstances, UndecidableInstances, BangPatterns, ConstraintKinds, MonoLocalBinds #-}
 module Main where
 import Control.Monad.Trans
 import Data.IORef
+import Data.Array
+import Data.Array.IO
 
 spc = Specs { startTime = 0, 
               stopTime = 10, 
@@ -151,7 +154,7 @@ data Method = Euler
             deriving (Eq, Ord, Show)
 \end{code}
 
-Finally, the \texttt{Parameters} type saves which specifications will be used across the simulation. Additionally, because it also used in the integration procedure itself, it also carries which time is the current time of a given calculation, which iteration is the current one, and in which stage of the solver method it is in a given moment.
+Finally, the \texttt{Parameters} type saves which specifications will be used across the simulation. Additionally, because it also used in the integration procedure itself, it also carries which time is the current time of a given calculation, which iteration is the current one, and in which stage of the solver method it is in.
 
 \begin{code}
 data Parameters = Parameters { specs     :: Specs,   
@@ -164,7 +167,7 @@ data Parameters = Parameters { specs     :: Specs,
 \subsection{Representing the Integrator}
 
 The integrator is being represented, intuitively, as a machine made of side effects. Inside this type, there are the following items: the initial condition of the system, one pointer to the memory managing caching and a second pointer resposable for calculating the current result:
-
+2
 \begin{code}
 data Integ = Integ { initial     :: Dynamics Double,  
                      cache       :: IORef (Dynamics Double),
@@ -174,6 +177,21 @@ data Integ = Integ { initial     :: Dynamics Double,
 When building an integrator it is necessary to allocate memory to store the computed values, and point the pointers to the right place. The \texttt{newInteg} is responsable of doing this procedure, whilst the function \texttt{initD} wraps the initial value into a valid initial state of the integrator:
 
 \begin{code}
+iterToTime :: Specs -> Int -> Int -> Double
+iterToTime sc n st =
+  if st < 0 then 
+    error "Incorrect stage: iterToTime"
+  else
+    (startTime sc) + n' * (dt sc) + delta (method sc) st
+      where n' = fromInteger (toInteger n)
+            delta Euler       0 = 0
+            delta RungeKutta2 0 = 0
+            delta RungeKutta2 1 = dt sc
+            delta RungeKutta4 0 = 0
+            delta RungeKutta4 1 = dt sc / 2
+            delta RungeKutta4 2 = dt sc / 2
+            delta RungeKutta4 3 = dt sc
+
 initD :: Dynamics a -> Dynamics a
 initD (Dynamics m) =
   Dynamics $ \ps ->
@@ -200,5 +218,110 @@ newInteg i =
      return integ
 
 \end{code}
+
+The function \texttt{initD} assures that the parameter value is configured right, setting the number of the current iteration, time and stage all to zero. This is necessary to guarantee that the computation follows the right sequence of steps, in order. The auxiliary function \texttt{iterToTime} transforms a given iteration $n$ to its correspondent in the time domain, based on the solver method and in which stage of the solving process the program is in.
+
+The second function, \texttt{newInteg}, is, alongside all the major integrator functions, one of the \textbf{most complicated} of the functions being used. In the beginning, it is being created two pointers to the memory, \texttt{r1} and \texttt{r2}, both of which, regardless of the content of a given \texttt{ps} it will always return the \textbf{initial value}. Next step is to create the \texttt{integ} data type, as has been shown previously. The label \texttt{z} is then created, being a computation, i.e., a \texttt{Dynamics} in which reads first whatever the \texttt{result} is pointing to and uses it to apply a given set of \texttt{Parameters}. It is important to keep in mind that at the current moment, this pointer is pointer to \texttt{a process} in which, given anything with the correct type, it will give you the initial value.
+
+The final lines are related to the caching and interpolation. Caching is important given that the current computation uses the previous computation and so forth. However, because these values are always the same, we only need to calculate them only once and save them in memory. This is the role of the \texttt{umemo} function.
+
+\begin{code}
+class (MArray IOUArray e IO) => UMemo e where
+  newMemoUArray_ :: Ix i => (i, i) -> IO (IOUArray i e)
+
+instance (MArray IOUArray e IO) => UMemo e where
+  newMemoUArray_ = newArray_
+
+stageBnds :: Specs -> (Int, Int)
+stageBnds sc = 
+  case method sc of
+    Euler -> (0, 0)
+    RungeKutta2 -> (0, 1)
+    RungeKutta4 -> (0, 3)
+
+stageHiBnd :: Specs -> Int
+stageHiBnd sc = snd $ stageBnds sc
+
+iterationBnds :: Specs -> (Int, Int)
+iterationBnds sc = (0, round ((stopTime sc - 
+                               startTime sc) / dt sc))
+
+umemo :: UMemo e => (Dynamics e -> Dynamics e) -> Dynamics e 
+        -> Dynamics (Dynamics e)
+umemo tr (Dynamics m) = 
+  Dynamics $ \ps ->
+  do let sc = specs ps
+         (stl, stu) = stageBnds sc
+         (nl, nu)   = iterationBnds sc
+     arr   <- newMemoUArray_ ((stl, nl), (stu, nu))
+     nref  <- newIORef 0
+     stref <- newIORef 0
+     let r ps =
+           do let sc  = specs ps
+                  n   = iteration ps
+                  st  = stage ps
+                  stu = stageHiBnd sc 
+                  loop n' st' = 
+                    if (n' > n) || ((n' == n) && (st' > st)) 
+                    then 
+                      readArray arr (st, n)
+                    else 
+                      let ps' = ps { iteration = n', 
+                                     stage = st',
+                                     time = iterToTime sc n' st' }
+                      in do a <- m ps'
+                            a `seq` writeArray arr (st', n') a
+                            if st' >= stu 
+                              then do writeIORef stref 0
+                                      writeIORef nref (n' + 1)
+                                      loop (n' + 1) 0
+                              else do writeIORef stref (st' + 1)
+                                      loop n' (st' + 1)
+              n'  <- readIORef nref
+              st' <- readIORef stref
+              loop n' st'
+     return $ tr $ Dynamics r
+\end{code}
+
+% Add explanation of umemo here
+
+Interpolation is important given that not every time the time of calculation is a multiple of the integration step, so it is necessary to interpolate between two known values.
+
+\begin{code}
+iterationLoBnd :: Specs -> Int
+iterationLoBnd sc = fst $ iterationBnds sc
+
+iterationHiBnd :: Specs -> Int
+iterationHiBnd sc = snd $ iterationBnds sc                   
+
+interpolate :: Dynamics Double -> Dynamics Double
+interpolate (Dynamics m) = 
+  Dynamics $ \ps -> 
+  if stage ps >= 0 then 
+    m ps
+  else 
+    let sc = specs ps
+        t  = time ps
+        x  = (t - startTime sc) / dt sc
+        n1 = max (floor x) (iterationLoBnd sc)
+        n2 = min (ceiling x) (iterationHiBnd sc)
+        t1 = iterToTime sc n1 0
+        t2 = iterToTime sc n2 0
+        z1 = m $ ps { time = t1, 
+                      iteration = n1, 
+                      stage = 0 }
+        z2 = m $ ps { time = t2,
+                      iteration = n2,
+                      stage = 0 }
+        r | t == t1   = z1
+          | t == t2   = z2
+          | otherwise = 
+            do y1 <- z1
+               y2 <- z2
+               return $ y1 + (y2 - y1) * (t - t1) / (t2 - t1)
+    in r
+\end{code}
+
+% Add explanation of interpolate here
 
 \end{document}
