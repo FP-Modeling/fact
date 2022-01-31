@@ -1,18 +1,21 @@
 \documentclass{article}
-
 %include colorcode.fmt
+\usepackage[a4paper, total={6in, 8in}]{geometry}
+\long\def\ignore#1{}
 
 \usepackage{minted}
-\newminted[code]{haskell}{}
+\newminted[code]{haskell}{breaklines}
 
 \usepackage{hyperref}
 
 \begin{document}
 
 \section{A DSL for simulating the Continuous}
+\label{DSL}
 
 This project is dedicated to explore the concepts of simulating the continuous, based on one of the earliest version of \href{https://github.com/dsorokin/aivika}{aivika}. In principle, the DSL works as the following example:
 
+\ignore{
 \begin{code}
 {-# LANGUAGE FlexibleContexts, FlexibleInstances, UndecidableInstances, BangPatterns, ConstraintKinds, MonoLocalBinds #-}
 module Main where
@@ -20,7 +23,10 @@ import Control.Monad.Trans
 import Data.IORef
 import Data.Array
 import Data.Array.IO
+\end{code}
+}
 
+\begin{code}
 spc = Specs { startTime = 0, 
               stopTime = 10, 
               dt = 1,
@@ -31,10 +37,10 @@ model =
      let a = integValue integA
      let ka = 1
      integDiff integA (- ka * a )
-     return $ sequence a
+     return $ sequence [a]
 
 main = 
-  do a <- runDynamics1 model specs
+  do a <- runDynamics1 model spc
      print a
      
 \end{code}
@@ -323,5 +329,199 @@ interpolate (Dynamics m) =
 \end{code}
 
 % Add explanation of interpolate here
+
+As shown in section \ref{DSL}, we are using the function \texttt{integValue} in the model of our example. This function reads whatever the \textit{cache} pointer is pointing to and applies the obtained \texttt{Dynamics} with a given \texttt{Parameters} record.
+
+\begin{code}
+integValue :: Integ -> Dynamics Double
+integValue integ = 
+  Dynamics $ \ps ->
+  do (Dynamics m) <- readIORef (cache integ)
+     m ps
+\end{code}
+
+Finally, there is the \texttt{integDiff} function, also used in the presentation section of the DSL. This function is the core of the integrator, since it is responsable of \textbf{changing which process the integrator will use}. When we create an integrator using \texttt{newInteg}, the \textit{result} pointer is pointing to a "dumb" computation (given any record with type \texttt{Parameters}, I will give you the initial value). This side-effect-only function changes which computation will be used during the solution of the system, according to the solver method.
+
+\begin{code}
+integDiff :: Integ -> Dynamics Double -> Dynamics ()
+integDiff integ diff =
+  do let z = Dynamics $ \ps ->
+           do y <- readIORef (cache integ)
+              let i = initial integ
+              case method (specs ps) of
+                Euler -> integEuler diff i y ps
+                RungeKutta2 -> integRK2 diff i y ps
+                RungeKutta4 -> integRK4 diff i y ps
+     liftIO $ writeIORef (result integ) z
+\end{code}
+
+\section{Solver Methods}
+
+There are three solver methods available in mivika. More methods can be used in the original project,  \href{https://github.com/dsorokin/aivika}{aivika}. Mivika supports the following methods for integration:
+
+\begin{itemize}
+  \item \href{https://en.wikipedia.org/wiki/Euler_method}{Euler}
+  \item \href{https://en.wikipedia.org/wiki/Runge%E2%80%93Kutta_methods}{Runge-Kutta 2nd order}
+  \item \href{https://en.wikipedia.org/wiki/Runge%E2%80%93Kutta_methods}{Runge-Kutta 4th order}
+\end{itemize}
+
+\begin{code}
+integEuler :: Dynamics Double
+             -> Dynamics Double 
+             -> Dynamics Double 
+             -> Parameters -> IO Double
+integEuler (Dynamics f) (Dynamics i) (Dynamics y) ps =
+  case iteration ps of
+    0 -> 
+      i ps
+    n -> do 
+      let sc  = specs ps
+          ty  = iterToTime sc (n - 1) 0
+          psy = ps { time = ty, iteration = n - 1, stage = 0 }
+      a <- y psy
+      b <- f psy
+      let !v = a + dt (specs ps) * b
+      return v
+
+integRK2 :: Dynamics Double
+           -> Dynamics Double
+           -> Dynamics Double
+           -> Parameters -> IO Double
+integRK2 (Dynamics f) (Dynamics i) (Dynamics y) ps =
+  case stage ps of
+    0 -> case iteration ps of
+      0 ->
+        i ps
+      n -> do
+        let sc = specs ps
+            ty = iterToTime sc (n - 1) 0
+            t1 = ty
+            t2 = iterToTime sc (n - 1) 1
+            psy = ps { time = ty, iteration = n - 1, stage = 0 }
+            ps1 = psy
+            ps2 = ps { time = t2, iteration = n - 1, stage = 1 }
+        vy <- y psy
+        k1 <- f ps1
+        k2 <- f ps2
+        let !v = vy + dt sc / 2.0 * (k1 + k2)
+        return v
+    1 -> do
+      let sc = specs ps
+          n  = iteration ps
+          ty = iterToTime sc n 0
+          t1 = ty
+          psy = ps { time = ty, iteration = n, stage = 0 }
+          ps1 = psy
+      vy <- y psy
+      k1 <- f ps1
+      let !v = vy + dt sc * k1
+      return v
+    _ -> 
+      error "Incorrect stase: integ"
+
+integRK4 :: Dynamics Double
+           -> Dynamics Double
+           -> Dynamics Double
+           -> Parameters -> IO Double
+integRK4 (Dynamics f) (Dynamics i) (Dynamics y) ps =
+  case stage ps of
+    0 -> case iteration ps of
+      0 -> 
+        i ps
+      n -> do
+        let sc = specs ps
+            ty = iterToTime sc (n - 1) 0
+            t1 = ty
+            t2 = iterToTime sc (n - 1) 1
+            t3 = iterToTime sc (n - 1) 2
+            t4 = iterToTime sc (n - 1) 3
+            psy = ps { time = ty, iteration = n - 1, stage = 0 }
+            ps1 = psy
+            ps2 = ps { time = t2, iteration = n - 1, stage = 1 }
+            ps3 = ps { time = t3, iteration = n - 1, stage = 2 }
+            ps4 = ps { time = t4, iteration = n - 1, stage = 3 }
+        vy <- y psy
+        k1 <- f ps1
+        k2 <- f ps2
+        k3 <- f ps3
+        k4 <- f ps4
+        let !v = vy + dt sc / 6.0 * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
+        return v
+    1 -> do
+      let sc = specs ps
+          n  = iteration ps
+          ty = iterToTime sc n 0
+          t1 = ty
+          psy = ps { time = ty, iteration = n, stage = 0 }
+          ps1 = psy
+      vy <- y psy
+      k1 <- f ps1
+      let !v = vy + dt sc / 2.0 * k1
+      return v
+    2 -> do
+      let sc = specs ps
+          n  = iteration ps
+          ty = iterToTime sc n 0
+          t2 = iterToTime sc n 1
+          psy = ps { time = ty, iteration = n, stage = 0 }
+          ps2 = ps { time = t2, iteration = n, stage = 1 }
+      vy <- y psy
+      k2 <- f ps2
+      let !v = vy + dt sc / 2.0 * k2
+      return v
+    3 -> do
+      let sc = specs ps
+          n  = iteration ps
+          ty = iterToTime sc n 0
+          t3 = iterToTime sc n 2
+          psy = ps { time = ty, iteration = n, stage = 0 }
+          ps3 = ps { time = t3, iteration = n, stage = 2 }
+      vy <- y psy
+      k3 <- f ps3
+      let !v = vy + dt sc * k3
+      return v
+    _ -> 
+      error "Incorrect stase: integ"
+\end{code}
+
+\section{The Driver}
+
+The last piece of the puzzle is the top layer, responsable for acting as the driver of the system. The couple of functions \texttt{runDynamics1} and \texttt{runDynamics} fulfills this role. The former execute the simulation and shows only the result of the last time point, while the latter shows the values of the interval specied in the \texttt{Specs} record.
+
+\begin{code}
+runDynamics1 :: Dynamics (Dynamics a) -> Specs -> IO a
+runDynamics1 (Dynamics m) sc = 
+  do d <- m Parameters { specs = sc,
+                         time = startTime sc,
+                         iteration = 0,
+                         stage = 0 }
+     subrunDynamics1 d sc
+
+runDynamics :: Dynamics (Dynamics a) -> Specs -> IO [a]
+runDynamics (Dynamics m) sc = 
+  do d <- m Parameters { specs = sc,
+                         time = startTime sc,
+                         iteration = 0,
+                         stage = 0 }
+     sequence $ subrunDynamics d sc
+
+subrunDynamics1 :: Dynamics a -> Specs -> IO a
+subrunDynamics1 (Dynamics m) sc =
+  do let n = iterationHiBnd sc
+         t = iterToTime sc n 0
+     m Parameters { specs = sc,
+                    time = t,
+                    iteration = n,
+                    stage = 0 }
+
+subrunDynamics :: Dynamics a -> Specs -> [IO a]
+subrunDynamics (Dynamics m) sc =
+  do let (nl, nu) = iterationBnds sc
+         parameterise n = Parameters { specs = sc,
+                                       time = iterToTime sc n 0,
+                                       iteration = n,
+                                       stage = 0 }
+     map (m . parameterise) [nl .. nu]
+\end{code}
 
 \end{document}

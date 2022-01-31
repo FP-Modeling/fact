@@ -10,10 +10,10 @@ There is a copy of the project in a single file, called `mivika.lhs`, making it 
 
 ### How to Use
 
-The script `literate.sh` is responsable to create documents and compile the fie. Below there are the available commands to execute in the terminal
+The script `literate.sh` is responsable to create documents and compile the fie. Below there are the available commands to execute in the terminal.
 
-- `/literate.sh compile` - It is necessaty to have installed the `ghc` compiler (must be in your PATH variable). It will compile the file `mivika.lhs`
+- `/literate.sh compile` - It is necessaty to have installed the `ghc` compiler (must be in your PATH variable). It will compile the file `mivika.lhs`.
 - `/literate.sh gray` - It is necessary to have installed [lhs2Tex](https://hackage.haskell.org/package/lhs2tex) and pdflatex (both must be in your PATH variable). It will generate a black and white document, following lhs2Tex guidelines.
-- `/literate.sh color` - It is necessary to have installed [pygments](https://pygments.org/download/) (must be in your PATH variable). It will generate a colorful version of the document, using the minted package
+- `/literate.sh colorful` - It is necessary to have installed [pygments](https://pygments.org/download/) (must be in your PATH variable). It will generate a colorful version of the document using the minted package.
 
 All of these commands use the same file, `mivika.lhs`, to execute different things. In this way documentation and source code come from the same file.

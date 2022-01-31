@@ -20,15 +20,16 @@ else
         # Renaming
         mv mivika.pdf mivikaGray.pdf
     else
-        if [[ $1 == 'color' ]]
+        if [[ $1 == 'colorful' ]]
         then
             # Generate colorful pdf from .lhs file
             pdflatex -shell-escape mivika.lhs
 
             # Renaming
-            mv mivika.pdf mivikaColor.pdf
+            mv mivika.pdf mivikaColorful.pdf
+
         else
-            echo "No available option! Use compile, color or gray!"
+            echo "No available option! Use compile, gray or colorful!"
         fi
     fi
 fi

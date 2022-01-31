@@ -334,21 +334,12 @@ integDiff integ diff =
                 RungeKutta2 -> integRK2 diff i y ps
                 RungeKutta4 -> integRK4 diff i y ps
      liftIO $ writeIORef (result integ) z
--- TODO: rename result as computation
---
---
---
---
---
---
---
 
 integEuler :: Dynamics Double
              -> Dynamics Double 
              -> Dynamics Double 
              -> Parameters -> IO Double
 integEuler (Dynamics f) (Dynamics i) (Dynamics y) ps =
---                diff            i            y  ps
   case iteration ps of
     0 -> 
       i ps
@@ -356,8 +347,8 @@ integEuler (Dynamics f) (Dynamics i) (Dynamics y) ps =
       let sc  = specs ps
           ty  = iterToTime sc (n - 1) 0
           psy = ps { time = ty, iteration = n - 1, stage = 0 }
-      a <- y psy -- This is yN
-      b <- f psy -- This is f(tN, yN)
+      a <- y psy
+      b <- f psy
       let !v = a + dt (specs ps) * b
       return v
 
