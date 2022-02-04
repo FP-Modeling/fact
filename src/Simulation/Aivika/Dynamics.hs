@@ -312,9 +312,12 @@ newInteg i =
          z = Dynamics $ \ps -> 
            do (Dynamics m) <- readIORef (result integ)
               m ps
-     -- y <- umemo interpolate z
-     liftIO $ writeIORef (cache integ) z
+     y <- umemo interpolate z
+     liftIO $ writeIORef (cache integ) y
      return integ
+
+     -- Me de qualquer coisa que te dou 50
+     -- Faça esta conta
 
 -- | Return the integral's value.
 integValue :: Integ -> Dynamics Double
@@ -327,19 +330,19 @@ integValue integ =
 integDiff :: Integ -> Dynamics Double -> Dynamics ()
 integDiff integ diff =
   do let z = Dynamics $ \ps ->
-           do y <- readIORef (cache integ)
-              let i = initial integ
-              case method (specs ps) of
+           do y <- readIORef (cache integ) -- Give me past values
+              let i = initial integ -- Give me initial value
+              case method (specs ps) of -- Check the solver method
                 Euler -> integEuler diff i y ps
                 RungeKutta2 -> integRK2 diff i y ps
                 RungeKutta4 -> integRK4 diff i y ps
-     liftIO $ writeIORef (result integ) z
+     liftIO $ writeIORef (result integ) z -- This is the new computation now!
 
 integEuler :: Dynamics Double
              -> Dynamics Double 
              -> Dynamics Double 
              -> Parameters -> IO Double
-integEuler (Dynamics f) (Dynamics i) (Dynamics y) ps =
+integEuler (Dynamics diff) (Dynamics i) (Dynamics y) ps =
   case iteration ps of
     0 -> 
       i ps
@@ -348,7 +351,7 @@ integEuler (Dynamics f) (Dynamics i) (Dynamics y) ps =
           ty  = iterToTime sc (n - 1) 0
           psy = ps { time = ty, iteration = n - 1, stage = 0 }
       a <- y psy
-      b <- f psy
+      b <- diff psy
       let !v = a + dt (specs ps) * b
       return v
 

@@ -17,8 +17,9 @@ testModel =
 
 edilModel =
   do integA <- newInteg 50
-     let a = integValue integA
-     integDiff integA a
+     let a  = integValue integA
+         ka = 1
+     integDiff integA ka
      return a
 
 parameterise' sc n = Parameters { specs = sc,

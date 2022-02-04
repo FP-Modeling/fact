@@ -1,6 +1,7 @@
 dist-newstyle
 auto
-_minted-mivika
+img
+_minted-thesis
 *.aux
 *.hi
 *.o
@@ -10,5 +11,10 @@ _minted-mivika
 *.exe
 *.tex
 *.out
+*.acn
+*.glo
+*.glsdefs
+*.ist
+*.lot
 .stack-work/
 *~
