@@ -1,11 +1,13 @@
 \documentclass[engenharia]{UnB-CIC}%
 %include polycode.fmt
+\selectlanguage{american}\entrue\brfalse
 
-%\usepackage{pdfpages}% incluir PDFs, usado no apêndice
+\usepackage{pdfpages}% incluir PDFs, usado no apêndice
 \usepackage{hyperref}
+\usepackage{dcolumn}
 
 \long\def\ignore#1{}
-\usepackage{minted}
+\usepackage[outputdir=GraduationThesis/]{minted}
 \newminted[code]{haskell}{breaklines}
 
 \orientador{\prof \dr José Edil Guimarães}{CIC/UnB}%
@@ -26,14 +28,19 @@
 
 \begin{document}
 
-
 \literateChapter{Introduction}
-%include lhs/Introduction.lhs
+%include graduationThesis/Lhs/Introduction.lhs
+
+\ifdefined\iscolorful
+  \input{graduationThesis/Lhs/Introduction.lhs}
+\fi
 
 \literateChapter{Section 2}
-%include lhs/Section2.lhs
+%include graduationThesis/Lhs/Section2.lhs
 
-
+\ifdefined\iscolorful
+  \input{graduationThesis/Lhs/Section2.lhs}
+\fi
 
 Isto é um teste para checar o programa.
 
@@ -41,7 +48,7 @@ Isto é um teste para checar o programa.
 \ignore{
 \begin{code}
 module Main where
-import Lhs.Introduction
+import GraduationThesis.Lhs.Introduction
 \end{code}
 }
 

@@ -2,6 +2,7 @@ dist-newstyle
 auto
 img
 _minted-thesis
+_minted-manual
 *.aux
 *.hi
 *.o
@@ -9,12 +10,14 @@ _minted-thesis
 *.pdf
 *.ptb
 *.exe
-*.tex
+manual.tex
+thesis.tex
 *.out
 *.acn
 *.glo
 *.glsdefs
 *.ist
 *.lot
+*.texlhs2TeX
 .stack-work/
 *~

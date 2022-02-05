@@ -368,7 +368,7 @@ executar o comando:
 
 \ignore{
 \begin{code}
-module Lhs.Section2 where
+module GraduationThesis.Lhs.Section2 where
 \end{code}
 }
 
@@ -420,13 +420,6 @@ Os argumentos são os mesmos do comando \texCommand{tabela}, acrescidos de:
 \begin{description}
 \item[bib] nome da referência bibliográfica que originou a tabela.
 \end{description}
-
-\tabelaBib{Matriz de Decisão de Eisenhower}
-{covey_first_1995}{EisenhowerTable}{ r | c | c }{
-                        & \textbf{Urgente} & \textbf{Não Urgente} \\\hline%
-\textbf{Importante}     & Crises       & Planejamentos \\\hline%
-\textbf{Não importante} & Interrupções & Distrações%
-}%
 
 Por exemplo, a \refTab{EisenhowerTable}\footnote{Vale a pena assistir o vídeo da palestra \emph{Time Management} de Randy Pausch: \url{http://www.cs.virginia.edu/~robins/Randy/}} foi gerada com o comando:
 \begin{verbatim}

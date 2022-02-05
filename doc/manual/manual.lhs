@@ -3,7 +3,7 @@
 \usepackage[a4paper, total={6in, 8in}]{geometry}
 \long\def\ignore#1{}
 
-\usepackage{minted}
+\usepackage[outputdir=manual/]{minted}
 \newminted[code]{haskell}{breaklines}
 
 \usepackage{hyperref}

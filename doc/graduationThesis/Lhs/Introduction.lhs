@@ -195,8 +195,8 @@ referente ao plágio nas instituições de ensino\footnote{\url{https://www.cape
 \ignore{
 \begin{code}
 {-# LANGUAGE FlexibleContexts, FlexibleInstances, UndecidableInstances, BangPatterns, ConstraintKinds, MonoLocalBinds #-}
-module Lhs.Introduction where
-import Lhs.Section2
+module GraduationThesis.Lhs.Introduction where
+import GraduationThesis.Lhs.Section2
 \end{code}
 }
 
