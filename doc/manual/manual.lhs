@@ -524,25 +524,4 @@ subrunDynamics (Dynamics m) sc =
      map (m . parameterise) [nl .. nu]
 \end{code}
 
-Use the operational amplifier as example of use of mfix
-
-Cap 1: Introduction - GPAC Edil - Pega a intro de lá (FOCO)
-                      George Date 2018 - Pega a intro de lá
-                      George and Edil 2021 - Revista ACM Transaction on Embedded Computing systems - intro de lá
-                      Escopo objetivos - DSL - search smart goals
-                      Exemplo de caso particular - Lorentz
-
-Cap 2: Exemplo sem caching! Bottom-up or Top-down? How to be faster?
-
-Cap 3: Exemplo com caching e interpolate!
-
-Cap 4: Fix and mfix - Amp Op Pure Example! GPAC inspired
-
-Cap 5: Mfix + mivika
-
-Conclusao
-Cap 6: Future improvements (PURE) and related: Reactive programming
-
-Cap 7: Side effects are bad!
-
 \end{document}
