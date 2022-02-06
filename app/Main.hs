@@ -2,7 +2,7 @@ module Main where
 
 import Examples.ChemicalReaction
 import Examples.Test
-import Simulation.Aivika.Dynamics
+import Simulation.Dynamics
 
 main = 
   do a <- runDynamics model spc

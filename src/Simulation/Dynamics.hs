@@ -46,7 +46,7 @@
 -- process-oriented and activity-oriented paradigms. Aivika also supports 
 -- the Agent-based Modeling. Finally, it can be applied to System Dynamics.
 --
-module Simulation.Aivika.Dynamics 
+module Simulation.Dynamics 
        (-- * Dynamics
         Dynamics(..),
         iterationBnds,

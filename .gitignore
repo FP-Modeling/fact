@@ -1,6 +1,7 @@
 dist-newstyle
 auto
 img
+*#*#
 _minted-thesis
 _minted-manual
 *.aux

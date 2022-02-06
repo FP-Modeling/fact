@@ -1,6 +1,6 @@
 module Examples.Test where
 
-import Simulation.Aivika.Dynamics
+import Simulation.Dynamics
 
 testSpecs = Specs { startTime = 0,
                     stopTime = 1,

@@ -1,6 +1,6 @@
 module Examples.ChemicalReaction where
 
-import Simulation.Aivika.Dynamics
+import Simulation.Dynamics
 
 spc = Specs { startTime = 0, 
               stopTime = 10, 
