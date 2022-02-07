@@ -4,17 +4,17 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 653f80bfd6c8af72ee2048852b8cf701701a96278f664685743e3292572eca67
+-- hash: 6199035fe7e90c766fe56806457d269e32271ea1832b26f0f80d3df736b560b0
 
-name:           mivika
+name:           rivika
 version:        0.1.0.0
-description:    Please see the README on GitHub at <https://github.com/githubuser/mivika#readme>
-homepage:       https://github.com/githubuser/mivika#readme
-bug-reports:    https://github.com/githubuser/mivika/issues
-author:         Author name here
-maintainer:     example@example.com
-copyright:      2022 Author name here
-license:        BSD3
+description:    Please see the README on GitHub at <https://github.com/FP-Modeling/rivika/blob/main/README.md>
+homepage:       https://github.com/https://github.com/FP-Modeling/rivika#readme
+bug-reports:    https://github.com/https://github.com/FP-Modeling/rivika/issues
+author:         Eduardo Lemos Rocha
+maintainer:     dudulr10@gmail.com
+copyright:      2022 EduardoLR10
+license:        MIT
 license-file:   LICENSE
 build-type:     Simple
 extra-source-files:
@@ -23,15 +23,16 @@ extra-source-files:
 
 source-repository head
   type: git
-  location: https://github.com/githubuser/mivika
+  location: https://github.com/https://github.com/FP-Modeling/rivika
 
 library
   exposed-modules:
       Examples.ChemicalReaction
+      Examples.Lorenz
       Examples.Test
       Simulation.Dynamics
   other-modules:
-      Paths_mivika
+      Paths_rivika
   hs-source-dirs:
       src
   build-depends:
@@ -40,31 +41,31 @@ library
     , mtl >=1.1.0.2
   default-language: Haskell2010
 
-executable mivika-exe
+executable rivika-exe
   main-is: Main.hs
   other-modules:
-      Paths_mivika
+      Paths_rivika
   hs-source-dirs:
       app
   ghc-options: -O2
   build-depends:
       array >=0.3.0.0
     , base >=4.7 && <5
-    , mivika
     , mtl >=1.1.0.2
+    , rivika
   default-language: Haskell2010
 
-test-suite mivika-test
+test-suite rivika-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
-      Paths_mivika
+      Paths_rivika
   hs-source-dirs:
       test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       array >=0.3.0.0
     , base >=4.7 && <5
-    , mivika
     , mtl >=1.1.0.2
+    , rivika
   default-language: Haskell2010

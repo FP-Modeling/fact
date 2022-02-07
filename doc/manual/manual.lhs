@@ -173,7 +173,7 @@ data Parameters = Parameters { specs     :: Specs,
 \subsection{Representing the Integrator}
 
 The integrator is being represented, intuitively, as a machine made of side effects. Inside this type, there are the following items: the initial condition of the system, one pointer to the memory managing caching and a second pointer resposable for calculating the current result:
-2
+
 \begin{code}
 data Integ = Integ { initial     :: Dynamics Double,  
                      cache       :: IORef (Dynamics Double),

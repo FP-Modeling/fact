@@ -901,7 +901,7 @@
 
 \newcommand{\literateChapter}[1]{%
 	\chapter{#1}%
-        \addtocontents{toc}{}{#1}
+        %\addtocontents{toc}{}{#1}
 	\label{#1}%
 }%
 
@@ -953,7 +953,7 @@
         \selectlanguage{brazil}%
         \selectbiblanguage{brazil}%
     }%
-	\@erroSeNaoExiste{bibliografia.bib}%
+	\@erroSeNaoExiste{bibliography.bib}%
 
 	\tableofcontents%
 	\iftotalfigures\listoffigures\fi%
@@ -967,7 +967,7 @@
 	\@PosTextualNaoInclusofalse%
     \postextual%
 	\bibliographystyle{babunsrt}%
-    \bibliography{bibliografia}%
+    \bibliography{bibliography}%
 }%
 
 

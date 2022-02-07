@@ -1,5 +1,7 @@
 \documentclass[engenharia]{UnB-CIC}%
 %include polycode.fmt
+%separation 1
+%latency 1
 \selectlanguage{american}\entrue\brfalse
 
 \usepackage{pdfpages}% incluir PDFs, usado no apêndice
@@ -8,7 +10,7 @@
 
 \long\def\ignore#1{}
 \usepackage[outputdir=GraduationThesis/]{minted}
-\newminted[code]{haskell}{breaklines}
+\newminted[code]{haskell}{breaklines,autogobble}
 
 \orientador{\prof \dr José Edil Guimarães}{CIC/UnB}%
 \coordenador[a]{\prof[a] \dr[a] Ada Lovelace}{Bibliothèque universelle de Genève}%
@@ -29,33 +31,28 @@
 \begin{document}
 
 \literateChapter{Introduction}
-%include graduationThesis/Lhs/Introduction.lhs
+%include GraduationThesis/Lhs/Introduction.lhs
 
 \ifdefined\iscolorful
-  \input{graduationThesis/Lhs/Introduction.lhs}
+  \input{GraduationThesis/Lhs/Introduction.lhs}
 \fi
 
-\literateChapter{Section 2}
-%include graduationThesis/Lhs/Section2.lhs
+\literateChapter{Rivika}
+%include GraduationThesis/Lhs/Explanation.lhs
 
 \ifdefined\iscolorful
-  \input{graduationThesis/Lhs/Section2.lhs}
+  \input{GraduationThesis/Lhs/Explanation.lhs}
 \fi
-
-Isto é um teste para checar o programa.
-
 
 \ignore{
 \begin{code}
+{-# LANGUAGE FlexibleContexts, FlexibleInstances, UndecidableInstances, BangPatterns, ConstraintKinds, MonoLocalBinds #-}
 module Main where
+import Control.Monad.Trans
+import Data.IORef
+import Data.Array
 import GraduationThesis.Lhs.Introduction
 \end{code}
 }
-
-
-\begin{code}
-main :: IO ()
-main = printForMe
-\end{code}
 
 \end{document}
