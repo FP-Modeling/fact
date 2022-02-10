@@ -3,9 +3,9 @@ module Examples.Lorenz where
 import Simulation.Dynamics
 
 lorenzSpecs = Specs { startTime = 0,
-                      stopTime = 40,
+                      stopTime = 10,
                       dt = 0.01,
-                      method = Euler
+                      method = RungeKutta2 
                     }
 
 sigma = 10.0

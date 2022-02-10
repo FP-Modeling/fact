@@ -1,6 +1,6 @@
 name:                rivika
 version:             0.1.0.0
-github:              "https://github.com/FP-Modeling/rivika"
+github:              "git@github.com:FP-Modeling/rivika.git"
 license:             MIT
 author:              "Eduardo Lemos Rocha"
 maintainer:          "dudulr10@gmail.com"

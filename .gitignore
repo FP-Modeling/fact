@@ -1,6 +1,5 @@
 dist-newstyle
 auto
-img
 *#*#
 _minted-thesis
 _minted-manual
@@ -8,7 +7,10 @@ _minted-manual
 *.hi
 *.o
 *.log
-*.pdf
+thesisColorful.pdf
+thesisGray.pdf
+manualColorful.pdf
+manualGray.pdf
 *.ptb
 *.exe
 manual.tex

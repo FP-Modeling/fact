@@ -1,16 +1,16 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.33.0.
+-- This file has been generated from package.yaml by hpack version 0.34.4.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 6199035fe7e90c766fe56806457d269e32271ea1832b26f0f80d3df736b560b0
+-- hash: 6c7c90e080c3df1c18b5b033ff5f55dec6b3e7785b178b67c9bb942010e9d8fe
 
 name:           rivika
 version:        0.1.0.0
 description:    Please see the README on GitHub at <https://github.com/FP-Modeling/rivika/blob/main/README.md>
-homepage:       https://github.com/https://github.com/FP-Modeling/rivika#readme
-bug-reports:    https://github.com/https://github.com/FP-Modeling/rivika/issues
+homepage:       https://github.com/git@github.com:FP-Modeling/rivika.git#readme
+bug-reports:    https://github.com/git@github.com:FP-Modeling/rivika.git/issues
 author:         Eduardo Lemos Rocha
 maintainer:     dudulr10@gmail.com
 copyright:      2022 EduardoLR10
@@ -23,7 +23,7 @@ extra-source-files:
 
 source-repository head
   type: git
-  location: https://github.com/https://github.com/FP-Modeling/rivika
+  location: https://github.com/git@github.com:FP-Modeling/rivika.git
 
 library
   exposed-modules:
