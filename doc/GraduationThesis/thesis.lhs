@@ -1,5 +1,6 @@
 \documentclass[engenharia]{UnB-CIC}%
 %include polycode.fmt
+%include GraduationThesis/lineno.fmt
 %separation 1
 %latency 1
 \selectlanguage{american}\entrue\brfalse
@@ -10,7 +11,9 @@
 
 \long\def\ignore#1{}
 \usepackage[outputdir=GraduationThesis/]{minted}
-\newminted[code]{haskell}{breaklines,autogobble}
+\newminted[code]{haskell}{breaklines,autogobble,linenos=true}
+\newminted[spec]{haskell}{breaklines,autogobble,linenos=true}
+
 
 \orientador{\prof \dr José Edil Guimarães}{CIC/UnB}%
 \coordenador[a]{\prof[a] \dr[a] Ada Lovelace}{Bibliothèque universelle de Genève}%

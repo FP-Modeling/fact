@@ -186,9 +186,8 @@ instance (Floating a) => Floating (Dynamics a) where
   acosh = liftMD acosh
   atanh = liftMD atanh
 
-instance MonadIO Dynamics where
-  liftIO m = Dynamics $ const m
-     
+-- instance MonadIO Dynamics where
+--   liftIO m = Dynamics $ const m     
 
 -- | Make a list of all possible iterations from 0
 iterations :: Specs -> [Int]
@@ -301,23 +300,31 @@ data Integ = Integ { initial     :: Dynamics Double,   -- ^ The initial value.
                      cache :: IORef (Dynamics Double),
                      result :: IORef (Dynamics Double) }
 
--- | Create a new integral with the specified initial value.
-newInteg :: Dynamics Double -> Dynamics Integ
-newInteg i = 
-  do r1 <- liftIO $ newIORef $ initD i 
-     r2 <- liftIO $ newIORef $ initD i 
-     let integ = Integ { initial = i, 
-                         cache   = r1,
-                         result  = r2 }
-         z = Dynamics $ \ps -> 
-           do (Dynamics m) <- readIORef (result integ)
-              m ps
-     y <- umemo interpolate z
-     liftIO $ writeIORef (cache integ) y
-     return integ
+data Integ' = Integ' { initial'     :: Dynamics Double,
+                       computation' :: IORef (Dynamics Double) }
 
-     -- Me de qualquer coisa que te dou 50
-     -- Faça esta conta
+
+-- -- | Create a new integral with the specified initial value.
+-- newInteg :: Dynamics Double -> Dynamics Integ
+-- newInteg i = 
+--   do r1 <- liftIO $ newIORef $ initD i 
+--      r2 <- liftIO $ newIORef $ initD i 
+--      let integ = Integ { initial = i, 
+--                          cache   = r1,
+--                          result  = r2 }
+--          z = Dynamics $ \ps -> 
+--            do (Dynamics m) <- readIORef (result integ)
+--               m ps
+--      y <- umemo interpolate z
+--      liftIO $ writeIORef (cache integ) y
+--      return integ
+
+newInteg' :: Dynamics Double -> Dynamics Integ'
+newInteg' i = 
+  do comp <- liftIO $ newIORef $ initD i 
+     let integ = Integ' { initial'     = i, 
+                          computation' = comp }
+     return integ
 
 -- | Return the integral's value.
 integValue :: Integ -> Dynamics Double
@@ -326,17 +333,17 @@ integValue integ =
   do (Dynamics m) <- readIORef (cache integ)
      m ps
 
--- | Set the derivative for the integral.
-integDiff :: Integ -> Dynamics Double -> Dynamics ()
-integDiff integ diff =
-  do let z = Dynamics $ \ps ->
-           do y <- readIORef (cache integ) -- Give me past values
-              let i = initial integ -- Give me initial value
-              case method (specs ps) of -- Check the solver method
-                Euler -> integEuler diff i y ps
-                RungeKutta2 -> integRK2 diff i y ps
-                RungeKutta4 -> integRK4 diff i y ps
-     liftIO $ writeIORef (result integ) z -- This is the new computation now!
+-- -- | Set the derivative for the integral.
+-- integDiff :: Integ -> Dynamics Double -> Dynamics ()
+-- integDiff integ diff =
+--   do let z = Dynamics $ \ps ->
+--            do y <- readIORef (cache integ) -- Give me past values
+--               let i = initial integ -- Give me initial value
+--               case method (specs ps) of -- Check the solver method
+--                 Euler -> integEuler diff i y ps
+--                 RungeKutta2 -> integRK2 diff i y ps
+--                 RungeKutta4 -> integRK4 diff i y ps
+--      liftIO $ writeIORef (result integ) z -- This is the new computation now!
 
 integEuler :: Dynamics Double
              -> Dynamics Double 
