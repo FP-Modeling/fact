@@ -1,18 +1,25 @@
-\documentclass[engenharia]{UnB-CIC}%
+\documentclass[engenharia]{UnB-CIC}
+
 %include polycode.fmt
 %include GraduationThesis/lineno.fmt
 %separation 1
 %latency 1
-\selectlanguage{american}\entrue\brfalse
 
+\long\def\ignore#1{}
+
+\selectlanguage{american}\entrue\brfalse
 \usepackage{pdfpages}% incluir PDFs, usado no apêndice
 \usepackage{hyperref}
 \usepackage{dcolumn}
+\usepackage{amsmath, systeme}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{amsmath}
 
-\long\def\ignore#1{}
 \usepackage[outputdir=GraduationThesis/]{minted}
-\newminted[code]{haskell}{breaklines,autogobble,linenos=true}
-\newminted[spec]{haskell}{breaklines,autogobble,linenos=true}
+\newminted[code]{haskell}{breaklines,autogobble,linenos=true, numberblanklines=false}
+\newminted[spec]{haskell}{breaklines,autogobble,linenos=true, numberblanklines=false}
 
 
 \orientador{\prof \dr José Edil Guimarães}{CIC/UnB}%
@@ -40,21 +47,21 @@
   \input{GraduationThesis/Lhs/Introduction.lhs}
 \fi
 
-\literateChapter{Rivika}
-%include GraduationThesis/Lhs/Explanation.lhs
+\literateChapter{Implementation}
+%include GraduationThesis/Lhs/Implementation.lhs
 
 \ifdefined\iscolorful
-  \input{GraduationThesis/Lhs/Explanation.lhs}
+  \input{GraduationThesis/Lhs/Implementation.lhs}
 \fi
 
 \ignore{
 \begin{code}
-{-# LANGUAGE FlexibleContexts, FlexibleInstances, UndecidableInstances, BangPatterns, ConstraintKinds, MonoLocalBinds #-}
 module Main where
-import Control.Monad.Trans
-import Data.IORef
-import Data.Array
 import GraduationThesis.Lhs.Introduction
+import GraduationThesis.Lhs.Implementation
+
+main :: IO ()
+main = executeLorenz
 \end{code}
 }
 

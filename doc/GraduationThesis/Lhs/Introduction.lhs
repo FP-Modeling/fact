@@ -1,6 +1,7 @@
 \ignore{
 \begin{code}
 module GraduationThesis.Lhs.Introduction where
+import GraduationThesis.Lhs.Implementation
 \end{code}
 }
 
@@ -17,8 +18,8 @@ This is a bullet list to me, with the bullet points that I need to master in ord
 
 \begin{code}
 lorenzSpecs = Specs { startTime = 0,
-                      stopTime  = 40,
-                      dt        = 0.01,
+                      stopTime  = 10,
+                      dt        = 1,
                       method    = Euler
                     }
 
@@ -26,7 +27,7 @@ sigma = 10.0
 rho = 28.0
 beta = 8.0 / 3.0
 
-lorenzModel :: Dynamics (Dynamics [Double])
+lorenzModel :: Model [Double]
 lorenzModel =
   do integX <- newInteg 1.0
      integY <- newInteg 1.0
@@ -39,8 +40,8 @@ lorenzModel =
      integDiff integZ (x*y-beta*z)
      return $ sequence [x,y,z]
 
-mainLorenz =
-  do ans <- runDynamics1 lorenzModel lorenzSpecs
+executeLorenz =
+  do ans <- runDynamicsFinal lorenzModel lorenzSpecs
      print ans
 \end{code}
 

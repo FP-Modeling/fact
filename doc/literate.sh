@@ -27,15 +27,19 @@ then
 	
     elif [[ $2 == 'compile' ]]
     then
-        # Compile the manual
+        # Compile the manual with GHC
         ghc manual/manual.lhs
 
 	# Moving to current directory (Unix and Windows)
 	mv manual/manual manual
 	mv manual/manual.exe manual.exe
+    elif [[ $2 == 'repl' ]]
+    then
+        # Enter GHCi with the manual loaded
+        ghci -Wdefault manual/manual.lhs
 	
     else
-        echo "No available option! Use compile, gray or colorful!"
+        echo "No available option! Use compile, repl, gray or colorful!"
     fi
 elif [[ $1 == 'thesis' ]]
 then
@@ -60,15 +64,19 @@ then
 
     elif [[ $2 == 'compile' ]]
     then
-        # Compile the thesis
+        # Compile the thesis with GHC
         ghc GraduationThesis/thesis.lhs
 
 	# Moving to current directory (Unix and Windows)
 	mv GraduationThesis/thesis thesis
 	mv GraduationThesis/thesis.exe thesis.exe
+    elif [[ $2 == 'repl' ]]
+    then
+        # Enter GHCi with the thesis loaded
+        ghci -Wdefault GraduationThesis/thesis.lhs
 
     else
-        echo "No available option! Use compile, gray or colorful!"
+        echo "No available option! Use compile, repl, gray or colorful!"
     fi
 else
     echo "No available documentation! Use manual or thesis!"

@@ -2,5 +2,7 @@
 \babel@toc {american}{}
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {2.1}{\ignorespaces Illustration of the \texttt {Dynamics} type.}}{4}{figure.2.1}%
-\contentsline {figure}{\numberline {2.2}{\ignorespaces Illustration of the \texttt {integDiff} function.}}{8}{figure.2.2}%
+\contentsline {figure}{\numberline {2.1}{\ignorespaces Illustration of the \texttt {Dynamics} type.}}{4}{figure.caption.6}%
+\contentsline {figure}{\numberline {2.2}{\ignorespaces Illustration of the \texttt {integDiff} function.}}{8}{figure.caption.7}%
+\contentsline {figure}{\numberline {2.3}{\ignorespaces Implementation of the system\relax }}{9}{figure.caption.8}%
+\contentsline {figure}{\numberline {2.4}{\ignorespaces Mathematical system\relax }}{9}{figure.caption.8}%

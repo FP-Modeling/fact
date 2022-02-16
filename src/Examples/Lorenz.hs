@@ -4,8 +4,8 @@ import Simulation.Dynamics
 
 lorenzSpecs = Specs { startTime = 0,
                       stopTime = 10,
-                      dt = 0.01,
-                      method = RungeKutta2 
+                      dt = 1,
+                      method = Euler
                     }
 
 sigma = 10.0
