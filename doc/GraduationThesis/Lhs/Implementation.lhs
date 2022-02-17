@@ -231,26 +231,46 @@ Initially, it may seem that this is computation will never halt. However, Haskel
 
 \section{Solvers}
 
-Here I'll do a brief explanation of the Euler method, so I can explain in more concrete terms where the implicit recursion is happening.
+There are three solvers, used in numerical analysis, currently implemented:
+
+\begin{itemize}
+\item Euler Method
+\item Second-order Runge-Kutta Method
+\item Forth-order Runge-Kutta Method
+\end{itemize}
+
+To explain in detail how the solvers work, it is useful to detail the implementation of the simpler one -- the Euler method in our case. Hence, it is worthwhile to understand this method in terms of its mathematical description:
+
+\begin{equation}
+y_{n+1} = y_n + hf(t_n,y_n) \rightarrow y_n = y_{n-1} + hf(t_{n-1}, y_{n-1})
+\end{equation}
+
+The value of the current iteration, $y_n$, can be described in terms of the sum of the previous value and the product between the time step $h$ with the differential equation from the previous iteration and time.
+
+The following code is the implementation of the Euler method. In terms of main functionality, the family of Runge-Kutta methods are analogous:
 
 \begin{code}
 integEuler :: Dynamics Double
-             -> Dynamics Double 
-             -> Dynamics Double 
-             -> Parameters -> IO Double
-integEuler (Dynamics f) (Dynamics i) (Dynamics y) ps =
-  case iteration ps of
+           -> Dynamics Double 
+           -> Dynamics Double 
+           -> Parameters -> IO Double
+integEuler (Dynamics diff) (Dynamics init) (Dynamics compute) params =
+  case iteration params of
     0 -> 
-      i ps
+      init params
     n -> do 
-      let sc  = specs ps
-          ty  = iterToTime sc (n - 1) 0
-          psy = ps { time = ty, iteration = n - 1, stage = 0 }
-      a <- y psy
-      b <- f psy
-      let !v = a + dt (specs ps) * b
+      let spc        = specs params
+          prevTime   = iterToTime spc (n - 1) 0
+          prevParams = params { time = prevTime, iteration = n - 1, stage = 0 }
+      a <- compute prevParams
+      b <- diff prevParams
+      let !v = a + (dt spc) * b
       return v
 \end{code}
+
+On line 5, it is possible to see which functions are available in order to execute a step in the solver. The function \texttt{diff} is the differential equation itself. To get the initial result, i.e., $y(t_0)$, apply any parameters record to the \texttt{init} function. The next function, \texttt{compute}, execute everything previously defined in \texttt{integDiff}; thus executing a step using the solver again. The main difference is which parameters record we will apply in that computation. This mechanism --- of executing again a step of solver, inside the solver itself --- is the preceding implicit recursion, described in the earlier section.
+
+With this in mind, the solver function treats the base case, i.e., the step of the sequence happening at $t_0$, and the remaining ones (line 6). If this computation is solving the first step, the calculation can be done by doing an application of \texttt{params} to \texttt{init}. Otherwise, it is necessary to know the result from the previous iteration in order to generate the current one. To address this requirement, the solver builds another parameters record (line 10 to 12) and applies it to the solver (line 13). Also, it calculates the value from applying this record to \texttt{diff} (line 14), the differential equation itself. Finally, it computes the result for the current iteration (line 15). It is worth noting that the use of \texttt{let!} is mandatory, given that this overlap Haskell's lazyness, making it execute everything necessaty in order to get the value \texttt{v}.
 
 \ignore{
 \begin{code}

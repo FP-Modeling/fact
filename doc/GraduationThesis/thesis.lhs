@@ -5,6 +5,11 @@
 %separation 1
 %latency 1
 
+
+\ifdefined\iscolorful\else
+  \renewcommand{\hscodestyle}{\small}
+\fi
+
 \long\def\ignore#1{}
 
 \selectlanguage{american}\entrue\brfalse
@@ -18,8 +23,8 @@
 \usepackage{amsmath}
 
 \usepackage[outputdir=GraduationThesis/]{minted}
-\newminted[code]{haskell}{breaklines,autogobble,linenos=true, numberblanklines=false}
-\newminted[spec]{haskell}{breaklines,autogobble,linenos=true, numberblanklines=false}
+\newminted[code]{haskell}{breaklines,autogobble,linenos=true, numberblanklines=false, fontsize=\footnotesize}
+\newminted[spec]{haskell}{breaklines,autogobble,linenos=true, numberblanklines=false, fontsize=\footnotesize}
 
 
 \orientador{\prof \dr José Edil Guimarães}{CIC/UnB}%
