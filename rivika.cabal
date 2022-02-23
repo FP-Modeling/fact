@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 6c7c90e080c3df1c18b5b033ff5f55dec6b3e7785b178b67c9bb942010e9d8fe
+-- hash: ee74f95c91e8896338c10ca189f8c4bd85d8c136df8f34fd599c3bb550f20da0
 
 name:           rivika
 version:        0.1.0.0
@@ -27,10 +27,16 @@ source-repository head
 
 library
   exposed-modules:
+      Driver
+      Dynamics
       Examples.ChemicalReaction
       Examples.Lorenz
-      Examples.Test
-      Simulation.Dynamics
+      Integrator
+      Memo
+      Simulation
+      Solver
+      Types
+      Utils
   other-modules:
       Paths_rivika
   hs-source-dirs:

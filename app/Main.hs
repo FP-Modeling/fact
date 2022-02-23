@@ -1,9 +1,8 @@
 module Main where
 
 import Examples.ChemicalReaction
-import Examples.Test
-import Simulation.Dynamics
+import Driver
 
 main = 
-  do a <- runDynamics model spc
+  do a <- runDynamicsFinal model interv solv
      print a

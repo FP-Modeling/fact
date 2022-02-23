@@ -1,13 +1,19 @@
 module Examples.ChemicalReaction where
 
-import Simulation.Dynamics
+import Driver
+import Solver
+import Simulation
+import Integrator
 
-spc = Specs { startTime = 0, 
-              stopTime = 10, 
-              dt = 1,
-              method = RungeKutta4 }
+interv = Interval { startTime = 0, 
+                    stopTime = 10 }
 
-model :: Dynamics (Dynamics [Double])
+solv = Solver { iteration = 0,
+                dt = 1,
+                method = RungeKutta4,
+                stage = 0 }
+
+model :: Model [Double]
 model =
   do integA <- newInteg 100
      integB <- newInteg 0
