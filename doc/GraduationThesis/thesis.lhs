@@ -27,18 +27,18 @@
 \newminted[spec]{haskell}{breaklines,autogobble,linenos=true, numberblanklines=false, fontsize=\footnotesize}
 
 
-\orientador{\prof \dr José Edil Guimarães}{CIC/UnB}%
-\coordenador[a]{\prof[a] \dr[a] Ada Lovelace}{Bibliothèque universelle de Genève}%
+\orientador{\prof José Edil Guimarães}{CIC/UnB}%
+\coordenador[a]{\prof[a] Ada Lovelace}{Bibliothèque universelle de Genève}%
 \diamesano{00}{onzembro}{2022}%
 
-\membrobanca{\prof \dr Donald Knuth}{Stanford University}%
+\membrobanca{\prof Donald Knuth}{Stanford University}%
 \membrobanca{\dr Leslie Lamport}{Microsoft Research}%
 
 \autor{Eduardo L.}{Rocha}%
 
 \titulo{The side effect hell on Earth}%
 
-%\palavraschave{differential equations, metodologia científica, trabalho de conclusão de curso}%
+\palavraschave{equações diferenciais, sistemas contínuos, ponto fixo, retroalimentação}
 \keywords{differential equations, continuous systems, fix point, feedback loop}%
 
 \newcommand{\unbcic}{\texttt{UnB-CIC}}%

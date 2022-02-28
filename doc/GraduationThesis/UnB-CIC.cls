@@ -49,7 +49,7 @@
     \gdef\@mododeescrita{\en{Monograph}\br{Monografia}}}%
 
 \DeclareOptionX{engenharia}{%
-    \gdef\@nomecurso{\en{Computer Engineering}\br{Curso de Engenharia da Computa\c{c}\~ao}}%
+    \gdef\@nomecurso{\en{Computer Engineering Program at University of Brasília}\br{Programa de Engenharia da Computa\c{c}\~ao na Universidade de Brasília}}%
     \gdef\@mododeescrita{\en{Monograph}\br{Monografia}}}%
 
 
@@ -382,7 +382,6 @@
 		\addtolength{\len@brasiliaw}{-.105em}%ajusta pequeno espaço em branco antes do B desta fonte
 		\includegraphics[width=\len@brasiliaw]{#1}\\[.63\len@uacaph]%logo com a largura da palavra Brasilia
 		\@universidade\@lskipoffset{.5}%
-		\@textscale{.5}{\@instituto}\@lskipoffset{.25}%
 		\@textscale{.5}{\@departamento}%
 		\end{spacing}%
 	\endgroup
@@ -432,6 +431,11 @@
 \newcommand*{\set@keywords}[2][]{%
 	\gdef\@keywords{#1}
 	\gdef\@@keywords{#2}
+}
+\newcommand*{\palavraschave}{\@dblarg\set@palavraschave}
+\newcommand*{\set@palavraschave}[2][]{%
+	\gdef\@palavraschave{#1}
+	\gdef\@@palavraschave{#2}
 }
 
 % data do trabalho
@@ -568,10 +572,10 @@
 	\end{otherlanguage*}
 	\end{paginatitulo}}
 
-\newenvironment{summary}
+\newenvironment{resumo}
 	{\begin{paginatitulo}%
-	\pdfbookmark{Summary}{summary}%
-	\chapter*{Summary}}%
+	\pdfbookmark{Resumo}{resumo}%
+	\chapter*{Resumo}}%
 		{\vskip 15pt\noindent\textbf{Palavras-chave:}\ \@@palavraschave%
     \end{paginatitulo}}
 
@@ -617,14 +621,14 @@
 			\if@posgraduacao%
 				\if@ppca%
                 \en{%
-					submitted in partial fullfilment of the requirements to %
+					submitted in partial fullfilment of the requirements to the %
 					\if@qualificacao{qualify for}\else{}\fi\\%
                 }\br{%
 					apresentada como requisito parcial para %
 					\if@qualificacao{qualificação}\else{conclus\~ao}\fi~do\\}%
 				\else%
                 \en{%
-					submitted in partial fullfilment of\\the requirements to %
+					submitted in partial fullfilment of\\the requirements to the %
 					\if@qualificacao{qualify for}\else{}\fi~%
                 }\br{%
 					apresentada como requisito parcial para\\
@@ -634,7 +638,7 @@
 			\else%
                 \en{%
 					submitted in partial fullfilment of\\
-                    the requirements to \@nomecurso%
+                    the requirements to the \@nomecurso%
                 }\br{%
                     apresentada como requisito parcial\\
                     para conclus\~ao do \@nomecurso%
@@ -664,7 +668,7 @@
 			\if@posgraduacao%
 				\if@ppca%
                 \en{%
-					submitted in partial fullfilment of the requirements to %
+					submitted in partial fullfilment of the requirements to the %
 					\if@qualificacao{qualify for}\else{}\fi\\%
                 }\br{%
 					apresentada como requisito parcial para %
@@ -672,7 +676,7 @@
                 }%
 				\else%
                 \en{%
-					submitted in partial fullfilment of\\the requirements to %
+					submitted in partial fullfilment of\\the requirements to the %
 					\if@qualificacao{qualify for}\else{}\fi~%
                 }\br{%
 					apresentada como requisito parcial para\\
@@ -683,7 +687,7 @@
 			\else%
                 \en{%
 					submitted in partial fullfilment of\\
-                    the requirements to \@nomecurso%
+                    the requirements to the \@nomecurso%
                 }\br{%
                     apresentada como requisito parcial\\
                     para conclus\~ao do \@nomecurso%
@@ -944,12 +948,13 @@
 		\@IncluirSecao{acknowledgments}%
 	\fi%
     \en{%
-        \@IncluirSecao{abstract}%
-        \selectbiblanguage{american}%
-    }\br{%
-        \@IncluirSecao{summary}%
         \selectlanguage{american}%
+        \selectbiblanguage{american}%
         \@IncluirSecao{abstract}%
+        \@IncluirSecao{resumo}%
+    }\br{%
+        \@IncluirSecao{abstract}%
+        \@IncluirSecao{resumo}%
         \selectlanguage{brazil}%
         \selectbiblanguage{brazil}%
     }%
