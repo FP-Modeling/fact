@@ -8,8 +8,7 @@ import Integrator
 lorenzInterv = Interval { startTime = 0,
                           stopTime = 10 }
 
-lorenzSolver = Solver { iteration = 0,
-                        dt = 1,
+lorenzSolver = Solver { dt = 1,
                         method = Euler,
                         stage = 0
                       }

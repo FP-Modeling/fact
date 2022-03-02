@@ -19,18 +19,18 @@ discrete (Dynamics m) =
       r | st == 0    = m ps
         | st > 0    = let iv = interval ps
                           sl = solver ps
-                          n  = iteration sl
+                          n  = iteration ps
                       in m $ ps { time = iterToTime iv sl n 0,
                                   solver = sl {stage = 0} }
         | otherwise = let iv = interval ps
                           t  = time ps
                           sl = solver ps
-                          n  = iteration sl
+                          n  = iteration ps
                           t' = startTime iv + fromIntegral (n + 1) * dt sl
                           n' = if neighborhood sl t t' then n + 1 else n
                       in m $ ps { time = iterToTime iv sl n' 0,
-                                  solver = sl { iteration = n',
-                                                stage = 0 }}
+                                  iteration = n',
+                                  solver = sl { stage = 0 } }
   in r
 
 -- | Interpolate the computation based on the integration time points only.
@@ -49,12 +49,12 @@ interpolate (Dynamics m) =
         n2 = min (ceiling x) (iterationHiBnd iv st)
         t1 = iterToTime iv sl n1 0
         t2 = iterToTime iv sl n2 0
-        z1 = m $ ps { time = t1, 
-                      solver = sl { iteration = n1, 
-                                    stage = 0 }}
+        z1 = m $ ps { time = t1,
+                      iteration = n1,
+                      solver = sl { stage = 0 } }
         z2 = m $ ps { time = t2,
-                      solver = sl { iteration = n2,
-                                    stage = 0 }}
+                      iteration = n2,
+                      solver = sl { stage = 0 } }
         r | t == t1   = z1
           | t == t2   = z2
           | otherwise = 

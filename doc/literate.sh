@@ -49,7 +49,7 @@ then
         lhs2Tex GraduationThesis/thesis.lhs > GraduationThesis/thesis.tex
 
         # Generate references
-        bibtex GraduationThesis/thesis.lhs
+        bibtex --include-directory='GraduationThesis/' GraduationThesis/thesis
 
         # Generate black and white pdf from created .tex file
         pdflatex -shell-escape -output-directory='GraduationThesis/' GraduationThesis/thesis.tex
@@ -60,7 +60,7 @@ then
     elif [[ $2 == 'colorful' ]]
     then
         # Generate references
-        bibtex GraduationThesis/thesis.lhs
+        bibtex --include-directory='GraduationThesis/' GraduationThesis/thesis
 
         # Generate colorful pdf from .lhs file
         pdflatex -shell-escape -output-directory='GraduationThesis/' "\def\iscolorful{} \input{GraduationThesis/thesis.lhs}"

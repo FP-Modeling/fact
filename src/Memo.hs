@@ -53,7 +53,7 @@ memo tr (Dynamics m) =
      let r ps =
            do let sl  = solver ps
                   iv  = interval ps
-                  n   = iteration sl
+                  n   = iteration ps
                   st  = stage sl
                   stu = stageHiBnd sl 
                   loop n' st' = 
@@ -62,8 +62,8 @@ memo tr (Dynamics m) =
                       readArray arr (st, n)
                     else 
                       let ps' = ps { time = iterToTime iv sl n' st',
-                                     solver = sl { iteration = n',
-                                                   stage = st'}}
+                                     iteration = n',
+                                     solver = sl { stage = st' }}
                       in do a <- m ps'
                             a `seq` writeArray arr (st', n') a
                             if st' >= stu 
@@ -90,15 +90,15 @@ memo0 tr (Dynamics m) =
      let r ps =
            do let sl = solver ps
                   iv = interval ps
-                  n  = iteration sl
+                  n  = iteration ps
                   loop n' = 
                     if n' > n
                     then 
                       readArray arr n
                     else 
                       let ps' = ps { time = iterToTime iv sl n' 0,
-                                     solver = sl { iteration = n',
-                                                   stage = 0}}
+                                     iteration = n',
+                                     solver = sl { stage = 0} }
                       in do a <- m ps'
                             a `seq` writeArray arr n' a
                             writeIORef nref (n' + 1)

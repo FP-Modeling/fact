@@ -65,15 +65,16 @@ import Simulation
 -- a key point of the Aivika simulation library.
 --
 
+-- | It defines the simulation time appended with additional information.
+data Parameters = Parameters { interval  :: Interval, -- ^ the simulation interval
+                               solver    :: Solver,   -- ^ the solver configuration
+                               time      :: Real,     -- ^ the current time
+                               iteration :: Iteration -- ^ the current iteration
+                             } deriving (Eq, Show)
+
 -- | A value in the 'Dynamics' monad represents a dynamic process, i.e.
 -- a polymorstic time varying function.
 newtype Dynamics a = Dynamics {apply :: Parameters -> IO a}
-
--- | It defines the simulation time appended with additional information.
-data Parameters = Parameters { interval :: Interval, -- ^ the simulation interval
-                               solver   :: Solver,   -- ^ the solver configuration
-                               time     :: Real      -- ^ the current time
-                             } deriving (Eq, Show)
 
 instance Functor Dynamics where
   fmap f (Dynamics da) = Dynamics $ \ps -> fmap f (da ps)

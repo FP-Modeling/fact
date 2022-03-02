@@ -5,10 +5,9 @@ import Types
 import Simulation
 
 -- | It defines configurations to use within the solver
-data Solver = Solver { iteration :: Iteration,    -- ^ the current iteration
-                       dt        :: Real, -- ^ the integration time step
-                       method    :: Method, -- ^ the integration method
-                       stage     :: Stage     -- ^ the current stage
+data Solver = Solver { dt        :: Real,      -- ^ the integration time step
+                       method    :: Method,    -- ^ the integration method
+                       stage     :: Stage      -- ^ the current stage
                      } deriving (Eq, Ord, Show)
 
 -- | It defines the integration method.

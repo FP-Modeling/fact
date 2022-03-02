@@ -12,8 +12,8 @@ runDynamicsFinal :: Model a -> Interval -> Solver -> IO a
 runDynamicsFinal (Dynamics m) iv sl = 
   do d <- m Parameters { interval = iv,
                          time = startTime iv,
-                         solver = sl { iteration = 0,
-                                       stage = 0 }}
+                         iteration = 0,
+                         solver = sl { stage = 0 }}
      subrunDynamicsFinal d iv sl
 
 -- | Auxiliary functions to runDyanamics (individual computation and list of computations)
@@ -23,8 +23,8 @@ subrunDynamicsFinal (Dynamics m) iv sl =
          t = iterToTime iv sl n 0
      m Parameters { interval = iv,
                     time = t,
-                    solver = sl { iteration = n,
-                                  stage = 0 }}
+                    iteration = n,
+                    solver = sl { stage = 0 }}
 
 -- | Run the simulation and return the results in all 
 -- integration time points using the specified simulation specs.
@@ -32,8 +32,8 @@ runDynamics :: Model a -> Interval -> Solver -> IO [a]
 runDynamics (Dynamics m) iv sl = 
   do d <- m Parameters { interval = iv,
                          time = startTime iv,
-                         solver = sl {iteration = 0,
-                                      stage = 0 }}
+                         iteration = 0,
+                         solver = sl { stage = 0 }}
      sequence $ subrunDynamics d iv sl
 
 subrunDynamics :: Dynamics a -> Interval -> Solver -> [IO a]
@@ -41,7 +41,7 @@ subrunDynamics (Dynamics m) iv sl =
   do let (nl, nu) = iterationBnds iv (dt sl)
          parameterise n = Parameters { interval = iv,
                                        time = iterToTime iv sl n 0,
-                                       solver = sl {iteration = n,
-                                                    stage = 0 }}
+                                       iteration = n,
+                                       solver = sl { stage = 0 }}
      map (m . parameterise) [nl .. nu]
 

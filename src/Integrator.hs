@@ -20,7 +20,7 @@ import Memo
 -- | The 'Integ' type represents an integral.
 data Integ = Integ { initial :: Dynamics Real,   -- ^ The initial value.
                      cache   :: IORef (Dynamics Real),
-                     result  :: IORef (Dynamics Real) }
+                     computation  :: IORef (Dynamics Real) }
 
 data Integ' = Integ' { initial'     :: Dynamics Real,
                        computation' :: IORef (Dynamics Real) }
@@ -29,14 +29,14 @@ data Integ' = Integ' { initial'     :: Dynamics Real,
 initialize :: Dynamics a -> Dynamics a
 initialize (Dynamics m) =
   Dynamics $ \ps ->
-  if iteration (solver ps) == 0 && stage (solver ps) == 0 then
+  if iteration ps == 0 && stage (solver ps) == 0 then
     m ps
   else
     let iv = interval ps
         sl = solver ps
     in m $ ps { time = iterToTime iv sl 0 0,
-                solver = sl { iteration = 0,
-                              stage = 0 }}
+                iteration = 0,
+                solver = sl { stage = 0 }}
 
 -- -- | Create a new integral with the specified initial value.
 newInteg :: Dynamics Real -> Dynamics Integ
@@ -45,9 +45,9 @@ newInteg i =
      r2 <- liftIO $ newIORef $ initialize i 
      let integ = Integ { initial = i, 
                          cache   = r1,
-                         result  = r2 }
+                         computation  = r2 }
          z = Dynamics $ \ps -> 
-           do (Dynamics m) <- readIORef (result integ)
+           do (Dynamics m) <- readIORef (computation integ)
               m ps
      y <- memo interpolate z
      liftIO $ writeIORef (cache integ) y
@@ -77,21 +77,21 @@ integDiff integ diff =
                 Euler -> integEuler diff i y ps
                 RungeKutta2 -> integRK2 diff i y ps
                 RungeKutta4 -> integRK4 diff i y ps
-     liftIO $ writeIORef (result integ) z -- This is the new computation now!
+     liftIO $ writeIORef (computation integ) z -- This is the new computation now!
 
 integEuler :: Dynamics Real
              -> Dynamics Real 
              -> Dynamics Real 
              -> Parameters -> IO Real
 integEuler (Dynamics diff) (Dynamics i) (Dynamics y) ps =
-  case iteration (solver ps) of
+  case iteration ps of
     0 -> 
       i ps
     n -> do 
       let iv  = interval ps
           sl  = solver ps
           ty  = iterToTime iv sl (n - 1) 0
-          psy = ps { time = ty, solver = sl {iteration = n - 1, stage = 0} }
+          psy = ps { time = ty, iteration = n - 1, solver = sl { stage = 0} }
       a <- y psy
       b <- diff psy
       let !v = a + dt (solver ps) * b
@@ -103,7 +103,7 @@ integRK2 :: Dynamics Real
            -> Parameters -> IO Real
 integRK2 (Dynamics f) (Dynamics i) (Dynamics y) ps =
   case stage (solver ps) of
-    0 -> case iteration (solver ps) of
+    0 -> case iteration ps of
       0 ->
         i ps
       n -> do
@@ -112,9 +112,9 @@ integRK2 (Dynamics f) (Dynamics i) (Dynamics y) ps =
             ty = iterToTime iv sl (n - 1) 0
             t1 = ty
             t2 = iterToTime iv sl (n - 1) 1
-            psy = ps { time = ty, solver = sl {iteration = n - 1, stage = 0 }}
+            psy = ps { time = ty, iteration = n - 1, solver = sl { stage = 0 }}
             ps1 = psy
-            ps2 = ps { time = t2, solver = sl {iteration = n - 1, stage = 1 }}
+            ps2 = ps { time = t2, iteration = n - 1, solver = sl { stage = 1 }}
         vy <- y psy
         k1 <- f ps1
         k2 <- f ps2
@@ -123,17 +123,17 @@ integRK2 (Dynamics f) (Dynamics i) (Dynamics y) ps =
     1 -> do
       let iv = interval ps
           sl = solver ps
-          n  = iteration sl
+          n  = iteration ps
           ty = iterToTime iv sl n 0
           t1 = ty
-          psy = ps { time = ty, solver = sl {iteration = n, stage = 0 }}
+          psy = ps { time = ty, iteration = n, solver = sl { stage = 0 }}
           ps1 = psy
       vy <- y psy
       k1 <- f ps1
       let !v = vy + dt sl * k1
       return v
     _ -> 
-      error "Incorrect stage: integ"
+      error "Incorrect stage: integRK2"
 
 integRK4 :: Dynamics Real
            -> Dynamics Real
@@ -141,7 +141,7 @@ integRK4 :: Dynamics Real
            -> Parameters -> IO Real
 integRK4 (Dynamics f) (Dynamics i) (Dynamics y) ps =
   case stage (solver ps) of
-    0 -> case iteration (solver ps) of
+    0 -> case iteration ps of
       0 -> 
         i ps
       n -> do
@@ -152,11 +152,11 @@ integRK4 (Dynamics f) (Dynamics i) (Dynamics y) ps =
             t2 = iterToTime iv sl  (n - 1) 1
             t3 = iterToTime iv sl  (n - 1) 2
             t4 = iterToTime iv sl  (n - 1) 3
-            psy = ps { time = ty, solver = sl {iteration = n - 1, stage = 0 }}
+            psy = ps { time = ty, iteration = n - 1, solver = sl { stage = 0 }}
             ps1 = psy
-            ps2 = ps { time = t2, solver = sl {iteration = n - 1, stage = 1 }}
-            ps3 = ps { time = t3, solver = sl {iteration = n - 1, stage = 2 }}
-            ps4 = ps { time = t4, solver = sl {iteration = n - 1, stage = 3 }}
+            ps2 = ps { time = t2, iteration = n - 1, solver = sl { stage = 1 }}
+            ps3 = ps { time = t3, iteration = n - 1, solver = sl { stage = 2 }}
+            ps4 = ps { time = t4, iteration = n - 1, solver = sl { stage = 3 }}
         vy <- y psy
         k1 <- f ps1
         k2 <- f ps2
@@ -167,10 +167,10 @@ integRK4 (Dynamics f) (Dynamics i) (Dynamics y) ps =
     1 -> do
       let iv = interval ps
           sl = solver ps
-          n  = iteration sl
+          n  = iteration ps
           ty = iterToTime iv sl n 0
           t1 = ty
-          psy = ps { time = ty, solver = sl {iteration = n, stage = 0 }}
+          psy = ps { time = ty, iteration = n, solver = sl { stage = 0 }}
           ps1 = psy
       vy <- y psy
       k1 <- f ps1
@@ -179,11 +179,11 @@ integRK4 (Dynamics f) (Dynamics i) (Dynamics y) ps =
     2 -> do
       let iv = interval ps
           sl = solver ps
-          n  = iteration sl
+          n  = iteration ps
           ty = iterToTime iv sl n 0
           t2 = iterToTime iv sl n 1
-          psy = ps { time = ty, solver = sl {iteration = n, stage = 0 }}
-          ps2 = ps { time = t2, solver = sl {iteration = n, stage = 1 }}
+          psy = ps { time = ty, iteration = n, solver = sl { stage = 0 }}
+          ps2 = ps { time = t2, iteration = n, solver = sl { stage = 1 }}
       vy <- y psy
       k2 <- f ps2
       let !v = vy + dt sl / 2.0 * k2
@@ -191,15 +191,15 @@ integRK4 (Dynamics f) (Dynamics i) (Dynamics y) ps =
     3 -> do
       let iv = interval ps
           sl = solver ps
-          n  = iteration sl
+          n  = iteration ps
           ty = iterToTime iv sl n 0
           t3 = iterToTime iv sl n 2
-          psy = ps { time = ty, solver = sl {iteration = n, stage = 0 }}
-          ps3 = ps { time = t3, solver = sl {iteration = n, stage = 2 }}
+          psy = ps { time = ty, iteration = n, solver = sl { stage = 0 }}
+          ps3 = ps { time = t3, iteration = n, solver = sl { stage = 2 }}
       vy <- y psy
       k3 <- f ps3
       let !v = vy + dt sl * k3
       return v
     _ -> 
-      error "Incorrect stase: integ"
+      error "Incorrect stase: integRK4"
 

@@ -7,6 +7,9 @@ _minted-manual
 *.hi
 *.o
 *.log
+*.bbl
+*.blg
+*.brf
 thesisColorful.pdf
 thesisGray.pdf
 manualColorful.pdf

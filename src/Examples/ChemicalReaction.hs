@@ -8,8 +8,7 @@ import Integrator
 interv = Interval { startTime = 0, 
                     stopTime = 10 }
 
-solv = Solver { iteration = 0,
-                dt = 1,
+solv = Solver { dt = 1,
                 method = RungeKutta4,
                 stage = 0 }
 

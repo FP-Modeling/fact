@@ -7,9 +7,57 @@ import Data.IORef
 \end{code}
 }
 
-The code presented in chapter \ref{Introduction} demonstrates the developed Domain-specific language (DSL), simulating a Lorenz system. The data structures that represent the continuous behaviour, the environment of the simulation itself, and the integrator were modeled using Haskell's type system. Recursion and caching are the main tools used by the chosen solver of ordinary differential equations. Finally, a simple driver executes the simulation, calling the solver to execute the defined set of equations, given specifications of the simulation, such as initial time, when to stop, and the size of the time step being used.
+In the previous chapter, the importance of making a bridge between two different sets of abstractions, computers and the physical domain, was clearly establised. In this chapter, the core implementation of this link will be explained in detail, starting with an introduction to the strong type system used in Haskell, going all the way to the functionality of the Euler solver. At the end, a few issues with the developed Domain-Specific Language (DSL) will be raised in order to be addressed in the next chapter.
 
 \section{Types}
+
+Types in programming languages are used to describe the "shape" of information, i.e., a label is added to it in order to make constraints and add security around data manipulation. Figure \ref{fig:simpleTypes} illustrates pictorial representations of data types and figure \ref{fig:functions} shows how types can be used to restrain which data can be plumbered into and from a function.
+
+\begin{figure}[ht!]
+\centering
+\begin{minipage}{.45\textwidth}
+  \centering
+  \includegraphics[width=0.85\linewidth]{GraduationThesis/img/SimpleTypes}
+  \captionof{figure}{Representation of Types}
+  \label{fig:simpleTypes}
+\end{minipage}
+\begin{minipage}{.45\textwidth}
+  \centering
+  \includegraphics[width=0.95\linewidth]{GraduationThesis/img/PictorialFunction}
+  \captionof{figure}{Representation of Functions}
+  \label{fig:functions}
+\end{minipage}
+\end{figure}
+
+Aside from the simple data types, i.e., \texttt{Int}, \texttt{Double} and \texttt{Char}, Haskell also uses \textbf{algebraic data types}, thus allowing the programmer to create sum and product types. The former is used to add \textbf{choice} across multiple types using a single label, and the latter is used to \textbf{combine} multiple types into a single one. Figure \ref{fig:sumType} shows an example with the type \texttt{Bool}, and figure \ref{fig:productType} exemplifies a type created by the combination of the types \texttt{Int} and \texttt{Bool}, wrapped or identified by the wrapper or label \texttt{Mt}.
+
+\begin{figure}[ht!]
+\centering
+\begin{minipage}{.45\textwidth}
+  \centering
+  \begin{spec}
+  data Bool = False | True
+  \end{spec}
+  \captionof{figure}{Example of Sum Type}
+  \label{fig:sumType}
+\end{minipage}
+\begin{minipage}{.45\textwidth}
+  \centering
+  \begin{spec}
+  data Multiple = Mt Int Bool
+  \end{spec}
+  \captionof{figure}{Example of Product Type}
+  \label{fig:productType}
+\end{minipage}
+\end{figure}
+
+In addition, functions in Haskell are \textbf{first class citizes}, meaning that they can be treated equally with data types that carries information, such as being used as arguments to another functions, so-called high order functions. The function presented in figure \ref{fig:functions} is a valid argument to function \texttt{negate}, described bellow:
+
+\begin{spec}
+negate :: (Int -> Bool) -> Bool
+\end{spec}
+
+Throughout all the implementation useful types were created to \textbf{represent} data used in the simulation, such as solver's methods, the size of the time step, and so on.
 
 In regard to the simulation itself, its environment is modeled by two types: \texttt{Specs} and \texttt{Method}. The latter describes which solving method will be used in the simulation, while the former adds to that the time interval and the size of the time step. All numeric information is being represented with floating point numbers to provide more accuracy to the simulations.
 

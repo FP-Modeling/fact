@@ -36,7 +36,7 @@
 
 \autor{Eduardo L.}{Rocha}%
 
-\titulo{The side effect hell on Earth}%
+\titulo{Continuous Modeling Made Functional: Tackle CPS Complexity with Haskell}%
 
 \palavraschave{equações diferenciais, sistemas contínuos, ponto fixo, retroalimentação}
 \keywords{differential equations, continuous systems, fix point, feedback loop}%

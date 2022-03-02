@@ -3,10 +3,14 @@
 \babel@toc {american}{}
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {2.1}{\ignorespaces Illustration of the \texttt {Dynamics} type.}}{3}{figure.caption.7}%
-\contentsline {figure}{\numberline {2.2}{\ignorespaces Illustration of the \texttt {integDiff} function.}}{7}{figure.caption.8}%
-\contentsline {figure}{\numberline {2.3}{\ignorespaces Implementation of the system\relax }}{9}{figure.caption.9}%
-\contentsline {figure}{\numberline {2.4}{\ignorespaces Mathematical system\relax }}{9}{figure.caption.9}%
+\contentsline {figure}{\numberline {2.1}{\ignorespaces Representation of Types\relax }}{3}{figure.caption.7}%
+\contentsline {figure}{\numberline {2.2}{\ignorespaces Representation of Functions\relax }}{3}{figure.caption.7}%
+\contentsline {figure}{\numberline {2.3}{\ignorespaces Example of Sum Type\relax }}{4}{figure.caption.8}%
+\contentsline {figure}{\numberline {2.4}{\ignorespaces Example of Product Type\relax }}{4}{figure.caption.8}%
+\contentsline {figure}{\numberline {2.5}{\ignorespaces Illustration of the \texttt {Dynamics} type.}}{5}{figure.caption.9}%
+\contentsline {figure}{\numberline {2.6}{\ignorespaces Illustration of the \texttt {integDiff} function.}}{8}{figure.caption.10}%
+\contentsline {figure}{\numberline {2.7}{\ignorespaces Implementation of the system\relax }}{10}{figure.caption.11}%
+\contentsline {figure}{\numberline {2.8}{\ignorespaces Mathematical system\relax }}{10}{figure.caption.11}%
 \babel@toc {american}{}
 \babel@toc {american}{}
 \babel@toc {american}{}
