@@ -48,25 +48,39 @@ then
         # Generate .tex file from .lhs file
         lhs2Tex GraduationThesis/thesis.lhs > GraduationThesis/thesis.tex
 
-        # Generate references
+                # Generate references
         bibtex --include-directory='GraduationThesis/' GraduationThesis/thesis
 
         # Generate black and white pdf from created .tex file
         pdflatex -shell-escape -output-directory='GraduationThesis/' GraduationThesis/thesis.tex
-
+        
         # Renaming and moving
         mv GraduationThesis/thesis.pdf thesisGray.pdf
 
     elif [[ $2 == 'colorful' ]]
     then
+        echo "----------------------------"
+        echo "pdflatex"
+        pdflatex -shell-escape -output-directory='GraduationThesis/' "\def\iscolorful{} \input{GraduationThesis/thesis.lhs}"
         # Generate references
+        echo "----------------------------"
+        echo "bibtex"
         bibtex --include-directory='GraduationThesis/' GraduationThesis/thesis
 
         # Generate colorful pdf from .lhs file
+        echo "----------------------------"
+        echo "pdflatex"
         pdflatex -shell-escape -output-directory='GraduationThesis/' "\def\iscolorful{} \input{GraduationThesis/thesis.lhs}"
+        pdflatex -shell-escape -output-directory='GraduationThesis/' "\def\iscolorful{} \input{GraduationThesis/thesis.lhs}"
+
+        echo "----------------------------"
+        echo "mv"
 
         # Renaming and moving
         mv GraduationThesis/thesis.pdf thesisColorful.pdf
+
+        echo "----------------------------"
+        echo "FIM"
 
     elif [[ $2 == 'compile' ]]
     then
