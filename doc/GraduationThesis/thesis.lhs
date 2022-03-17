@@ -18,7 +18,7 @@
 \usepackage{dcolumn}
 \usepackage{amsmath, systeme}
 \usepackage{float}
-\usepackage{caption}
+\usepackage[font=footnotesize]{caption}
 \usepackage{subcaption}
 \usepackage{amsmath}
 
@@ -36,7 +36,7 @@
 
 \autor{Eduardo L.}{Rocha}%
 
-\titulo{Continuous Modeling Made Functional: Tackle CPS Complexity with Haskell}%
+\titulo{Continuous Time Modeling Made Functional: Tackle Cyber-Physical Systems with Haskell}%
 
 \palavraschave{equações diferenciais, sistemas contínuos, ponto fixo, retroalimentação}
 \keywords{differential equations, continuous systems, fix point, feedback loop}%
@@ -52,12 +52,27 @@
   \input{GraduationThesis/Lhs/Introduction.lhs}
 \fi
 
-\literateChapter{Implementation}
+\literateChapter{Design Philosophy}
+%include GraduationThesis/Lhs/Design.lhs
+
+\ifdefined\iscolorful
+  \input{GraduationThesis/Lhs/Design.lhs}
+\fi
+
+\literateChapter{The Side-Effect Beast}
 %include GraduationThesis/Lhs/Implementation.lhs
 
 \ifdefined\iscolorful
   \input{GraduationThesis/Lhs/Implementation.lhs}
 \fi
+
+\literateChapter{Enlightenment}
+%include GraduationThesis/Lhs/Enlightenment.lhs
+
+\ifdefined\iscolorful
+  \input{GraduationThesis/Lhs/Enlightenment.lhs}
+\fi
+
 
 \ignore{
 \begin{code}

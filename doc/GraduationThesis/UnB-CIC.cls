@@ -185,6 +185,12 @@
 	\RequirePackage[hidelinks]{hyperref}%
 \fi
 
+\usepackage{epigraph}
+\setlength\epigraphwidth{.8\textwidth}
+\setlength\epigraphrule{0pt}
+
+
+
 \usepackage[acronym,nonumberlist]{glossaries}% Após o hyperref!
 \makeglossaries%
 
@@ -579,6 +585,16 @@
 		{\vskip 15pt\noindent\textbf{Palavras-chave:}\ \@@palavraschave%
     \end{paginatitulo}}
 
+
+\newenvironment{epigf}
+        {\newpage
+         \thispagestyle{empty}
+         \vspace*{\fill}
+         \begin{center}
+           \epigraph{\itshape ``If you don't know, the thing to do is not to get scared, but to learn.''}{--- Ayn Rand, \textit{Atlas Shrugged}}
+         \end{center}
+         \newpage}    
+  
 \newenvironment{dedication}
 	{\begin{paginatitulo}%
 	\pdfbookmark{IfLanguageName{american}{Dedicated to}{Dedicat\'oria}}{dedication}%
@@ -944,6 +960,7 @@
 \newcommand{\@conteudoPreTextual}{%
 	\maketitle%
 	\if@qualificacao\else%
+             	\epigf%
 		\@IncluirSecao{dedication}%
 		\@IncluirSecao{acknowledgments}%
 	\fi%

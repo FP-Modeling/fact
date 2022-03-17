@@ -3,14 +3,22 @@
 \babel@toc {american}{}
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {2.1}{\ignorespaces Representation of Types\relax }}{3}{figure.caption.7}%
-\contentsline {figure}{\numberline {2.2}{\ignorespaces Representation of Functions\relax }}{3}{figure.caption.7}%
-\contentsline {figure}{\numberline {2.3}{\ignorespaces Example of Sum Type\relax }}{4}{figure.caption.8}%
-\contentsline {figure}{\numberline {2.4}{\ignorespaces Example of Product Type\relax }}{4}{figure.caption.8}%
-\contentsline {figure}{\numberline {2.5}{\ignorespaces Illustration of the \texttt {Dynamics} type.}}{5}{figure.caption.9}%
-\contentsline {figure}{\numberline {2.6}{\ignorespaces Illustration of the \texttt {integDiff} function.}}{8}{figure.caption.10}%
-\contentsline {figure}{\numberline {2.7}{\ignorespaces Implementation of the system\relax }}{10}{figure.caption.11}%
-\contentsline {figure}{\numberline {2.8}{\ignorespaces Mathematical system\relax }}{10}{figure.caption.11}%
+\contentsline {figure}{\numberline {2.1}{\ignorespaces Types are not just labels; they enhance the manipulated data with new information. Their difference in shape can work as the interface of the data.\relax }}{3}{figure.caption.7}%
+\contentsline {figure}{\numberline {2.2}{\ignorespaces Functions' signatures are contracts; they specify which shape the input information has as well as which shape the output information will have.\relax }}{3}{figure.caption.7}%
+\contentsline {figure}{\numberline {2.3}{\ignorespaces Sum types can be understood in terms of sets, in which the members of the set are available candidates for the outer shell type. Parity and possible values in digital states are examples.\relax }}{4}{figure.caption.8}%
+\contentsline {figure}{\numberline {2.4}{\ignorespaces Product types are a combination of different sets, where you pick a representative from each one. Digital clocks' time and objects' coordinates in space are common use cases. In Haskell, a product type can be defined using a \textbf {record} alongside with the constructor, where the labels for each member inside it are explicit.\relax }}{5}{figure.caption.9}%
+\contentsline {figure}{\numberline {2.5}{\ignorespaces Depending on the application, different representations of the same structure need to used due to the domain of interest and/or memory contraints.\relax }}{5}{figure.caption.10}%
+\contentsline {figure}{\numberline {2.6}{\ignorespaces The minimum requirement for the \texttt {Ord} typeclass is the $<=$ operator, meaning that the functions $<$, $<=$, $>$, $>=$, \texttt {max} and \texttt {min} are now unlocked for the type \texttt {ClockTime} after the implementation.\relax }}{6}{figure.caption.11}%
+\contentsline {figure}{\numberline {2.7}{\ignorespaces Replacements of the validation function within a pipeline like the above is common.}}{6}{figure.caption.12}%
+\contentsline {figure}{\numberline {2.8}{\ignorespaces The initial value is used as a starting point for the procedure. The algorithm continues until the time of interest is reached in the unknown function. Due to its large time step, the final answer is really far-off from the expected result.\relax }}{8}{figure.caption.13}%
+\contentsline {figure}{\numberline {2.9}{\ignorespaces In Haskell, the \texttt {type} keyword works for alias. The first draft of the \texttt {Dynamics} type is a \textbf {function}, in which providing a floating point value as time returns another value as outcome.\relax }}{9}{figure.caption.14}%
+\contentsline {figure}{\numberline {2.10}{\ignorespaces The \texttt {Parameters} type represents a given moment in time, carrying over all the necessary information to execute a solver step until the time limit is reached. Some useful typeclasses are being derived to these types, given that Haskell is capable of infering the implementation of typeclasses in simple cases.\relax }}{9}{figure.caption.15}%
+\contentsline {figure}{\numberline {2.11}{\ignorespaces The \texttt {Dynamics} type is a function of from time related information to an arbitraty outcome value.\relax }}{10}{figure.caption.16}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Illustration of the \texttt {integDiff} function.}}{14}{figure.caption.17}%
+\contentsline {figure}{\numberline {3.2}{\ignorespaces Implementation of the system\relax }}{16}{figure.caption.18}%
+\contentsline {figure}{\numberline {3.3}{\ignorespaces Mathematical system\relax }}{16}{figure.caption.18}%
+\addvspace {10\p@ }
 \babel@toc {american}{}
 \babel@toc {american}{}
 \babel@toc {american}{}
