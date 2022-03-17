@@ -81,7 +81,8 @@ instance Functor Dynamics where
 
 instance Applicative Dynamics where
   pure = returnD
-  (Dynamics df) <*> (Dynamics da) = Dynamics $ \ps -> flip fmap (da ps) =<< df ps
+--  (Dynamics df) <*> (Dynamics da) = Dynamics $ \ps -> flip fmap (da ps) =<< df ps
+  cf <*> cs = Dynamics $ \ps -> (cf `apply` ps) >>= \f -> f <$> (cs `apply` ps)
   
 instance Monad Dynamics where
   return  = returnD
