@@ -16,7 +16,7 @@ then
 
         # Renaming
         mv manual/manual.pdf manualGray.pdf
-	
+
     elif [[ $2 == 'colorful' ]]
     then
         # Generate colorful pdf from .lhs file
@@ -24,7 +24,7 @@ then
 
         # Renaming
         mv manual/manual.pdf manualColorful.pdf
-	
+
     elif [[ $2 == 'compile' ]]
     then
         # Compile the manual with GHC
@@ -37,7 +37,7 @@ then
     then
         # Enter GHCi with the manual loaded
         ghci -Wdefault manual/manual.lhs
-	
+
     else
         echo "No available option! Use compile, repl, gray or colorful!"
     fi
@@ -45,42 +45,64 @@ elif [[ $1 == 'thesis' ]]
 then
     if [[ $2 == 'gray' ]]
     then
+        echo "----------------------------"
+        echo "Generating intermediate PDF"
         # Generate .tex file from .lhs file
         lhs2Tex GraduationThesis/thesis.lhs > GraduationThesis/thesis.tex
 
-                # Generate references
-        bibtex --include-directory='GraduationThesis/' GraduationThesis/thesis
+        echo "----------------------------"
+        echo "Generating PDF with pdflatex"
+        pdflatex -shell-escape -output-directory='GraduationThesis/' GraduationThesis/thesis.tex
+
+        # Generate references
+        echo "----------------------------"
+        echo "Generating references with bibtex"
+        cp GraduationThesis/bibliography.bib .
+        bibtex GraduationThesis/thesis
+        rm bibliography.bib
 
         # Generate black and white pdf from created .tex file
+        echo "----------------------------"
+        echo "Generating PDF with pdflatex"
         pdflatex -shell-escape -output-directory='GraduationThesis/' GraduationThesis/thesis.tex
-        
+        pdflatex -shell-escape -output-directory='GraduationThesis/' GraduationThesis/thesis.tex
+
+        echo "----------------------------"
+        echo "Moving PDF to the parent folder"
+
         # Renaming and moving
         mv GraduationThesis/thesis.pdf thesisGray.pdf
+
+        echo "----------------------------"
+        echo "END"
 
     elif [[ $2 == 'colorful' ]]
     then
         echo "----------------------------"
-        echo "pdflatex"
+        echo "Generating PDF with pdflatex"
         pdflatex -shell-escape -output-directory='GraduationThesis/' "\def\iscolorful{} \input{GraduationThesis/thesis.lhs}"
+
         # Generate references
         echo "----------------------------"
-        echo "bibtex"
-        bibtex --include-directory='GraduationThesis/' GraduationThesis/thesis
+        echo "Generating references with bibtex"
+        cp GraduationThesis/bibliography.bib .
+        bibtex GraduationThesis/thesis
+        rm bibliography.bib
 
         # Generate colorful pdf from .lhs file
         echo "----------------------------"
-        echo "pdflatex"
+        echo "Generating PDF with pdflatex"
         pdflatex -shell-escape -output-directory='GraduationThesis/' "\def\iscolorful{} \input{GraduationThesis/thesis.lhs}"
         pdflatex -shell-escape -output-directory='GraduationThesis/' "\def\iscolorful{} \input{GraduationThesis/thesis.lhs}"
 
         echo "----------------------------"
-        echo "mv"
+        echo "Moving PDF to the parent folder"
 
         # Renaming and moving
         mv GraduationThesis/thesis.pdf thesisColorful.pdf
 
         echo "----------------------------"
-        echo "FIM"
+        echo "END"
 
     elif [[ $2 == 'compile' ]]
     then

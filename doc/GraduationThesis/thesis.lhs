@@ -21,6 +21,7 @@
 \usepackage[font=footnotesize]{caption}
 \usepackage{subcaption}
 \usepackage{amsmath}
+\usepackage{footmisc}
 
 \usepackage[outputdir=GraduationThesis/]{minted}
 \newminted[code]{haskell}{breaklines,autogobble,linenos=true, numberblanklines=false, fontsize=\footnotesize}

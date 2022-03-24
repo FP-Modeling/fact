@@ -141,7 +141,10 @@ The first-order Euler method calculates the next step by the following relations
 
 This equality assumes that the next step following the derivative's direction will not be that different from the actual value of the function $y$ if the time step is small enough. Further, it is assumed that in case of a small enough time step, the diference between time samples is $h$, i.e., the time step, with the following equation representing one step of the method: 
 
-$$y_{n + 1} = y_n + hf(t_n, y_n)$$
+\begin{equation}
+y_{n + 1} = y_n + hf(t_n, y_n)
+\label{eq:nextStep}
+\end{equation}
 
 So, the next step of the function $y_{n+1}$ can be computed by the sum of the previous step $y_n$ with the predicted value obtained by the derivative $f(t_n,y_n)$ multiplied by the time step $h$. Figure \ref{fig:eulerExample} provides an example of a step-by-step solution of one differential equation using the Euler method. In this case, the unknown function is the exponential function $e_t + t$ and the time of interest is $t = 5$.
 

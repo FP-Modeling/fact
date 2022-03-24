@@ -22,12 +22,12 @@ lorenzModel =
   do integX <- newInteg 1.0
      integY <- newInteg 1.0
      integZ <- newInteg 1.0
-     let x = integValue integX
-         y = integValue integY
-         z = integValue integZ
-     integDiff integX (sigma * (y - x))
-     integDiff integY (x * (rho - z) - y)
-     integDiff integZ (x * y - beta * z)
+     let x = readInteg integX
+         y = readInteg integY
+         z = readInteg integZ
+     diffInteg integX (sigma * (y - x))
+     diffInteg integY (x * (rho - z) - y)
+     diffInteg integZ (x * y - beta * z)
      return $ sequence [x, y, z]
 
 mainLorenz =

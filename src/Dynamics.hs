@@ -80,9 +80,12 @@ instance Functor Dynamics where
   fmap f (Dynamics da) = Dynamics $ \ps -> fmap f (da ps)
 
 instance Applicative Dynamics where
-  pure = returnD
---  (Dynamics df) <*> (Dynamics da) = Dynamics $ \ps -> flip fmap (da ps) =<< df ps
-  cf <*> cs = Dynamics $ \ps -> (cf `apply` ps) >>= \f -> f <$> (cs `apply` ps)
+  pure a = Dynamics $ const (return a)
+  (<*>) = appComposition
+
+appComposition :: Dynamics (a -> b) -> Dynamics a -> Dynamics b
+appComposition (Dynamics df) (Dynamics da)
+  = Dynamics $ \ps -> df ps >>= \f -> fmap f (da ps)
   
 instance Monad Dynamics where
   return  = returnD
@@ -104,46 +107,46 @@ instance Eq (Dynamics a) where
 instance Show (Dynamics a) where
   showsPrec _ x = showString "<< Dynamics >>"
 
-liftMD :: (a -> b) -> Dynamics a -> Dynamics b
-liftMD f (Dynamics x) =
-  Dynamics $ \ps -> do { a <- x ps; return $ f a }
+liftOP :: (a -> b) -> Dynamics a -> Dynamics b
+liftOP f (Dynamics x) =
+  Dynamics $ \ps -> fmap f (x ps)
 
-liftM2D :: (a -> b -> c) -> Dynamics a -> Dynamics b -> Dynamics c
-liftM2D f (Dynamics x) (Dynamics y) =
+liftOP2 :: (a -> b -> c) -> Dynamics a -> Dynamics b -> Dynamics c
+liftOP2 f (Dynamics x) (Dynamics y) =
   Dynamics $ \ps -> do { a <- x ps; b <- y ps; return $ f a b }
-
+  
 instance (Num a) => Num (Dynamics a) where
-  x + y = liftM2D (+) x y
-  x - y = liftM2D (-) x y
-  x * y = liftM2D (*) x y
-  negate = liftMD negate
-  abs = liftMD abs
-  signum = liftMD signum
+  x + y = liftOP2 (+) x y
+  x - y = liftOP2 (-) x y
+  x * y = liftOP2 (*) x y
+  negate = liftOP negate
+  abs = liftOP abs
+  signum = liftOP signum
   fromInteger i = return $ fromInteger i
 
 instance (Fractional a) => Fractional (Dynamics a) where
-  x / y = liftM2D (/) x y
-  recip = liftMD recip
+  x / y = liftOP2 (/) x y
+  recip = liftOP recip
   fromRational t = return $ fromRational t
 
 instance (Floating a) => Floating (Dynamics a) where
   pi = return pi
-  exp = liftMD exp
-  log = liftMD log
-  sqrt = liftMD sqrt
-  x ** y = liftM2D (**) x y
-  sin = liftMD sin
-  cos = liftMD cos
-  tan = liftMD tan
-  asin = liftMD asin
-  acos = liftMD acos
-  atan = liftMD atan
-  sinh = liftMD sinh
-  cosh = liftMD cosh
-  tanh = liftMD tanh
-  asinh = liftMD asinh
-  acosh = liftMD acosh
-  atanh = liftMD atanh
+  exp = liftOP exp
+  log = liftOP log
+  sqrt = liftOP sqrt
+  x ** y = liftOP2 (**) x y
+  sin = liftOP sin
+  cos = liftOP cos
+  tan = liftOP tan
+  asin = liftOP asin
+  acos = liftOP acos
+  atan = liftOP atan
+  sinh = liftOP sinh
+  cosh = liftOP cosh
+  tanh = liftOP tanh
+  asinh = liftOP asinh
+  acosh = liftOP acosh
+  atanh = liftOP atanh
 
 instance MonadIO Dynamics where
   liftIO m = Dynamics $ const m     

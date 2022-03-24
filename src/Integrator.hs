@@ -1,5 +1,4 @@
 {-# LANGUAGE BangPatterns #-}
-
 module Integrator where
 
 import Data.IORef
@@ -14,15 +13,15 @@ import Utils
 import Memo
            
 --
--- Integral type
+-- Integratorral type
 --
 
--- | The 'Integ' type represents an integral.
-data Integ = Integ { initial :: Dynamics Real,   -- ^ The initial value.
+-- | The 'Integrator' type represents an integral.
+data Integrator = Integrator { initial :: Dynamics Real,   -- ^ The initial value.
                      cache   :: IORef (Dynamics Real),
                      computation  :: IORef (Dynamics Real) }
 
-data Integ' = Integ' { initial'     :: Dynamics Real,
+data Integrator' = Integrator' { initial'     :: Dynamics Real,
                        computation' :: IORef (Dynamics Real) }
 
 -- | Return the initial value.
@@ -39,11 +38,11 @@ initialize (Dynamics m) =
                 solver = sl { stage = 0 }}
 
 -- -- | Create a new integral with the specified initial value.
-newInteg :: Dynamics Real -> Dynamics Integ
+newInteg :: Dynamics Real -> Dynamics Integrator
 newInteg i = 
   do r1 <- liftIO $ newIORef $ initialize i 
      r2 <- liftIO $ newIORef $ initialize i 
-     let integ = Integ { initial = i, 
+     let integ = Integrator { initial = i, 
                          cache   = r1,
                          computation  = r2 }
          z = Dynamics $ \ps -> 
@@ -53,23 +52,23 @@ newInteg i =
      liftIO $ writeIORef (cache integ) y
      return integ
 
--- newInteg' :: Dynamics Real -> Dynamics Integ'
--- newInteg' i = 
+-- newIntegrator' :: Dynamics Real -> Dynamics Integrator'
+-- newIntegrator' i = 
 --   do comp <- liftIO $ newIORef $ initD i 
---      let integ = Integ' { initial'     = i, 
+--      let integ = Integrator' { initial'     = i, 
 --                           computation' = comp }
 --      return integ
 
 -- | Return the integral's value.
-integValue :: Integ -> Dynamics Real
-integValue integ = 
+readInteg :: Integrator -> Dynamics Real
+readInteg integ = 
   Dynamics $ \ps ->
   do (Dynamics m) <- readIORef (cache integ)
      m ps
 
 -- -- | Set the derivative for the integral.
-integDiff :: Integ -> Dynamics Real -> Dynamics ()
-integDiff integ diff =
+diffInteg :: Integrator -> Dynamics Real -> Dynamics ()
+diffInteg integ diff =
   do let z = Dynamics $ \ps ->
            do y <- readIORef (cache integ) -- Give me past values
               let i = initial integ -- Give me initial value
