@@ -15,26 +15,26 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
         
+      - name: Install pdflatex
+        run: sudo apt-get install texlive-latex-base
+        
+      - name: Install extra fonts
+        run: sudo apt-get install texlive-fonts-extra
+        
       - name: Create gray version of the manual's PDF
-        uses: dante-ev/latex-action@latest
-        with:
-          entrypoint: ./doc/literate.sh
-          args: manual gray
+        run: ./doc/literate.sh manual gray
         
-      - name: Create colorful version of the manual's PDF
-        uses: dante-ev/latex-action@latest
-        with:
-          entrypoint: ./doc/literate.sh 
-          args: manual colorful
+#       - name: Create colorful version of the manual's PDF
+#         run: ./doc/literate.sh manual colorful
         
-      - name: Create gray version of the thesis's PDF
-        uses: dante-ev/latex-action@latest
-        with:
-          entrypoint: ./doc/literate.sh 
-          args: thesis gray
+#       - name: Create gray version of the thesis's PDF
+#         uses: dante-ev/latex-action@latest
+#         with:
+#           entrypoint: ./doc/literate.sh 
+#           args: thesis gray
         
-      - name: Create colorful version of the thesis's PDF
-        uses: dante-ev/latex-action@latest
-        with:
-          entrypoint: ./doc/literate.sh 
-          args: thesis colorful
+#       - name: Create colorful version of the thesis's PDF
+#         uses: dante-ev/latex-action@latest
+#         with:
+#           entrypoint: ./doc/literate.sh 
+#           args: thesis colorful
