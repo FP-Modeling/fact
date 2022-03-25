@@ -1,0 +1,33 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Check creation manual and thesis PDFs
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+    
+jobs:
+  linux:
+    name: Linux build on node ${{ matrix.node_version }}
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      - name: Create gray version of the manual's PDF
+        run: ./doc/literate.sh manual gray
+
+      - name: Create colorful version of the manual's PDF
+        run: ./doc/literate.sh manual colorful
+
+      - name: Create gray version of the thesis's PDF
+        run: ./doc/literate.sh thesis gray
+
+      - name: Create colorful version of the thesis's PDF
+        run: ./doc/literate.sh thesis colorful
