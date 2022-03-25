@@ -12,6 +12,7 @@ jobs:
     defaults:
       run:
         working-directory: ./doc
+    
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - name: Checkout repository
@@ -23,20 +24,8 @@ jobs:
       - name: Install extra fonts
         run: sudo apt-get install texlive-fonts-extra
         
-      - name: Create gray version of the PDF of the manual
+      - name: Create colorful version of the PDF of the manual
         run: ./literate.sh manual colorful
         
-#       - name: Create colorful version of the manual's PDF
-#         run: ./doc/literate.sh manual colorful
-        
-#       - name: Create gray version of the thesis's PDF
-#         uses: dante-ev/latex-action@latest
-#         with:
-#           entrypoint: ./doc/literate.sh 
-#           args: thesis gray
-        
-#       - name: Create colorful version of the thesis's PDF
-#         uses: dante-ev/latex-action@latest
-#         with:
-#           entrypoint: ./doc/literate.sh 
-#           args: thesis colorful
+      - name: Create colorful version of the PDF of the thesis
+        run: ./literate.sh thesis colorful
