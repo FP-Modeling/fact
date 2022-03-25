@@ -22,7 +22,7 @@ jobs:
         run: sudo apt-get install texlive-fonts-extra
         
       - name: Create gray version of the manual's PDF
-        run: ./doc/literate.sh manual gray
+        run: ./doc/literate.sh manual colorful
         
 #       - name: Create colorful version of the manual's PDF
 #         run: ./doc/literate.sh manual colorful
