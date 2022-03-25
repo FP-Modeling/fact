@@ -9,7 +9,9 @@ jobs:
   linux:
     name: Linux build on node ${{ matrix.node_version }}
     runs-on: ubuntu-latest
-
+    defaults:
+      run:
+        working-directory: ./doc
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - name: Checkout repository
@@ -20,12 +22,6 @@ jobs:
         
       - name: Install extra fonts
         run: sudo apt-get install texlive-fonts-extra
-        
-      - name: Enter documentation directory
-        run: cd doc
-        
-      - name: Debug
-        run: ls
         
       - name: Create gray version of the PDF of the manual
         run: ./literate.sh manual colorful
