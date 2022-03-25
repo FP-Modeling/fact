@@ -24,7 +24,10 @@ jobs:
       - name: Enter documentation directory
         run: cd doc
         
-      - name: Create gray version of the manual's PDF
+      - name: Debug
+        run: ls
+        
+      - name: Create gray version of the PDF of the manual
         run: ./literate.sh manual colorful
         
 #       - name: Create colorful version of the manual's PDF
