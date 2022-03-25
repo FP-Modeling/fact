@@ -15,6 +15,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
         
+      - name: Get latex tools
+        uses: dante-ev/latex-action@latest
+        
       - name: Create gray version of the manual's PDF
         run: ./doc/literate.sh manual gray
 
