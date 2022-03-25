@@ -15,17 +15,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
         
-      - name: Get latex tools
-        uses: dante-ev/latex-action@latest
-        
       - name: Create gray version of the manual's PDF
-        run: ./doc/literate.sh manual gray
-
+        uses: dante-ev/latex-action@latest
+        with:
+          entrypoint: ./doc/literate.sh manual gray
+        
       - name: Create colorful version of the manual's PDF
-        run: ./doc/literate.sh manual colorful
-
+        uses: dante-ev/latex-action@latest
+        with:
+          entrypoint: ./doc/literate.sh manual colorful
+        
       - name: Create gray version of the thesis's PDF
-        run: ./doc/literate.sh thesis gray
-
+        uses: dante-ev/latex-action@latest
+        with:
+          entrypoint: ./doc/literate.sh thesis gray
+        
       - name: Create colorful version of the thesis's PDF
-        run: ./doc/literate.sh thesis colorful
+        uses: dante-ev/latex-action@latest
+        with:
+          entrypoint: ./doc/literate.sh thesis colorful
