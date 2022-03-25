@@ -21,8 +21,11 @@ jobs:
       - name: Install extra fonts
         run: sudo apt-get install texlive-fonts-extra
         
+      - name: Enter documentation directory
+        run: cd doc
+        
       - name: Create gray version of the manual's PDF
-        run: ./doc/literate.sh manual colorful
+        run: ./literate.sh manual colorful
         
 #       - name: Create colorful version of the manual's PDF
 #         run: ./doc/literate.sh manual colorful
