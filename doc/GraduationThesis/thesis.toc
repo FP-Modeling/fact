@@ -12,8 +12,8 @@
 \contentsline {section}{\numberline {3.3}Using Recursion to solve Math}{18}{section.3.3}%
 \contentsline {chapter}{\numberline {4}Enlightenment}{21}{chapter.4}%
 \contentsline {section}{\numberline {4.1}Who is driving the bus?}{21}{section.4.1}%
-\contentsline {section}{\numberline {4.2}Our best friend: an Example}{23}{section.4.2}%
-\contentsline {chapter}{References}{24}{section*.26}%
+\contentsline {section}{\numberline {4.2}Our best friend: an Example}{24}{section.4.2}%
+\contentsline {chapter}{References}{25}{section*.26}%
 \babel@toc {american}{}
 \babel@toc {american}{}
 \babel@toc {american}{}

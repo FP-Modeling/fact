@@ -1,7 +1,9 @@
 \ignore{
 \begin{code}
 module GraduationThesis.Lhs.Introduction where
+import GraduationThesis.Lhs.Design
 import GraduationThesis.Lhs.Implementation
+import GraduationThesis.Lhs.Enlightenment
 \end{code}
 }
 
@@ -31,11 +33,13 @@ The main goal of the present work is to provide an alternative tool for simulati
 
 \ignore{
 \begin{code}
-lorenzSpecs = Specs { startTime = 0,
-                      stopTime  = 10,
-                      dt        = 1,
-                      method    = Euler
-                    }
+lorenzInterv = Interval { startTime = 0,
+                          stopTime = 10 }
+
+lorenzSolver = Solver { dt = 1,
+                        method = Euler,
+                        stage = 0
+                      }
 
 sigma = 10.0
 rho = 28.0
@@ -46,16 +50,16 @@ lorenzModel =
   do integX <- newInteg 1.0
      integY <- newInteg 1.0
      integZ <- newInteg 1.0
-     let x = integValue integX
-         y = integValue integY
-         z = integValue integZ
-     integDiff integX (sigma*(y-x))
-     integDiff integY (x*(rho-z)-y)
-     integDiff integZ (x*y-beta*z)
-     return $ sequence [x,y,z]
+     let x = readInteg integX
+         y = readInteg integY
+         z = readInteg integZ
+     diffInteg integX (sigma * (y - x))
+     diffInteg integY (x * (rho - z) - y)
+     diffInteg integZ (x * y - beta * z)
+     return $ sequence [x, y, z]
 
-executeLorenz =
-  do ans <- runDynamicsFinal lorenzModel lorenzSpecs
+mainLorenz =
+  do ans <- runDynamicsFinal lorenzModel lorenzInterv lorenzSolver
      print ans
 \end{code}
 }

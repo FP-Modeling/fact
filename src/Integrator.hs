@@ -43,8 +43,8 @@ newInteg i =
   do r1 <- liftIO $ newIORef $ initialize i 
      r2 <- liftIO $ newIORef $ initialize i 
      let integ = Integrator { initial = i, 
-                         cache   = r1,
-                         computation  = r2 }
+                              cache   = r1,
+                              computation  = r2 }
          z = Dynamics $ \ps -> 
            do (Dynamics m) <- readIORef (computation integ)
               m ps

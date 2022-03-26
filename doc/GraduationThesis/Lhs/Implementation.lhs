@@ -2,6 +2,7 @@
 \begin{code}
 {-# LANGUAGE FlexibleContexts, FlexibleInstances, UndecidableInstances, BangPatterns, ConstraintKinds, MonoLocalBinds #-}
 module GraduationThesis.Lhs.Implementation where
+import GraduationThesis.Lhs.Enlightenment
 import GraduationThesis.Lhs.Design
 import Control.Monad.Trans
 import Data.IORef
@@ -210,22 +211,23 @@ Following the example presented in the \textit{Introduction}, the first step in 
 initialize :: Dynamics a -> Dynamics a
 initialize (Dynamics m) =
   Dynamics $ \ps ->
-  if iteration ps == 0 && stage ps == 0 then
+  if iteration ps == 0 && stage (solver ps) == 0 then
     m ps
   else
-    let sc = specs ps
-    in m $ ps { time = iterToTime sc 0 0,
+    let iv = interval ps
+        sl = solver ps
+    in m $ ps { time = iterToTime iv sl 0 0,
                 iteration = 0,
-                stage = 0 } 
+                solver = sl { stage = 0 }}
 \end{code}
 }
 
 \begin{code}
-newInteg :: Dynamics Double -> Dynamics Integ
+newInteg :: Dynamics Double -> Dynamics Integrator
 newInteg i = 
   do comp <- liftIO $ newIORef $ initialize i 
-     let integ = Integ { initial     = i, 
-                         computation = comp }
+     let integ = Integrator { initial     = i, 
+                              computation = comp }
      return integ
 \end{code}
 
@@ -246,16 +248,16 @@ readInteg integ =
 Finally, the function \textit{diffInteg} is a side-effect-only function that changes \textbf{which computation} will be used by the integrator. It is worth noticing that after the creation of the integrator, the \texttt{computation} pointer is addressing a simple and, initially, useless computation: given a random record of \texttt{Parameters}, it will fix it to assure it is starting at $t_0$, and will return the initial value in form of a \texttt{Dynamics Double}. To update this behaviour, the \textit{diffInteg} change the content being pointed by the integrator's pointer:
 
 \begin{code}
-diffInteg :: Integ -> Dynamics Double -> Dynamics ()
+diffInteg :: Integrator -> Dynamics Double -> Dynamics ()
 diffInteg integ diff =
   do let z = Dynamics $ \ps ->
            do whatToDo <- readIORef (computation integ)
               let i = initial integ
-              case method (specs ps) of
+              case method (solver ps) of
                 Euler -> integEuler diff i whatToDo ps
                 RungeKutta2 -> integRK2 diff i whatToDo ps
                 RungeKutta4 -> integRK4 diff i whatToDo ps
-     liftIO $ writeIORef (computation integ) z
+     liftIO $ writeIORef (computation integ) z     
 \end{code}
 
 In the beginning of the function (line 3), it is being created a new computation, so-called \texttt{z} --- a function wrapped in the \texttt{Dynamics} type that receives a \texttt{Parameters} record and computes the result based on the solving method. In \texttt{z}, the first step is to build a copy of the \textbf{same process} being pointed by \texttt{computation} and getting the initial condition of the system (line 5). Finally, after checking the chosen solver, it is executed one iteration of the process by calling \textit{integEuler}, or \textit{integRK2} or \textit{integRK4}. Afther line 10, this entire process \texttt{z} is being pointed by the \texttt{computation} pointer, being done by the $writeIORef$ function~\footref{foot:IORef}. It may be seem confusing that inside \texttt{z} we are \textbf{reading} what is being pointed and later, on the last line of \textit{diffInteg}, this is being used on the final line to update that same pointer. This is necessary, as it will be explained in the next chapter \textit{Enlightement}, to allow the use of an \textbf{implicit recursion} to assure the sequential aspect needed by the solvers. For now, the core idea is this: the \textit{diffInteg} function alters the \textbf{future} computations; it rewrites which procedure will be pointed by the \texttt{computation} pointer. This new procedure, which we called \texttt{z}, creates an intermediate computation, \texttt{whatToDo} (line 4), that \textbf{reads} what this pointer is addressing, which is \texttt{z} itself.
@@ -284,20 +286,21 @@ The value of the current iteration, $y_n$, can be described in terms of the sum 
 
 \begin{code}
 integEuler :: Dynamics Double
-           -> Dynamics Double 
-           -> Dynamics Double 
-           -> Parameters -> IO Double
-integEuler (Dynamics diff) (Dynamics init) (Dynamics compute) params =
-  case iteration params of
+             -> Dynamics Double 
+             -> Dynamics Double 
+             -> Parameters -> IO Double
+integEuler (Dynamics diff) (Dynamics i) (Dynamics y) ps =
+  case iteration ps of
     0 -> 
-      init params
+      i ps
     n -> do 
-      let spc        = specs params
-          prevTime   = iterToTime spc (n - 1) 0
-          prevParams = params { time = prevTime, iteration = n - 1, stage = 0 }
-      a <- compute prevParams
-      b <- diff prevParams
-      let !v = a + (dt spc) * b
+      let iv  = interval ps
+          sl  = solver ps
+          ty  = iterToTime iv sl (n - 1) 0
+          psy = ps { time = ty, iteration = n - 1, solver = sl { stage = 0} }
+      a <- y psy
+      b <- diff psy
+      let !v = a + dt (solver ps) * b
       return v
 \end{code}
 
@@ -312,96 +315,106 @@ integRK2 :: Dynamics Double
            -> Dynamics Double
            -> Parameters -> IO Double
 integRK2 (Dynamics f) (Dynamics i) (Dynamics y) ps =
-  case stage ps of
+  case stage (solver ps) of
     0 -> case iteration ps of
       0 ->
         i ps
       n -> do
-        let sc = specs ps
-            ty = iterToTime sc (n - 1) 0
-            t2 = iterToTime sc (n - 1) 1
-            psy = ps { time = ty, iteration = n - 1, stage = 0 }
+        let iv = interval ps
+            sl = solver ps
+            ty = iterToTime iv sl (n - 1) 0
+            t1 = ty
+            t2 = iterToTime iv sl (n - 1) 1
+            psy = ps { time = ty, iteration = n - 1, solver = sl { stage = 0 }}
             ps1 = psy
-            ps2 = ps { time = t2, iteration = n - 1, stage = 1 }
+            ps2 = ps { time = t2, iteration = n - 1, solver = sl { stage = 1 }}
         vy <- y psy
         k1 <- f ps1
         k2 <- f ps2
-        let !v = vy + dt sc / 2.0 * (k1 + k2)
+        let !v = vy + dt sl / 2.0 * (k1 + k2)
         return v
     1 -> do
-      let sc = specs ps
+      let iv = interval ps
+          sl = solver ps
           n  = iteration ps
-          ty = iterToTime sc n 0
-          psy = ps { time = ty, iteration = n, stage = 0 }
+          ty = iterToTime iv sl n 0
+          t1 = ty
+          psy = ps { time = ty, iteration = n, solver = sl { stage = 0 }}
           ps1 = psy
       vy <- y psy
       k1 <- f ps1
-      let !v = vy + dt sc * k1
+      let !v = vy + dt sl * k1
       return v
     _ -> 
-      error "Incorrect stase: integ"
+      error "Incorrect stage: integRK2"
 
 integRK4 :: Dynamics Double
            -> Dynamics Double
            -> Dynamics Double
            -> Parameters -> IO Double
 integRK4 (Dynamics f) (Dynamics i) (Dynamics y) ps =
-  case stage ps of
+  case stage (solver ps) of
     0 -> case iteration ps of
       0 -> 
         i ps
       n -> do
-        let sc = specs ps
-            ty = iterToTime sc (n - 1) 0
-            t2 = iterToTime sc (n - 1) 1
-            t3 = iterToTime sc (n - 1) 2
-            t4 = iterToTime sc (n - 1) 3
-            psy = ps { time = ty, iteration = n - 1, stage = 0 }
+        let iv = interval ps
+            sl = solver ps
+            ty = iterToTime iv sl (n - 1) 0
+            t1 = ty
+            t2 = iterToTime iv sl  (n - 1) 1
+            t3 = iterToTime iv sl  (n - 1) 2
+            t4 = iterToTime iv sl  (n - 1) 3
+            psy = ps { time = ty, iteration = n - 1, solver = sl { stage = 0 }}
             ps1 = psy
-            ps2 = ps { time = t2, iteration = n - 1, stage = 1 }
-            ps3 = ps { time = t3, iteration = n - 1, stage = 2 }
-            ps4 = ps { time = t4, iteration = n - 1, stage = 3 }
+            ps2 = ps { time = t2, iteration = n - 1, solver = sl { stage = 1 }}
+            ps3 = ps { time = t3, iteration = n - 1, solver = sl { stage = 2 }}
+            ps4 = ps { time = t4, iteration = n - 1, solver = sl { stage = 3 }}
         vy <- y psy
         k1 <- f ps1
         k2 <- f ps2
         k3 <- f ps3
         k4 <- f ps4
-        let !v = vy + dt sc / 6.0 * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
+        let !v = vy + dt sl / 6.0 * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
         return v
     1 -> do
-      let sc = specs ps
+      let iv = interval ps
+          sl = solver ps
           n  = iteration ps
-          ty = iterToTime sc n 0
-          psy = ps { time = ty, iteration = n, stage = 0 }
+          ty = iterToTime iv sl n 0
+          t1 = ty
+          psy = ps { time = ty, iteration = n, solver = sl { stage = 0 }}
           ps1 = psy
       vy <- y psy
       k1 <- f ps1
-      let !v = vy + dt sc / 2.0 * k1
+      let !v = vy + dt sl / 2.0 * k1
       return v
     2 -> do
-      let sc = specs ps
+      let iv = interval ps
+          sl = solver ps
           n  = iteration ps
-          ty = iterToTime sc n 0
-          t2 = iterToTime sc n 1
-          psy = ps { time = ty, iteration = n, stage = 0 }
-          ps2 = ps { time = t2, iteration = n, stage = 1 }
+          ty = iterToTime iv sl n 0
+          t2 = iterToTime iv sl n 1
+          psy = ps { time = ty, iteration = n, solver = sl { stage = 0 }}
+          ps2 = ps { time = t2, iteration = n, solver = sl { stage = 1 }}
       vy <- y psy
       k2 <- f ps2
-      let !v = vy + dt sc / 2.0 * k2
+      let !v = vy + dt sl / 2.0 * k2
       return v
     3 -> do
-      let sc = specs ps
+      let iv = interval ps
+          sl = solver ps
           n  = iteration ps
-          ty = iterToTime sc n 0
-          t3 = iterToTime sc n 2
-          psy = ps { time = ty, iteration = n, stage = 0 }
-          ps3 = ps { time = t3, iteration = n, stage = 2 }
+          ty = iterToTime iv sl n 0
+          t3 = iterToTime iv sl n 2
+          psy = ps { time = ty, iteration = n, solver = sl { stage = 0 }}
+          ps3 = ps { time = t3, iteration = n, solver = sl { stage = 2 }}
       vy <- y psy
       k3 <- f ps3
-      let !v = vy + dt sc * k3
+      let !v = vy + dt sl * k3
       return v
     _ -> 
-      error "Incorrect stase: integ"
+      error "Incorrect stase: integRK4"
 \end{code}
 }
 

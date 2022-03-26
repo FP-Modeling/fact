@@ -5,7 +5,6 @@
 %separation 1
 %latency 1
 
-
 \ifdefined\iscolorful\else
   \renewcommand{\hscodestyle}{\small}
 \fi
@@ -26,7 +25,6 @@
 \usepackage[outputdir=GraduationThesis/]{minted}
 \newminted[code]{haskell}{breaklines,autogobble,linenos=true, numberblanklines=false, fontsize=\footnotesize}
 \newminted[spec]{haskell}{breaklines,autogobble,linenos=true, numberblanklines=false, fontsize=\footnotesize}
-
 
 \orientador{\prof José Edil Guimarães}{CIC/UnB}%
 \coordenador[a]{\prof[a] Ada Lovelace}{Bibliothèque universelle de Genève}%
@@ -79,10 +77,9 @@
 \begin{code}
 module Main where
 import GraduationThesis.Lhs.Introduction
-import GraduationThesis.Lhs.Implementation
 
 main :: IO ()
-main = executeLorenz
+main = mainLorenz
 \end{code}
 }
 

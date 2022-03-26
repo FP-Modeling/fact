@@ -1,7 +1,6 @@
 \ignore{
 \begin{code}
-module GraduationThesis.Lhs.Englightenment where
-import GraduationThesis.Lhs.Implementation
+module GraduationThesis.Lhs.Enlightenment where
 import GraduationThesis.Lhs.Design
 \end{code}
 }
@@ -24,18 +23,18 @@ Finally, it is desireable, during a simulation, to initialize all the differenti
 type Model a = Dynamics (Dynamics a)
 \end{code}
 
-Figure \ref{fig:modelPipe} depicts an example of a mathematical system alongside its implementation with explained notion of \texttt{Model}. Below it, it is visiually presented the general pipeline used to create any model:
+Figure \ref{fig:modelPipe} depicts an example of a mathematical system alongside its implementation with the \texttt{Model} alias. Below it, it is visiually presented the general pipeline used to create any model:
 
 \begin{figure}[ht!]
 \begin{minipage}{.5\textwidth}
-\begin{code}
+\begin{spec}
 exampleModel :: Model [Double]
 exampleModel =
   do integ <- newInteg 1
-     let y = integValue integ
-     integDiff integ y
+     let y = readInteg integ
+     diffInteg integ y
      return $ sequence [y]
-\end{code}
+\end{spec}
 \end{minipage}
 \begin{minipage}{.47\textwidth}
 \begin{center}
@@ -45,81 +44,78 @@ $\dot{y} = y \quad \quad y(0) = 1$
 \begin{center}
 \includegraphics[width=0.95\linewidth]{GraduationThesis/img/ModelPipeline}
 \end{center}
-\caption{With the \texttt{Applicative} typeclass, it is possible to \textbf{compose} \texttt{Dynamics} types. The pure function wrapped with the type can be correctly plumbered to the second value inside the same shell type, generating the result.}
+\caption{When building a model for simulation, the above pipeline is always used. After managing the integrator, switch the order of the shells using \textit{sequence} and wrap everything in \texttt{Dynamics} using \textit{return}.}
 \label{fig:modelPipe}
 \end{figure}
 
 The remaining piece of the puzzle is grasp who picks the model and its simulation specification, e.g., start time, stop time, which method will be used, and provides the final result. In this sense, the function \texttt{runDynamics} is the \textbf{driver}, i.e., it generates a list with the calculated answers.
 
-\ignore{
 \begin{code}
-iterToTime :: Specs -> Int -> Int -> Double
-iterToTime sc n st =
-  if st < 0 then 
-    error "Incorrect stage: iterToTime"
-  else
-    (startTime sc) + n' * (dt sc) + delta (method sc) st
-      where n' = fromInteger (toInteger n)
-            delta Euler       0 = 0
-            delta RungeKutta2 0 = 0
-            delta RungeKutta2 1 = dt sc
-            delta RungeKutta4 0 = 0
-            delta RungeKutta4 1 = dt sc / 2
-            delta RungeKutta4 2 = dt sc / 2
-            delta RungeKutta4 3 = dt sc
-            delta _ _ = 0
-
-iterationBnds :: Specs -> (Int, Int)
-iterationBnds sc = (0, round ((stopTime sc - 
-                               startTime sc) / dt sc))
-\end{code}
-}
-
-\begin{code}
-runDynamics :: Model a -> Specs -> IO [a]
-runDynamics (Dynamics m) sc = 
-  do d <- m Parameters { specs = sc,
-                         time = startTime sc,
+runDynamics :: Model a -> Interval -> Solver -> IO [a]
+runDynamics (Dynamics m) iv sl = 
+  do d <- m Parameters { interval = iv,
+                         time = startTime iv,
                          iteration = 0,
-                         stage = 0 }
-     sequence $ subrunDynamics d sc
+                         solver = sl { stage = 0 }}
+     sequence $ subRunDynamics d iv sl
      
-subrunDynamics :: Dynamics a -> Specs -> [IO a]
-subrunDynamics (Dynamics m) sc =
-  do let (nl, nu) = iterationBnds sc
-         parameterise n = Parameters { specs = sc,
-                                       time = iterToTime sc n 0,
+subRunDynamics :: Dynamics a -> Interval -> Solver -> [IO a]
+subRunDynamics (Dynamics m) iv sl =
+  do let (nl, nu) = iterationBnds iv (dt sl)
+         parameterise n = Parameters { interval = iv,
+                                       time = iterToTime iv sl n 0,
                                        iteration = n,
-                                       stage = 0 }
+                                       solver = sl { stage = 0 }}
      map (m . parameterise) [nl .. nu]
 \end{code}
 
+On line 3, it is being created the initial \texttt{Parameters} record using the simulation related types, such as \texttt{Interval} and \texttt{Solver}, explained in chapter \textit{Design Philosophy}. This record will be used in all computations for all variables of the system simultaneously. The function ends by calling a second function, \texttt{subRunDynamics}. This auxiliary function calculates, in a \textbf{sequential} manner, the result using the chosen solving method for all iteration steps by applying a \textbf{map} operation. This procedure, being the \texttt{Functor} of the list monad, applying a function to the internal members of it (line 15). In this case, the \textit{parameterise} function (line 11) is being composed the the dynamic application, in which a custom value of the type \texttt{Parameters} is created to each iteration and this is applied to the received \texttt{Dynamics} value. The final result is a list of answers in order, each one wrapped in the \texttt{IO} monad.
+
+There are two utilitarian functions that participate in this process. The \textit{iterationBnds} function (line 10) uses the established time step to convert the \textbf{time} interval to an \textbf{iteration} interval in the format of a tuple, i.e., the continuous interval becomes the tuple $(0, \frac{stopTime - startTime}{timeStep})$. Moreover, the \textit{iterToTime} function (line 12) converts from the domain of discrete steps to the domain of time. This conversion is based on the time step being used, as well as which method and in which stage it is for that specific iteration.
+
+Additionally, there are analogous versions of these two functions, so-called \texttt{runDynamicsFinal} and \texttt{subRunDynamicsFinal}, that return only the final result of the simulation, i.e., $y(stopTime)$.
+
 \ignore{
 \begin{code}
-iterationHiBnd :: Specs -> Int
-iterationHiBnd sc = snd $ iterationBnds sc                   
+iterToTime :: Interval -> Solver -> Int -> Int -> Double
+iterToTime interv solver n st =
+  if st < 0 then 
+    error "Incorrect stage: iterToTime"
+  else
+    (startTime interv) + n' * (dt solver) + delta (method solver) st
+      where n' = fromInteger (toInteger n)
+            delta Euler       0 = 0
+            delta RungeKutta2 0 = 0
+            delta RungeKutta2 1 = dt solver
+            delta RungeKutta4 0 = 0
+            delta RungeKutta4 1 = dt solver / 2
+            delta RungeKutta4 2 = dt solver / 2
+            delta RungeKutta4 3 = dt solver
 
-runDynamicsFinal :: Model a -> Specs -> IO a
-runDynamicsFinal (Dynamics m) sc = 
-  do d <- m Parameters { specs = sc,
-                         time = startTime sc,
+iterationBnds :: Interval -> Double -> (Int, Int)
+iterationBnds interv dt = (0, round ((stopTime interv - 
+                               startTime interv) / dt))
+
+iterationHiBnd :: Interval -> Double -> Int
+iterationHiBnd interv dt = snd $ iterationBnds interv dt
+
+runDynamicsFinal :: Model a -> Interval -> Solver -> IO a
+runDynamicsFinal (Dynamics m) iv sl = 
+  do d <- m Parameters { interval = iv,
+                         time = startTime iv,
                          iteration = 0,
-                         stage = 0 }
-     subrunDynamicsFinal d sc
+                         solver = sl { stage = 0 }}
+     subRunDynamicsFinal d iv sl
 
-subrunDynamicsFinal :: Dynamics a -> Specs -> IO a
-subrunDynamicsFinal (Dynamics m) sc =
-  do let n = iterationHiBnd sc
-         t = iterToTime sc n 0
-     m Parameters { specs = sc,
+subRunDynamicsFinal :: Dynamics a -> Interval -> Solver -> IO a
+subRunDynamicsFinal (Dynamics m) iv sl =
+  do let n = iterationHiBnd iv (dt sl)
+         t = iterToTime iv sl n 0
+     m Parameters { interval = iv,
                     time = t,
                     iteration = n,
-                    stage = 0 }
+                    solver = sl { stage = 0 }}
 \end{code}
 }
-
-On line 3, it is being created the initial \texttt{Parameters} record; this record will be used in all computations for all variables simultaneously. There are two utilitarian functions; \texttt{iterToTime} (line 12) does a converstion from the domain of discrete steps to the domain of time and \texttt{iterationBnds} (line 10), which generates a tuple with the first and last iterations. The The main function ends by calling the \texttt{subrunDynamics} function. This auxiliary function calculates, \textbf{in sequence}, for all $\frac{stopTime - startTime}{timeStep}$ steps the result using the chosen solving method.
-
-Additionally, there are analogous versions of these two functions, so-called \texttt{runDynamicsFinal} and \texttt{subrunDynamicsFinal}, that return only the final result of the simulation, i.e., $y(stopTime)$.
 
 \section{Our best friend: an Example}

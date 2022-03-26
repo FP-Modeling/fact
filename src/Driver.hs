@@ -14,11 +14,11 @@ runDynamicsFinal (Dynamics m) iv sl =
                          time = startTime iv,
                          iteration = 0,
                          solver = sl { stage = 0 }}
-     subrunDynamicsFinal d iv sl
+     subRunDynamicsFinal d iv sl
 
 -- | Auxiliary functions to runDyanamics (individual computation and list of computations)
-subrunDynamicsFinal :: Dynamics a -> Interval -> Solver -> IO a
-subrunDynamicsFinal (Dynamics m) iv sl =
+subRunDynamicsFinal :: Dynamics a -> Interval -> Solver -> IO a
+subRunDynamicsFinal (Dynamics m) iv sl =
   do let n = iterationHiBnd iv (dt sl)
          t = iterToTime iv sl n 0
      m Parameters { interval = iv,
@@ -34,10 +34,10 @@ runDynamics (Dynamics m) iv sl =
                          time = startTime iv,
                          iteration = 0,
                          solver = sl { stage = 0 }}
-     sequence $ subrunDynamics d iv sl
+     sequence $ subRunDynamics d iv sl
 
-subrunDynamics :: Dynamics a -> Interval -> Solver -> [IO a]
-subrunDynamics (Dynamics m) iv sl =
+subRunDynamics :: Dynamics a -> Interval -> Solver -> [IO a]
+subRunDynamics (Dynamics m) iv sl =
   do let (nl, nu) = iterationBnds iv (dt sl)
          parameterise n = Parameters { interval = iv,
                                        time = iterToTime iv sl n 0,
