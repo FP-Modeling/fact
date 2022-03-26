@@ -10,20 +10,24 @@ Previously, the latter core type of the implementation, the \texttt{Integrator},
 
 \section{Who is driving the bus?}
 
-A model is a function which builds, sets and manipulates all the aformentioned integrator functions; creates variables to set the system of differential equations; and produces the final list of values --- just like the lorenz example in chapter \ref{Introduction}.
+With the main functionality of the program out-of-the-way, it remains to understand how and who, i.e., which functions and their behaviour, executes a set of differential equations. When the system is written using the integrator functions described in the last chapter, the final product is called a \textbf{model}. This model comprises memory allocation for the integrator, set reader pointer and change the internal procedure of the integrator to an actual differential equation solving computation. However, the final line of the previous examples is still a mystery: what exactly the \textit{return} and \textit{sequence} do and what's the meaning behind it?
+
+The $sequence$ function does a \textbf{traverse} operation, meaning that it inverts the order of nested monads inside a value. For instance, applying this function to a list of values of type \texttt{Maybe} would generate a single \texttt{Maybe} value in which its content is a list of the previous content individually wrapped by the \texttt{Maybe} type. This is only possible because the external monad, list in this case, has implemented the \texttt{Traverse} typeclass. Figure \ref{fig:sequence} depicts the example before and after applying the function.
+
+\figuraBib{Sequence}{The \texttt{Traverse} typeclass allows the type to use the \textit{traverse} and \textit{sequence} function, in which both are related to apply inversion with structured data.}{}{fig:sequence}{width=.95\textwidth}%
+
+The main use case of this function when building a model is to combine multiple dynamic computation, i.e., multiple calculation of differential equations, in one single \texttt{Dynamics} typed value. So, because the created readers, as explained in the previous chapter, have type \texttt{Dynamics Double}, the \textit{sequence} function picks the values wrapped inside a "bundler" type, such as list, and invert it to obtain a single result. Thus, a list of \texttt{Dynamics Double} is transformed into a value with the signature \texttt{Dynamics [Double]}. Moreover, only the external structure needs to have implemented the aforementioned \texttt{Traverse} typeclass; and the list monad has the implementation built into the language.
+
+Finally, it is desireable, during a simulation, to initialize all the differential equations with the \textbf{same} initial condition to the same variable used in each differential equation. However, because we have multiple dynamic computations, this is not an easy-task to accomplish. The solution is to wrap all the written \texttt{Dynamics [Double]} with a new \texttt{Dynamics} shell. In this manner, whem applied with a value with the type \texttt{Parameters}, the same application will be happening to all the internal computations. This nested structure, a dynamic value inside another one, is the representation of a model in the project and has its own alias:
 
 \begin{code}
 type Model a = Dynamics (Dynamics a)
 \end{code}
 
-A model is a value \texttt{a} wrapped with two \texttt{Dynamics} type. The former shell is responsable for grouping all the variables of interest, i.e., \textit{x}, \textit{y} and \textit{z} from the system of equation in the \texttt{lorenzModel}, and providing to them the same initial \texttt{Parameters} record. The latter wrapper is the computation of each variable, in a individual basis.
+Figure \ref{fig:modelPipe} depicts an example of a mathematical system alongside its implementation with explained notion of \texttt{Model}. Below it, it is visiually presented the general pipeline used to create any model:
 
-Below, there are an example of a model with one variable and its mathematical parallel:
-
-\begin{figure}[H]
-\centering
+\begin{figure}[ht!]
 \begin{minipage}{.5\textwidth}
-  \centering
 \begin{code}
 exampleModel :: Model [Double]
 exampleModel =
@@ -32,27 +36,20 @@ exampleModel =
      integDiff integ y
      return $ sequence [y]
 \end{code}
-\captionof{figure}{Implementation of the system}
-\label{rivika:example}
-\end{minipage}%
-\begin{minipage}{.5\textwidth}
-  \centering
-    $\dot{y} = y \quad \quad y(0) = 1$
-  \captionof{figure}{Mathematical system}
-\label{math:rivika}
 \end{minipage}
+\begin{minipage}{.47\textwidth}
+\begin{center}
+$\dot{y} = y \quad \quad y(0) = 1$
+\end{center}
+\end{minipage}
+\begin{center}
+\includegraphics[width=0.95\linewidth]{GraduationThesis/img/ModelPipeline}
+\end{center}
+\caption{With the \texttt{Applicative} typeclass, it is possible to \textbf{compose} \texttt{Dynamics} types. The pure function wrapped with the type can be correctly plumbered to the second value inside the same shell type, generating the result.}
+\label{fig:modelPipe}
 \end{figure}
 
-Similarly with the lorenz's model presented in the introduction, the \texttt{example} model follows the following structure:
-
-\begin{itemize}
-\item Create an integrator with 1 being the initial value;
-\item Create a variable by reading the computation stored inside the integrator;
-\item Change the integrator so it knows which differential equation will be used in the solver;
-\item Traverse the result using the \texttt{sequence} function, so instead of having a list of \texttt{Dynamics Double}, we have the type \texttt{Dynamics [Double]}, i.e., a dynamic computation that will provide us a list of results in the specified time interval.
-\end{itemize}
-
-The remaining piece of the puzzle is to execute the simulation itself, making what is known to be \textbf{the driver} of the simulation. The function \texttt{runDynamics} picks a model and a specification of the simulation --- both of which were described in detail in the past sections --- and generates a list with the calculated answers.
+The remaining piece of the puzzle is grasp who picks the model and its simulation specification, e.g., start time, stop time, which method will be used, and provides the final result. In this sense, the function \texttt{runDynamics} is the \textbf{driver}, i.e., it generates a list with the calculated answers.
 
 \ignore{
 \begin{code}

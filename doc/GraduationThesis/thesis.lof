@@ -23,8 +23,8 @@
 \contentsline {figure}{\numberline {3.6}{\ignorespaces State Machines are a common abstraction in computer science due to its easy mapping between function calls and states. Memory regions and periphals are embedded with the idea of a state, not only pure functions. Further, side-effects can even act as the trigger to move from one state to another, meaning that executing a simple function can do more than return a value. Its internal guts can signicantly modify the state machine.\relax }}{15}{figure.caption.22}%
 \contentsline {figure}{\numberline {3.7}{\ignorespaces Illustration of the current state of the integrator's pointer after the \textit {diffInteg} function. What's being pointed involves the same pointer again recursively..}}{18}{figure.caption.23}%
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {4.1}{\ignorespaces Implementation of the system\relax }}{21}{figure.caption.24}%
-\contentsline {figure}{\numberline {4.2}{\ignorespaces Mathematical system\relax }}{21}{figure.caption.24}%
+\contentsline {figure}{\numberline {4.1}{\ignorespaces The \texttt {Traverse} typeclass allows the type to use the \textit {traverse} and \textit {sequence} function, in which both are related to apply inversion with structured data..}}{22}{figure.caption.24}%
+\contentsline {figure}{\numberline {4.2}{\ignorespaces With the \texttt {Applicative} typeclass, it is possible to \textbf {compose} \texttt {Dynamics} types. The pure function wrapped with the type can be correctly plumbered to the second value inside the same shell type, generating the result.\relax }}{22}{figure.caption.25}%
 \babel@toc {american}{}
 \babel@toc {american}{}
 \babel@toc {american}{}
