@@ -13,7 +13,17 @@
 \contentsline {chapter}{\numberline {4}Enlightenment}{21}{chapter.4}%
 \contentsline {section}{\numberline {4.1}Who is driving the bus?}{21}{section.4.1}%
 \contentsline {section}{\numberline {4.2}Our best friend: an Example}{24}{section.4.2}%
-\contentsline {chapter}{References}{25}{section*.26}%
+\contentsline {chapter}{\numberline {5}Drawbacks}{25}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Lorenz's Butterfly}{25}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Sluggishness}{25}{section.5.2}%
+\contentsline {section}{\numberline {5.3}Time Step's In-betweens}{25}{section.5.3}%
+\contentsline {chapter}{\numberline {6}The Speed Pill: Caching}{26}{chapter.6}%
+\contentsline {section}{\numberline {6.1}The Saving Strategy}{26}{section.6.1}%
+\contentsline {section}{\numberline {6.2}Tweak I: Memoization}{26}{section.6.2}%
+\contentsline {chapter}{\numberline {7}Surpassing Discreteness}{27}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Accepting Computer's Limitations}{27}{section.7.1}%
+\contentsline {section}{\numberline {7.2}Tweak II: Interpolation}{27}{section.7.2}%
+\contentsline {chapter}{References}{28}{section*.26}%
 \babel@toc {american}{}
 \babel@toc {american}{}
 \babel@toc {american}{}

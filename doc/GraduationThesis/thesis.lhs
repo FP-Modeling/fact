@@ -72,6 +72,26 @@
   \input{GraduationThesis/Lhs/Enlightenment.lhs}
 \fi
 
+\literateChapter{Drawbacks}
+%include GraduationThesis/Lhs/Drawbacks.lhs
+
+\ifdefined\iscolorful
+  \input{GraduationThesis/Lhs/Drawbacks.lhs}
+\fi
+
+\literateChapter{The Speed Pill: Caching}
+%include GraduationThesis/Lhs/Caching.lhs
+
+\ifdefined\iscolorful
+  \input{GraduationThesis/Lhs/Caching.lhs}
+\fi
+
+\literateChapter{Surpassing Discreteness}
+%include GraduationThesis/Lhs/Interpolation.lhs
+
+\ifdefined\iscolorful
+  \input{GraduationThesis/Lhs/Interpolation.lhs}
+\fi
 
 \ignore{
 \begin{code}
