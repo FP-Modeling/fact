@@ -4,11 +4,12 @@ import Driver
 import Solver
 import Simulation
 import Integrator
+import IO
 
 lorenzInterv = Interval { startTime = 0,
-                          stopTime = 10 }
+                          stopTime = 40 }
 
-lorenzSolver = Solver { dt = 1,
+lorenzSolver = Solver { dt = 0.01,
                         method = Euler,
                         stage = 0
                       }
@@ -33,3 +34,10 @@ lorenzModel =
 mainLorenz =
   do ans <- runDynamicsFinal lorenzModel lorenzInterv lorenzSolver
      print ans
+
+allResultsLorenz = runDynamics lorenzModel lorenzInterv lorenzSolver
+
+lorenzInputOutput = addTime allResultsLorenz lorenzInterv lorenzSolver
+
+writeLorenz = do wData <- lorenzInputOutput
+                 exportData wData "scripts/LorenzData.txt"

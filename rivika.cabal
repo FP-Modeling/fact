@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: ee74f95c91e8896338c10ca189f8c4bd85d8c136df8f34fd599c3bb550f20da0
+-- hash: 0ec5621c4ae2f871b0826a034a76480be6325594abf3ee18d54f037733bab8e0
 
 name:           rivika
 version:        0.1.0.0
@@ -32,6 +32,7 @@ library
       Examples.ChemicalReaction
       Examples.Lorenz
       Integrator
+      IO
       Memo
       Simulation
       Solver

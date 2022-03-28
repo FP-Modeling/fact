@@ -23,7 +23,12 @@
 \contentsline {chapter}{\numberline {7}Surpassing Discreteness}{27}{chapter.7}%
 \contentsline {section}{\numberline {7.1}Accepting Computer's Limitations}{27}{section.7.1}%
 \contentsline {section}{\numberline {7.2}Tweak II: Interpolation}{27}{section.7.2}%
-\contentsline {chapter}{References}{28}{section*.26}%
+\contentsline {chapter}{\numberline {8}An Elegant Shrinking}{28}{chapter.8}%
+\contentsline {section}{\numberline {8.1}The narcissistic Mapping}{28}{section.8.1}%
+\contentsline {section}{\numberline {8.2}Fixing recursion in Monads}{28}{section.8.2}%
+\contentsline {section}{\numberline {8.3}Tweak III: MonadFix}{28}{section.8.3}%
+\contentsline {chapter}{\numberline {9}Conclusion}{29}{chapter.9}%
+\contentsline {chapter}{References}{30}{section*.26}%
 \babel@toc {american}{}
 \babel@toc {american}{}
 \babel@toc {american}{}

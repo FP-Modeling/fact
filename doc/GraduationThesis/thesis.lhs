@@ -93,10 +93,28 @@
   \input{GraduationThesis/Lhs/Interpolation.lhs}
 \fi
 
+\literateChapter{An Elegant Shrinking}
+%include GraduationThesis/Lhs/MonadFix.lhs
+
+\ifdefined\iscolorful
+  \input{GraduationThesis/Lhs/MonadFix.lhs}
+\fi
+
+
+\literateChapter{Conclusion}
+%include GraduationThesis/Lhs/Conclusion.lhs
+
+\ifdefined\iscolorful
+  \input{GraduationThesis/Lhs/Conclusion.lhs}
+\fi
+
 \ignore{
 \begin{code}
 module Main where
 import GraduationThesis.Lhs.Introduction
+import GraduationThesis.Lhs.Design
+import GraduationThesis.Lhs.Implementation
+import GraduationThesis.Lhs.Enlightenment
 
 main :: IO ()
 main = mainLorenz
