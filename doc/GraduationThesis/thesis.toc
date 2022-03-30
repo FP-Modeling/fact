@@ -13,22 +13,18 @@
 \contentsline {chapter}{\numberline {4}Enlightenment}{21}{chapter.4}%
 \contentsline {section}{\numberline {4.1}Who is driving the bus?}{21}{section.4.1}%
 \contentsline {section}{\numberline {4.2}Our best friend: an Example}{24}{section.4.2}%
-\contentsline {chapter}{\numberline {5}Drawbacks}{25}{chapter.5}%
-\contentsline {section}{\numberline {5.1}Lorenz's Butterfly}{25}{section.5.1}%
-\contentsline {section}{\numberline {5.2}Sluggishness}{25}{section.5.2}%
-\contentsline {section}{\numberline {5.3}Time Step's In-betweens}{25}{section.5.3}%
-\contentsline {chapter}{\numberline {6}The Speed Pill: Caching}{26}{chapter.6}%
-\contentsline {section}{\numberline {6.1}The Saving Strategy}{26}{section.6.1}%
-\contentsline {section}{\numberline {6.2}Tweak I: Memoization}{26}{section.6.2}%
-\contentsline {chapter}{\numberline {7}Surpassing Discreteness}{27}{chapter.7}%
-\contentsline {section}{\numberline {7.1}Accepting Computer's Limitations}{27}{section.7.1}%
-\contentsline {section}{\numberline {7.2}Tweak II: Interpolation}{27}{section.7.2}%
-\contentsline {chapter}{\numberline {8}An Elegant Shrinking}{28}{chapter.8}%
-\contentsline {section}{\numberline {8.1}The narcissistic Mapping}{28}{section.8.1}%
-\contentsline {section}{\numberline {8.2}Fixing recursion in Monads}{28}{section.8.2}%
-\contentsline {section}{\numberline {8.3}Tweak III: MonadFix}{28}{section.8.3}%
-\contentsline {chapter}{\numberline {9}Conclusion}{29}{chapter.9}%
-\contentsline {chapter}{References}{30}{section*.26}%
+\contentsline {chapter}{\numberline {5}Drawbacks}{28}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Lorenz's Butterfly}{28}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Sluggishness}{28}{section.5.2}%
+\contentsline {section}{\numberline {5.3}Time Step's In-betweens}{28}{section.5.3}%
+\contentsline {chapter}{\numberline {6}The Speed Pill: Caching}{29}{chapter.6}%
+\contentsline {section}{\numberline {6.1}The Saving Strategy}{29}{section.6.1}%
+\contentsline {section}{\numberline {6.2}Tweak I: Memoization}{29}{section.6.2}%
+\contentsline {chapter}{\numberline {7}Surpassing Discreteness}{30}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Accepting Computer's Limitations}{30}{section.7.1}%
+\contentsline {section}{\numberline {7.2}Tweak II: Interpolation}{30}{section.7.2}%
+\contentsline {chapter}{\numberline {8}Conclusion}{31}{chapter.8}%
+\contentsline {chapter}{References}{32}{section*.31}%
 \babel@toc {american}{}
 \babel@toc {american}{}
 \babel@toc {american}{}

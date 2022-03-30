@@ -93,14 +93,6 @@
   \input{GraduationThesis/Lhs/Interpolation.lhs}
 \fi
 
-\literateChapter{An Elegant Shrinking}
-%include GraduationThesis/Lhs/MonadFix.lhs
-
-\ifdefined\iscolorful
-  \input{GraduationThesis/Lhs/MonadFix.lhs}
-\fi
-
-
 \literateChapter{Conclusion}
 %include GraduationThesis/Lhs/Conclusion.lhs
 

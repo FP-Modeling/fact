@@ -33,14 +33,6 @@ The main goal of the present work is to provide an alternative tool for simulati
 
 \ignore{
 \begin{code}
-lorenzInterv = Interval { startTime = 0,
-                          stopTime = 10 }
-
-lorenzSolver = Solver { dt = 1,
-                        method = Euler,
-                        stage = 0
-                      }
-
 sigma = 10.0
 rho = 28.0
 beta = 8.0 / 3.0
@@ -57,9 +49,5 @@ lorenzModel =
      diffInteg integY (x * (rho - z) - y)
      diffInteg integZ (x * y - beta * z)
      return $ sequence [x, y, z]
-
-mainLorenz =
-  do ans <- runDynamicsFinal lorenzModel lorenzInterv lorenzSolver
-     print ans
 \end{code}
 }
