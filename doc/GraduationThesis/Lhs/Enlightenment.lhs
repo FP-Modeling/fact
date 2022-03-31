@@ -187,6 +187,19 @@ The \textit{diffInteg} function uses integrator's information, such as initial v
 
 After establishing the environment in which the integrator will execute, the final image of the variable or readers is showed in Figure \ref{fig:finalModelExample}.
 
-\figuraBib{ExampleFinalModel}{After setting up the environment, this is the final depiction of an independent variable. The reader $x$ reads the valus computed by the procedure stored in memory, a second-order Runge-Kutta method in this case}{}{fig:finalModelExample}{width=.90\textwidth}%
+\figuraBib{ExampleFinalModel}{After setting up the environment, this is the final depiction of an independent variable. The reader $x$ reads the values computed by the procedure stored in memory, a second-order Runge-Kutta method in this case}{}{fig:finalModelExample}{width=.90\textwidth}%
 
-As explained in the previous section, the last step of any given model is to traverse the monads and wrap it with a \texttt{Dynamics} monad. After this step, the driver of the simulation takes place to execute the built model.
+As explained in the previous section, the last step of any given model is to traverse the monads and wrap it with a \texttt{Dynamics} monad. This means that the list of variables in the model, with the signature \texttt{[Dynamics Double]}, is transformed into a value with the type \texttt{Dynamics [Double]} after the \textit{sequence} function. The transformation can be visually understood when looking at Figure \ref{fig:finalModelExample}. Instead of picking one \textit{ps} of type \texttt{Parameters} and returning a value \textit{v}, the same parameters record returns a \textbf{list} of values, meaning that the \textbf{same} parametric dependency is being applied to $[x, y, z]$.
+
+????????
+At the end of the model, a second shell or wrapper is added, i.e., the value is wrapped by the \texttt{Dynamics} type.
+????????
+
+After this step, the driver of the simulation executes the built model. The function \textit{runDynamics} or \textit{runDynamicsFinal} only create and apply the initial parametric record to the model and call their respective auxiliary functions --- \textit{subRunDynamics} and \textit{subRunDynamicsFinal} respectively. The main goal of such functions is to calculate the result of the system at \textbf{every iteration} within the interval of interest. The chosen time step as well as solver method are metrics used in the transformation from the \textbf{time} axis to the \textbf{iteration} axis. For all the iterations contained in the time interval, an individual parametric record of type \texttt{Parameters} is created and applied to the previous explained dynamic computation, meaning that the \texttt{Dynamic} value in Figure \ref{fig:finalModelExample} is executed by supplying it with a dependency of type \texttt{Parameters}, one for each iteration in this case.
+
+However, this only addresses \textbf{how} the driver triggers the entire execution and does explain how the differential equations are actually being calculated. This is done by the solver functions, such as \textit{integEuler} function described in chapter 3, \textit{The Side-Effect Beast}. These functions, regardless of the chosen method, are all based on equation \ref{eq:solverEquation}, also introduced in chapter 3. The equation goes as following:
+
+$$y_{n+1} = y_n + hf(t_n,y_n) \rightarrow y_n = y_{n-1} + hf(t_{n-1}, y_{n-1})$$
+
+The equation above makes the dependencies in the \textit{RK2} function more clear: the previous iteration result ($y_{n-1}$), the time step ($h$) and differential equation itself ($f(t_{n-1}, y_{n-1})$) of the previous iteration. Further, the dependency $d$ in the \textit{RK2} function is the differential equation, whilst $ps$ carries solver information, such as the size of the time step. Finally, the dependency $c$ is the call of a \textbf{solver step}, meaning that it is capable of calculating the previous step $y_{n-1}$. This is accomplished in a \textbf{recursive} manner, since for every iteration the previous one is necessary. When the base case is achieved, by calculating the value at the first iteration using the $i$ dependency, the recursion stops and the process folds with the final result for the iteration that has started the chain.
+

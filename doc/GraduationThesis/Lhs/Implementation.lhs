@@ -280,6 +280,7 @@ To explain how the solvers work and their nuances, it is useful to go into the i
 
 \begin{equation}
 y_{n+1} = y_n + hf(t_n,y_n) \rightarrow y_n = y_{n-1} + hf(t_{n-1}, y_{n-1})
+\label{eq:solverEquation}
 \end{equation}
 
 The value of the current iteration, $y_n$, can be described in terms of the sum of the previous value and the product between the time step $h$ with the differential equation from the previous iteration and time. With this difference taken in to account, the following code is the implementation of the Euler method. In terms of main functionality, the family of Runge-Kutta methods are analogous:

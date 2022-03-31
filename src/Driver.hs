@@ -45,3 +45,16 @@ subRunDynamics (Dynamics m) iv sl =
                                        solver = sl { stage = 0 }}
      map (m . parameterise) [nl .. nu]
 
+
+runDynamicsTest :: Dynamics a -> Interval -> Solver -> IO [a]
+runDynamicsTest m iv sl = sequence $ subRunDynamics m iv sl
+
+subRunDynamicsTest :: Dynamics a -> Interval -> Solver -> [IO a]
+subRunDynamicsTest (Dynamics m) iv sl =
+  do let (nl, nu) = iterationBnds iv (dt sl)
+         parameterise n = Parameters { interval = iv,
+                                       time = iterToTime iv sl n 0,
+                                       iteration = n,
+                                       solver = sl { stage = 0 }}
+     map (m . parameterise) [nl .. nu]
+

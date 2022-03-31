@@ -5,6 +5,7 @@ import Solver
 import Simulation
 import Integrator
 import IO
+import Dynamics
 
 lorenzInterv = Interval { startTime = 0,
                           stopTime = 40 }
@@ -30,6 +31,24 @@ lorenzModel =
      diffInteg integY (x * (rho - z) - y)
      diffInteg integZ (x * y - beta * z)
      return $ sequence [x, y, z]
+
+
+lorenzModel' :: Dynamics [Double]
+lorenzModel' =
+  do integX <- newInteg 1.0
+     integY <- newInteg 1.0
+     integZ <- newInteg 1.0
+     let x = readInteg integX
+         y = readInteg integY
+         z = readInteg integZ
+     diffInteg integX (sigma * (y - x))
+     diffInteg integY (x * (rho - z) - y)
+     diffInteg integZ (x * y - beta * z)
+     sequence [x, y, z]
+
+mainLorenz' =
+  do ans <- runDynamicsTest lorenzModel' lorenzInterv lorenzSolver
+     print ans
 
 mainLorenz =
   do ans <- runDynamicsFinal lorenzModel lorenzInterv lorenzSolver
