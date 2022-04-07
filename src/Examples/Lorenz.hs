@@ -10,10 +10,25 @@ import Dynamics
 lorenzInterv = Interval { startTime = 0,
                           stopTime = 40 }
 
+
 lorenzSolver = Solver { dt = 0.01,
-                        method = Euler,
+                        method = RungeKutta2,
                         stage = 0
                       }
+
+lorenzSolver2 = Solver { dt = 1,
+                        method = RungeKutta2,
+                        stage = 0
+                       }
+
+
+lorenzInterv2 = Interval { startTime = 0,
+                           stopTime = 5.5 }
+
+
+lorenzInterv3 = Interval { startTime = 0,
+                           stopTime = 6 }
+
 
 sigma = 10.0
 rho = 28.0
@@ -46,12 +61,16 @@ lorenzModel' =
      diffInteg integZ (x * y - beta * z)
      sequence [x, y, z]
 
-mainLorenz' =
-  do ans <- runDynamicsTest lorenzModel' lorenzInterv lorenzSolver
-     print ans
-
 mainLorenz =
   do ans <- runDynamicsFinal lorenzModel lorenzInterv lorenzSolver
+     print ans
+
+mainLorenz2 =
+  do ans <- runDynamics lorenzModel lorenzInterv2 lorenzSolver2
+     print ans
+
+mainLorenz3 =
+  do ans <- runDynamics lorenzModel lorenzInterv3 lorenzSolver2
      print ans
 
 allResultsLorenz = runDynamics lorenzModel lorenzInterv lorenzSolver

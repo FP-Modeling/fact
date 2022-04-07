@@ -175,7 +175,6 @@ Our primary goal is to combine the knowledge levegered in section \ref{sec:types
 
 Any representation of a physical system that can be modeled by a set of differential equations, being written in terms the rate of change and the function or recursively, has an outcome value at any given moment of time. The type \texttt{Dynamics} in Figure \ref{fig:firstDynamics} is a first draft of representing the continuous physical dynamics~\cite{LeeModeling} --- the evolution of a system state in time:
 
-
 \begin{figure}[ht!]
 \centering
 \begin{minipage}{.43\textwidth}
@@ -252,4 +251,4 @@ data Dynamics a =
 \label{fig:dynamics}
 \end{figure}
 
-This summarizes the bridge between the mathematical world and how the we are modeling this domain in Haskell. The next chapter, \textit{Implementation}, will start from this foundation, by adding typeclasses to the \texttt{Dynamics} type, and will later describe the last core type before explaining the solver execution: the \texttt{Integrator} type.
+This summarizes the bridge between the mathematical world and how we are modeling this domain in Haskell. The next chapter, \textit{The Side Effect Beast}, will start from this foundation, by adding typeclasses to the \texttt{Dynamics} type, and will later describe the last core type before explaining the solver execution: the \texttt{Integrator} type.

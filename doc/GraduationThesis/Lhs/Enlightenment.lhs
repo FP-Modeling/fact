@@ -1,15 +1,17 @@
 \ignore{
 \begin{code}
 module GraduationThesis.Lhs.Enlightenment where
+import GraduationThesis.Lhs.Implementation
+import GraduationThesis.Lhs.Caching
 import GraduationThesis.Lhs.Design
 \end{code}
 }
 
-Previously, the latter core type of the implementation, the \texttt{Integrator}, was presented and explained in detail as well as why it can model an integral when used with the \texttt{Dynamics} type. This chapter is a follow-up, and its objectives are twofold: reveal and describe which functions executes a given example and, with that final piece unraveled, execute and follow the execution of a set of differential equations to see some action and proof-of-concept.
+Previously, the latter core type of the implementation, the \texttt{Integrator}, was presented and explained in detail as well as why it can model an integral when used with the \texttt{Dynamics} type. This chapter is a follow-up, and its objectives are twofold: reveal and describe which functions execute a given example and, with that final piece unraveled, execute and follow the execution of a set of differential equations to see some action and proof-of-concept.
 
 \section{Who is driving the bus?}
 
-With the main functionality of the program out-of-the-way, it remains to understand how and who, i.e., which functions and their behaviour, executes a set of differential equations. When the system is written using the integrator functions described in the last chapter, the final product is called a \textbf{model}. This model comprises memory allocation for the integrator, set reader pointer and change the internal procedure of the integrator to an actual differential equation solving computation. However, the final line of the previous examples is still a mystery: what exactly the \textit{return} and \textit{sequence} do and what's the meaning behind it?
+With the main functionality of the program out-of-the-way, it remains to understand how and who, i.e., which functions and their behaviour, executes a set of differential equations. When the system is written using the integrator functions described in the last chapter, the final product is called a \textbf{model}. This model comprises memory allocation for the integrator, set reader pointer and change the internal procedure of the integrator to an actual differential equation solving computation. However, the final line of the previous examples is still a mystery: what exactly the \textit{return} and \textit{sequence} do, and what's the meaning behind it?
 
 The $sequence$ function does a \textbf{traverse} operation, meaning that it inverts the order of nested monads inside a value. For instance, applying this function to a list of values of type \texttt{Maybe} would generate a single \texttt{Maybe} value in which its content is a list of the previous content individually wrapped by the \texttt{Maybe} type. This is only possible because the external monad, list in this case, has implemented the \texttt{Traverse} typeclass. Figure \ref{fig:sequence} depicts the example before and after applying the function.
 
@@ -69,7 +71,7 @@ subRunDynamics (Dynamics m) iv sl =
      map (m . parameterise) [nl .. nu]
 \end{code}
 
-On line 3, it is being created the initial \texttt{Parameters} record using the simulation related types, such as \texttt{Interval} and \texttt{Solver}, explained in chapter \textit{Design Philosophy}. This record will be used in all computations for all variables of the system simultaneously. The function ends by calling a second function, \texttt{subRunDynamics}. This auxiliary function calculates, in a \textbf{sequential} manner, the result using the chosen solving method for all iteration steps by applying a \textbf{map} operation. This procedure, being the \texttt{Functor} of the list monad, applying a function to the internal members of it (line 15). In this case, the \textit{parameterise} function (line 11) is being composed the the dynamic application, in which a custom value of the type \texttt{Parameters} is created to each iteration and this is applied to the received \texttt{Dynamics} value. The final result is a list of answers in order, each one wrapped in the \texttt{IO} monad.
+On line 3, it is being created the initial \texttt{Parameters} record using the simulation related types, such as \texttt{Interval} and \texttt{Solver}, explained in chapter \textit{Design Philosophy}. This record will be used in all computations for all variables of the system simultaneously. The function ends by calling a second function, \texttt{subRunDynamics}. This auxiliary function calculates, in a \textbf{sequential} manner, the result using the chosen solving method for all iteration steps by applying a \textbf{map} operation. This procedure, being the \texttt{Functor} of the list monad, applying a function to the internal members of it (line 15). In this case, the \textit{parameterise} function (line 11) is being composed the dynamic application, in which a custom value of the type \texttt{Parameters} is created to each iteration and this is applied to the received \texttt{Dynamics} value. The final result is a list of answers in order, each one wrapped in the \texttt{IO} monad.
 
 There are two utilitarian functions that participate in this process. The \textit{iterationBnds} function (line 10) uses the established time step to convert the \textbf{time} interval to an \textbf{iteration} interval in the format of a tuple, i.e., the continuous interval becomes the tuple $(0, \frac{stopTime - startTime}{timeStep})$. Moreover, the \textit{iterToTime} function (line 12) converts from the domain of discrete steps to the domain of time. This conversion is based on the time step being used, as well as which method and in which stage it is for that specific iteration.
 
@@ -77,21 +79,6 @@ Additionally, there are analogous versions of these two functions, so-called \te
 
 \ignore{
 \begin{code}
-iterToTime :: Interval -> Solver -> Int -> Int -> Double
-iterToTime interv solver n st =
-  if st < 0 then 
-    error "Incorrect stage: iterToTime"
-  else
-    (startTime interv) + n' * (dt solver) + delta (method solver) st
-      where n' = fromInteger (toInteger n)
-            delta Euler       0 = 0
-            delta RungeKutta2 0 = 0
-            delta RungeKutta2 1 = dt solver
-            delta RungeKutta4 0 = 0
-            delta RungeKutta4 1 = dt solver / 2
-            delta RungeKutta4 2 = dt solver / 2
-            delta RungeKutta4 3 = dt solver
-
 iterationBnds :: Interval -> Double -> (Int, Int)
 iterationBnds interv dt = (0, round ((stopTime interv - 
                                startTime interv) / dt))
@@ -134,14 +121,33 @@ $$\frac{dz}{dt} = x(t)y(t) - \beta z(t) \rightarrow \int \frac{dz}{dt} = \int x(
 
 With the recursive versions of the systems on-hand, it is straight-forward to map it to the described domain-specific language (DSL). The remaining details are simulation-related, i.e., which solver method will be used, the interval of the simulation, as well as the size of the time step. Taking into account that the constants $\sigma$, $\rho$ and $\beta$ need to be set, the code below summarizes it:
 
-\begin{spec}
+\begin{code}
 lorenzInterv = Interval { startTime = 0,
                           stopTime = 40 }
+
+lorenzInterv2 = Interval { startTime = 0,
+                           stopTime = 5 }
+
+
+lorenzInterv3 = Interval { startTime = 0,
+                           stopTime = 6 }
 
 lorenzSolver = Solver { dt = 0.01,
                         method = RungeKutta2,
                         stage = 0
                       }
+
+lorenzSolver2 = Solver { dt = 1,
+                         method = RungeKutta2,
+                         stage = 0
+                       }
+
+
+lorenzSolver3 = Solver { dt = 1,
+                         method = Euler,
+                         stage = 0
+                       }
+
 
 sigma = 10.0
 rho = 28.0
@@ -163,11 +169,24 @@ lorenzModel =
 mainLorenz =
   do ans <- runDynamics lorenzModel lorenzInterv lorenzSolver
      print ans
-\end{spec}
+     
+mainLorenz2 =
+  do ans <- runDynamics lorenzModel lorenzInterv2 lorenzSolver2
+     print ans
+     
+mainLorenz3 =
+  do ans <- runDynamics lorenzModel lorenzInterv3 lorenzSolver2
+     print ans
+     
+mainLorenz4 =
+  do ans <- runDynamics lorenzModel lorenzInterv3 lorenzSolver3
+     print ans
+
+\end{code}
 
 The first two records, \texttt{Interval} and \texttt{Solver}, sets the enviornment (line 1 to 6). The former determines the simulation interval, from start to finish, and the latter configures the solver with $0.01$ as the time step, whilst executing the second-order Runge-Kutta method from the initial stage. The \textit{lorenzModel}, presented after setting the constants (line 7 to 9), executes the aforementioned pipeline to create the model: allocate memory, create readers, change the computation and dispatch it (line 10 to 21). Finally, the function \textit{mainLorenz} groups everything together calling the \textit{runDynamics} driver (line 22 and 23). Later, the result values are provided to the end user in the terminal (line 24).
 
-After this overview, let's follow the execution path of the $x$ variable, given the other two variables are analogous. First and foremost, memory is allocated for the integrator to work with. Figure \ref{fig:allocateExample} depicts this idea, as well as being a reminder of what the \textit{newInteg} and \textit{initialize} functions do, described in the chapter \textit{The Side-Effect Beast}. Abstracted terms are being used to leverage intuition.
+After this overview, let's follow the execution path of the $x$ variable, given the other two variables are analogous. First and foremost, memory is allocated for the integrator to work with. Figure \ref{fig:allocateExample} depicts this idea, as well as being a reminder of what the \textit{newInteg} and \textit{initialize} functions do, described in the chapter \textit{The Side Effect Beast}. Abstracted terms are being used to leverage intuition.
 
 \figuraBib{ExampleAllocate}{After \textit{newInteg}, this record is the final result. The function \textit{initialize} gives us protecting against wrong records of the type \texttt{Parameters}, assuring it begins from the first iteration, i.e., $t_0$}{}{fig:allocateExample}{width=.90\textwidth}%
 
@@ -181,9 +200,9 @@ When reading a value from a integrator, the computation pointer is being used to
 
 The final step before calling the driver is to \textbf{change} the computation \textbf{inside} the memory region. Until this moment, the stored computation is always returning the value of the system at $t_0$, whilst changing the obtained parameters record to be correct. Our goal is to modify this to actually calculate the solution of the differential equations by using numerical methods, i.e., using the solver of the simulation. The function \textit{diffInteg} fulfills this role and its functionality is illustrated in Figure \ref{fig:changeExample}.
 
-\figuraBib{ExampleChange}{The \textit{diffInteg} function only does side-effects, meaning that only affects memory. The internal variable \texttt{c} is a pointer to the computation \textit{itself}, i.e., the dynamic computation being created references this exact procedure}{}{fig:changeExample}{width=.90\textwidth}%
+\figuraBib{ExampleChange}{The \textit{diffInteg} function only does side effects, meaning that only affects memory. The internal variable \texttt{c} is a pointer to the computation \textit{itself}, i.e., the dynamic computation being created references this exact procedure}{}{fig:changeExample}{width=.90\textwidth}%
 
-The \textit{diffInteg} function uses integrator's information, such as initial value and computation pointer, to change the content pointed by the latter. As depicted in the image, the procedure of type \texttt{Dynamics Double} stored in the memory region creates an internal reference to \textbf{itself}, meaning that when the dynamic computation is triggered the function \textit{RK2} will have access to this exact behaviour. This is due to the implicit recursion that the solver uses, as will be explained in a few pages. Moreover, the initial value of the integrator is also being used by that function, as well as the differential equation itself, $\sigma(y - x)$ in this case. All those information will be used by the chosen solver method.
+The \textit{diffInteg} function uses integrator's information, such as initial value and computation pointer, to change the content pointed by the latter. As depicted in the image, the procedure of type \texttt{Dynamics Double} stored in the memory region creates an internal reference to \textbf{itself}, meaning that when the dynamic computation is triggered the function \textit{RK2} will have access to this exact behaviour. This is due to the implicit recursion that the solver uses, as will be explained in a few pages. Moreover, the initial value of the integrator is also being used by that function, as well as the differential equation itself, $\sigma(y - x)$ in this case. All this information will be used by the chosen solver method.
 
 After establishing the environment in which the integrator will execute, the final image of the variable or readers is showed in Figure \ref{fig:finalModelExample}.
 
@@ -197,7 +216,7 @@ At the end of the model, a second shell or wrapper is added, i.e., the value is 
 
 After this step, the driver of the simulation executes the built model. The function \textit{runDynamics} or \textit{runDynamicsFinal} only create and apply the initial parametric record to the model and call their respective auxiliary functions --- \textit{subRunDynamics} and \textit{subRunDynamicsFinal} respectively. The main goal of such functions is to calculate the result of the system at \textbf{every iteration} within the interval of interest. The chosen time step as well as solver method are metrics used in the transformation from the \textbf{time} axis to the \textbf{iteration} axis. For all the iterations contained in the time interval, an individual parametric record of type \texttt{Parameters} is created and applied to the previous explained dynamic computation, meaning that the \texttt{Dynamic} value in Figure \ref{fig:finalModelExample} is executed by supplying it with a dependency of type \texttt{Parameters}, one for each iteration in this case.
 
-However, this only addresses \textbf{how} the driver triggers the entire execution and does explain how the differential equations are actually being calculated. This is done by the solver functions, such as \textit{integEuler} function described in chapter 3, \textit{The Side-Effect Beast}. These functions, regardless of the chosen method, are all based on equation \ref{eq:solverEquation}, also introduced in chapter 3. The equation goes as following:
+However, this only addresses \textbf{how} the driver triggers the entire execution and does explain how the differential equations are actually being calculated. This is done by the solver functions, such as \textit{integEuler} function described in chapter 3, \textit{The Side Effect Beast}. These functions, regardless of the chosen method, are all based on equation \ref{eq:solverEquation}, also introduced in chapter 3. The equation goes as the following:
 
 $$y_{n+1} = y_n + hf(t_n,y_n) \rightarrow y_n = y_{n-1} + hf(t_{n-1}, y_{n-1})$$
 

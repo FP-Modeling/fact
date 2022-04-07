@@ -6,25 +6,25 @@
 \contentsline {section}{\numberline {2.1}The Shape of Information}{3}{section.2.1}%
 \contentsline {section}{\numberline {2.2}Modeling Reality}{6}{section.2.2}%
 \contentsline {section}{\numberline {2.3}Cybernization of Mathematics}{8}{section.2.3}%
-\contentsline {chapter}{\numberline {3}The Side-Effect Beast}{11}{chapter.3}%
+\contentsline {chapter}{\numberline {3}The Side Effect Beast}{11}{chapter.3}%
 \contentsline {section}{\numberline {3.1}Uplifting the Dynamics Type}{11}{section.3.1}%
 \contentsline {section}{\numberline {3.2}Exploiting Impurity}{15}{section.3.2}%
 \contentsline {section}{\numberline {3.3}Using Recursion to solve Math}{18}{section.3.3}%
 \contentsline {chapter}{\numberline {4}Enlightenment}{21}{chapter.4}%
 \contentsline {section}{\numberline {4.1}Who is driving the bus?}{21}{section.4.1}%
 \contentsline {section}{\numberline {4.2}Our best friend: an Example}{24}{section.4.2}%
-\contentsline {chapter}{\numberline {5}Drawbacks}{29}{chapter.5}%
-\contentsline {section}{\numberline {5.1}Lorenz's Butterfly}{29}{section.5.1}%
-\contentsline {section}{\numberline {5.2}Sluggishness}{29}{section.5.2}%
-\contentsline {section}{\numberline {5.3}Time Step's In-betweens}{29}{section.5.3}%
-\contentsline {chapter}{\numberline {6}The Speed Pill: Caching}{30}{chapter.6}%
-\contentsline {section}{\numberline {6.1}The Saving Strategy}{30}{section.6.1}%
-\contentsline {section}{\numberline {6.2}Tweak I: Memoization}{30}{section.6.2}%
-\contentsline {chapter}{\numberline {7}Surpassing Discreteness}{31}{chapter.7}%
-\contentsline {section}{\numberline {7.1}Accepting Computer's Limitations}{31}{section.7.1}%
-\contentsline {section}{\numberline {7.2}Tweak II: Interpolation}{31}{section.7.2}%
-\contentsline {chapter}{\numberline {8}Conclusion}{32}{chapter.8}%
-\contentsline {chapter}{References}{33}{section*.31}%
+\contentsline {chapter}{\numberline {5}Drawbacks}{30}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Lorenz's Butterfly}{30}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Time Step's In-betweens}{31}{section.5.2}%
+\contentsline {section}{\numberline {5.3}Sluggishness}{31}{section.5.3}%
+\contentsline {chapter}{\numberline {6}Weakening Discreteness}{33}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Accepting Computer's Limitations}{33}{section.6.1}%
+\contentsline {section}{\numberline {6.2}Tweak I: Interpolation}{33}{section.6.2}%
+\contentsline {chapter}{\numberline {7}The Speed Pill: Caching}{35}{chapter.7}%
+\contentsline {section}{\numberline {7.1}The Saving Strategy}{35}{section.7.1}%
+\contentsline {section}{\numberline {7.2}Tweak II: Memoization}{37}{section.7.2}%
+\contentsline {chapter}{\numberline {8}Conclusion}{42}{chapter.8}%
+\contentsline {chapter}{References}{43}{section*.37}%
 \babel@toc {american}{}
 \babel@toc {american}{}
 \babel@toc {american}{}

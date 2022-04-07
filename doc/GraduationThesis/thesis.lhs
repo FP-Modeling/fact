@@ -58,7 +58,7 @@
   \input{GraduationThesis/Lhs/Design.lhs}
 \fi
 
-\literateChapter{The Side-Effect Beast}
+\literateChapter{The Side Effect Beast}
 %include GraduationThesis/Lhs/Implementation.lhs
 
 \ifdefined\iscolorful
@@ -79,18 +79,18 @@
   \input{GraduationThesis/Lhs/Drawbacks.lhs}
 \fi
 
+\literateChapter{Weakening Discreteness}
+%include GraduationThesis/Lhs/Interpolation.lhs
+
+\ifdefined\iscolorful
+  \input{GraduationThesis/Lhs/Interpolation.lhs}
+\fi
+
 \literateChapter{The Speed Pill: Caching}
 %include GraduationThesis/Lhs/Caching.lhs
 
 \ifdefined\iscolorful
   \input{GraduationThesis/Lhs/Caching.lhs}
-\fi
-
-\literateChapter{Surpassing Discreteness}
-%include GraduationThesis/Lhs/Interpolation.lhs
-
-\ifdefined\iscolorful
-  \input{GraduationThesis/Lhs/Interpolation.lhs}
 \fi
 
 \literateChapter{Conclusion}

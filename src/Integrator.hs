@@ -52,13 +52,6 @@ newInteg i =
      liftIO $ writeIORef (cache integ) y
      return integ
 
--- newIntegrator' :: Dynamics Real -> Dynamics Integrator'
--- newIntegrator' i = 
---   do comp <- liftIO $ newIORef $ initD i 
---      let integ = Integrator' { initial'     = i, 
---                           computation' = comp }
---      return integ
-
 -- | Return the integral's value.
 readInteg :: Integrator -> Dynamics Real
 readInteg integ = 
