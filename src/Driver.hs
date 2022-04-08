@@ -21,10 +21,16 @@ subRunDynamicsFinal :: Dynamics a -> Interval -> Solver -> IO a
 subRunDynamicsFinal (Dynamics m) iv sl =
   do let n = iterationHiBnd iv (dt sl)
          t = iterToTime iv sl n 0
-     m Parameters { interval = iv,
-                    time = t,
-                    iteration = n,
-                    solver = sl { stage = 0 }}
+         x = m Parameters { interval = iv,
+                            time = t,
+                            iteration = n,
+                            solver = sl { stage = 0 }}
+     if t - (stopTime iv) < 0.00001
+     then x
+     else m Parameters { interval = iv,
+                         time = stopTime iv,
+                         iteration = n,
+                         solver = sl { stage = -1 }}
 
 -- | Run the simulation and return the results in all 
 -- integration time points using the specified simulation specs.

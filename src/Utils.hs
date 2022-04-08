@@ -55,10 +55,13 @@ interpolate (Dynamics m) =
         z2 = m $ ps { time = t2,
                       iteration = n2,
                       solver = sl { stage = 0 } }
-        r | t == t1   = z1
-          | t == t2   = z2
-          | otherwise = 
-            do y1 <- z1
-               y2 <- z2
-               return $ y1 + (y2 - y1) * (t - t1) / (t2 - t1)
-    in r
+        -- r | t == t1   = z1
+        --   | t == t2   = z2
+        --   | otherwise = 
+        --     do y1 <- z1
+        --        y2 <- z2
+        --        return $ y1 + (y2 - y1) * (t - t1) / (t2 - t1)
+        
+    in do y1 <- z1
+          y2 <- z2
+          return $ y1 + (y2 - y1) * (t - t1) / (t2 - t1)

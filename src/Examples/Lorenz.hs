@@ -62,7 +62,7 @@ lorenzModel' =
      sequence [x, y, z]
 
 mainLorenz =
-  do ans <- runDynamicsFinal lorenzModel lorenzInterv lorenzSolver
+  do ans <- runDynamicsFinal lorenzModel lorenzInterv2 lorenzSolver2
      print ans
 
 mainLorenz2 =
