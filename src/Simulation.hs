@@ -17,7 +17,7 @@ iterations interv dt = [i1 .. i2] where
 
 -- | Make a tuple with minium and maximum boundaries
 iterationBnds :: Interval -> TimeStep -> (Iteration, Iteration)
-iterationBnds interv dt = (0, round ((stopTime interv - 
+iterationBnds interv dt = (0, ceiling ((stopTime interv - 
                                startTime interv) / dt))
 
 -- | Auxiliary functions for boundaries of iterations                   

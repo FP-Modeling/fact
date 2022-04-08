@@ -58,7 +58,6 @@ readInteg integ =
   Dynamics $ \ps ->
   do (Dynamics m) <- readIORef (cache integ)
      m ps
-
 -- -- | Set the derivative for the integral.
 diffInteg :: Integrator -> Dynamics Real -> Dynamics ()
 diffInteg integ diff =

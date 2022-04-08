@@ -23,7 +23,7 @@ lorenzSolver2 = Solver { dt = 1,
 
 
 lorenzInterv2 = Interval { startTime = 0,
-                           stopTime = 5.5 }
+                           stopTime = 5.1 }
 
 
 lorenzInterv3 = Interval { startTime = 0,
