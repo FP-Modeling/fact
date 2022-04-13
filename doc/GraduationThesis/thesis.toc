@@ -19,12 +19,12 @@
 \contentsline {section}{\numberline {5.3}Sluggishness}{31}{section.5.3}%
 \contentsline {chapter}{\numberline {6}Weakening Discreteness}{33}{chapter.6}%
 \contentsline {section}{\numberline {6.1}Accepting Computer's Limitations}{33}{section.6.1}%
-\contentsline {section}{\numberline {6.2}Tweak I: Interpolation}{33}{section.6.2}%
-\contentsline {chapter}{\numberline {7}The Speed Pill: Caching}{35}{chapter.7}%
-\contentsline {section}{\numberline {7.1}The Saving Strategy}{35}{section.7.1}%
-\contentsline {section}{\numberline {7.2}Tweak II: Memoization}{37}{section.7.2}%
-\contentsline {chapter}{\numberline {8}Conclusion}{42}{chapter.8}%
-\contentsline {chapter}{References}{43}{section*.37}%
+\contentsline {section}{\numberline {6.2}Tweak I: Interpolation}{35}{section.6.2}%
+\contentsline {chapter}{\numberline {7}The Speed Pill: Caching}{37}{chapter.7}%
+\contentsline {section}{\numberline {7.1}The Saving Strategy}{37}{section.7.1}%
+\contentsline {section}{\numberline {7.2}Tweak II: Memoization}{39}{section.7.2}%
+\contentsline {chapter}{\numberline {8}Conclusion}{44}{chapter.8}%
+\contentsline {chapter}{References}{45}{section*.37}%
 \babel@toc {american}{}
 \babel@toc {american}{}
 \babel@toc {american}{}

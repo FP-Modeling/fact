@@ -2,6 +2,7 @@
 \begin{code}
 module GraduationThesis.Lhs.Enlightenment where
 import GraduationThesis.Lhs.Implementation
+import GraduationThesis.Lhs.Interpolation
 import GraduationThesis.Lhs.Caching
 import GraduationThesis.Lhs.Design
 \end{code}
@@ -79,10 +80,6 @@ Additionally, there are analogous versions of these two functions, so-called \te
 
 \ignore{
 \begin{code}
-iterationBnds :: Interval -> Double -> (Int, Int)
-iterationBnds interv dt = (0, round ((stopTime interv - 
-                               startTime interv) / dt))
-
 iterationHiBnd :: Interval -> Double -> Int
 iterationHiBnd interv dt = snd $ iterationBnds interv dt
 

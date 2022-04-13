@@ -56,7 +56,6 @@ subRunDynamics (Dynamics m) iv sl =
      if (iterToTime iv sl nu 0) - (stopTime iv) < 0.00001
      then map (m . parameterise) [nl .. nu]
      else (init $ map (m . parameterise) [nl .. nu]) ++ [m ps]     
-
      
 runDynamicsTest :: Dynamics a -> Interval -> Solver -> IO [a]
 runDynamicsTest m iv sl = sequence $ subRunDynamics m iv sl

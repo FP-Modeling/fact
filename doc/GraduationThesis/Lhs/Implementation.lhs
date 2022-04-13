@@ -5,21 +5,6 @@ module GraduationThesis.Lhs.Implementation where
 import GraduationThesis.Lhs.Design
 import Control.Monad.Trans
 import Data.IORef
-
-iterToTime :: Interval -> Solver -> Int -> Int -> Double
-iterToTime interv solver n st =
-  if st < 0 then 
-    error "Incorrect stage: iterToTime"
-  else
-    (startTime interv) + n' * (dt solver) + delta (method solver) st
-      where n' = fromInteger (toInteger n)
-            delta Euler       0 = 0
-            delta RungeKutta2 0 = 0
-            delta RungeKutta2 1 = dt solver
-            delta RungeKutta4 0 = 0
-            delta RungeKutta4 1 = dt solver / 2
-            delta RungeKutta4 2 = dt solver / 2
-            delta RungeKutta4 3 = dt solver
 \end{code}
 }
 

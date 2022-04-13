@@ -24,13 +24,13 @@ Although correct, the presented solution has a few drawbacks. The first one arai
 
 \section{Time Step's In-betweens}
 
-The second drawback is related to the time steps and the stop time the user is interested in. As explained in the previous chapters, the size of the time step is used across the simulation to walk through the iteration axis, a discrete version of the time axis. Hence, this size interfers with which interval of time the integrator is capable of computing, given that it is limited to values that are \textbf{multiple} of the size of the time step. This means that multiple end points will generate the same answer, affecting the accuracy of the simulator.
+The first drawback is related to the time steps and the stop time the user is interested in. As explained in the previous chapters, the size of the time step is used across the simulation to walk through the iteration axis, a discrete version of the time axis. Hence, this size interfers with which interval of time the integrator is capable of computing, given that it is limited to values that are \textbf{multiple} of the size of the time step. This means that multiple end points will generate the same answer, affecting the accuracy of the simulator.
 
-
+For instance, a simulation that runs in the inverval of 0 to 6 seconds with a time step of 1 will have the same output as if the interval was from 0 to 5.5 seconds, considering the same size of time step. Because the time of interest in in between two multiples of the time step, 5 and 6 in this case, and the simulator always \textbf{rounds} the iteration according to the time step, arbitrary in-between values are not modeled correctly. 
 
 \section{Sluggishness}
 
-The first encountered issue is related to performance; the simulation takes too \textbf{long} to execute. For instance, to execute the Lorenz's Attractor example with an unreasonable time step size of 1, the simulator can take around \textbf{10 seconds} to compute in modern hardware an interval of 0 to 5 seconds of the physical system. Increasing this interval shows an exponencitial growth in execution time, as depicted by the table in Table \ref{tab:execTimes}. Thus, with this exponentinal growth, it is totally impractical to execute longer simulations, diminishing the usability of the proposed software.
+The second issue is related to performance; the simulation takes too \textbf{long} to execute. For instance, to execute the Lorenz's Attractor example with an unreasonable time step size of 1, the simulator can take around \textbf{10 seconds} to compute in modern hardware an interval of 0 to 5 seconds of the physical system. Increasing this interval shows an exponencitial growth in execution time, as depicted by the table in Table \ref{tab:execTimes}. Thus, with this exponentinal growth, it is totally impractical to execute longer simulations, diminishing the usability of the proposed software.
 
 \begin{table}[H]
 \centering
