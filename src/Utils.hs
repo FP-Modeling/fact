@@ -34,7 +34,7 @@ discrete (Dynamics m) =
   in r
 
 -- | Interpolate the computation based on the integration time points only.
-interpolate :: Dynamics Double -> Dynamics Double
+interpolate :: Dynamics Real -> Dynamics Real
 interpolate (Dynamics m) = 
   Dynamics $ \ps -> 
   if stage (solver ps) >= 0 then 

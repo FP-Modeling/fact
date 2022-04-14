@@ -1,11 +1,14 @@
 \ignore{
 \begin{code}
+{-# LANGUAGE FlexibleContexts, FlexibleInstances, UndecidableInstances, ConstraintKinds, MonoLocalBinds #-}
 module GraduationThesis.Lhs.Caching where
-import GraduationThesis.Lhs.Design
+import GraduationThesis.Lhs.Implementation
 import GraduationThesis.Lhs.Interpolation
-import Data.IORef
-import Data.Array
+import GraduationThesis.Lhs.Design
+import Control.Monad.Trans
 import Data.Array.IO
+import Data.Array
+import Data.IORef
 
 initialize :: Dynamics a -> Dynamics a
 initialize (Dynamics m) =
@@ -30,6 +33,21 @@ instance Memo e where
     
 instance (MArray IOUArray e IO) => UMemo e where
   newMemoUArray_ = newArray_
+
+  
+stageBnds :: Solver -> (Int, Int)
+stageBnds sl = 
+  case method sl of
+    Euler -> (0, 0)
+    RungeKutta2 -> (0, 1)
+    RungeKutta4 -> (0, 3)
+
+stageLoBnd :: Solver -> Int
+stageLoBnd sc = fst $ stageBnds sc
+                  
+stageHiBnd :: Solver -> Int
+stageHiBnd sc = snd $ stageBnds sc
+ 
 \end{code}
 }
 
@@ -138,7 +156,7 @@ With this function on-hand, it remains to couple it to the \texttt{Integrator} t
 
 \begin{code}
 data Integrator = Integrator { initial     :: Dynamics Double,
-                               cache       :: IORef (Dynamics Double)
+                               cache       :: IORef (Dynamics Double),
                                computation :: IORef (Dynamics Double)
                              }
 \end{code}
@@ -182,6 +200,26 @@ readInteg integ =
   do (Dynamics m) <- readIORef (cache integ)
      m ps
 \end{code}
+\begin{center}
+  \includegraphics[width=0.95\linewidth]{GraduationThesis/img/ReadInteg}
+\end{center}
+\caption{The reader function now collects data from the cached version, rather than reading the computation's memory region directly.}
+\label{fig:readInteg}
+\end{figure}
+
+\begin{figure}[ht!]
+\begin{code}
+diffInteg :: Integrator -> Dynamics Double -> Dynamics ()
+diffInteg integ diff =
+  do let z = Dynamics $ \ps ->
+           do y <- readIORef (cache integ) -- Give me past values
+              let i = initial integ -- Give me initial value
+              case method (solver ps) of -- Check the solver method
+                Euler -> integEuler diff i y ps
+                RungeKutta2 -> integRK2 diff i y ps
+                RungeKutta4 -> integRK4 diff i y ps
+     liftIO $ writeIORef (computation integ) z -- This is the new computation now!
+\end{code}     
 \begin{center}
   \includegraphics[width=0.95\linewidth]{GraduationThesis/img/ReadInteg}
 \end{center}

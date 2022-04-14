@@ -42,9 +42,9 @@ The main use case of this function when building a model is to combine multiple 
 
 Finally, it is desireable, during a simulation, to initialize all the differential equations with the \textbf{same} initial condition to the same variable used in each differential equation. However, because we have multiple dynamic computations, this is not an easy-task to accomplish. The solution is to wrap all the written \texttt{Dynamics [Double]} with a new \texttt{Dynamics} shell. In this manner, whem applied with a value with the type \texttt{Parameters}, the same application will be happening to all the internal computations. This nested structure, a dynamic value inside another one, is the representation of a model in the project and has its own alias:
 
-\begin{code}
+\begin{spec}
 type Model a = Dynamics (Dynamics a)
-\end{code}
+\end{spec}
 
 Further, when creating a model, the same steps have to done in the same order, always starting with the integrator functions and finishing with the \textit{return} and \textit{sequence} functions. So, Figure \ref{fig:modelPipe} depicts the general pipeline used to create any model:
 
@@ -58,7 +58,7 @@ Further, when creating a model, the same steps have to done in the same order, a
 
 The remaining piece of the puzzle is grasp who picks the model and its simulation specification, e.g., start time, stop time, which method will be used, and provides the final result. In this sense, the function \texttt{runDynamics} is the \textbf{driver}, i.e., it generates a list with the calculated answers.
 
-\begin{code}
+\begin{spec}
 runDynamics :: Model a -> Interval -> Solver -> IO [a]
 runDynamics (Dynamics m) iv sl = 
   do d <- m Parameters { interval = iv,
@@ -75,19 +75,16 @@ subRunDynamics (Dynamics m) iv sl =
                                        iteration = n,
                                        solver = sl { stage = 0 }}
      map (m . parameterise) [nl .. nu]
-\end{code}
+\end{spec}
 
 On line 3, it is being created the initial \texttt{Parameters} record using the simulation related types, such as \texttt{Interval} and \texttt{Solver}, explained in chapter \textit{Design Philosophy}. This record will be used in all computations for all variables of the system simultaneously. The function ends by calling a second function, \texttt{subRunDynamics}. This auxiliary function calculates, in a \textbf{sequential} manner, the result using the chosen solving method for all iteration steps by applying a \textbf{map} operation. This procedure, being the \texttt{Functor} of the list monad, applying a function to the internal members of it (line 15). In this case, the \textit{parameterise} function (line 11) is being composed the dynamic application, in which a custom value of the type \texttt{Parameters} is created to each iteration and this is applied to the received \texttt{Dynamics} value. The final result is a list of answers in order, each one wrapped in the \texttt{IO} monad.
 
 There are two utilitarian functions that participate in this process. The \textit{iterationBnds} function (line 10) uses the established time step to convert the \textbf{time} interval to an \textbf{iteration} interval in the format of a tuple, i.e., the continuous interval becomes the tuple $(0, \frac{stopTime - startTime}{timeStep})$. Moreover, the \textit{iterToTime} function (line 12) converts from the domain of discrete steps to the domain of time. This conversion is based on the time step being used, as well as which method and in which stage it is for that specific iteration.
 
-Additionally, there are analogous versions of these two functions, so-called \texttt{runDynamicsFinal} and \texttt{subRunDynamicsFinal}, that return only the final result of the simulation, i.e., $y(stopTime)$.
+Additionally, there are analogous versions of these two functions, so-called \textit{runDynamicsFinal} and \textit{subRunDynamicsFinal}, that return only the final result of the simulation, i.e., $y(stopTime)$.
 
 \ignore{
 \begin{code}
-iterationHiBnd :: Interval -> Double -> Int
-iterationHiBnd interv dt = snd $ iterationBnds interv dt
-
 runDynamicsFinal :: Model a -> Interval -> Solver -> IO a
 runDynamicsFinal (Dynamics m) iv sl = 
   do d <- m Parameters { interval = iv,
@@ -100,10 +97,16 @@ subRunDynamicsFinal :: Dynamics a -> Interval -> Solver -> IO a
 subRunDynamicsFinal (Dynamics m) iv sl =
   do let n = iterationHiBnd iv (dt sl)
          t = iterToTime iv sl n 0
-     m Parameters { interval = iv,
-                    time = t,
-                    iteration = n,
-                    solver = sl { stage = 0 }}
+         x = m Parameters { interval = iv,
+                            time = t,
+                            iteration = n,
+                            solver = sl { stage = 0 }}
+     if t - (stopTime iv) < 0.00001
+     then x
+     else m Parameters { interval = iv,
+                         time = stopTime iv,
+                         iteration = n,
+                         solver = sl { stage = -1 }}
 \end{code}
 }
 
@@ -152,19 +155,6 @@ lorenzModel =
 mainLorenz =
   do ans <- runDynamics lorenzModel lorenzInterv lorenzSolver
      print ans
-     
-mainLorenz2 =
-  do ans <- runDynamics lorenzModel lorenzInterv2 lorenzSolver2
-     print ans
-     
-mainLorenz3 =
-  do ans <- runDynamics lorenzModel lorenzInterv3 lorenzSolver2
-     print ans
-     
-mainLorenz4 =
-  do ans <- runDynamics lorenzModel lorenzInterv3 lorenzSolver3
-     print ans
-
 \end{code}
 
 The first two records, \texttt{Interval} and \texttt{Solver}, sets the enviornment (line 1 to 6). The former determines the simulation interval, from start to finish, and the latter configures the solver with $0.01$ as the time step, whilst executing the second-order Runge-Kutta method from the initial stage. The \textit{lorenzModel}, presented after setting the constants (line 7 to 9), executes the aforementioned pipeline to create the model: allocate memory, create readers, change the computation and dispatch it (line 10 to 21). Finally, the function \textit{mainLorenz} groups everything together calling the \textit{runDynamics} driver (line 22 and 23). Later, the result values are provided to the end user in the terminal (line 24).

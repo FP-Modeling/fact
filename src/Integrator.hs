@@ -22,7 +22,7 @@ data Integrator = Integrator { initial :: Dynamics Real,   -- ^ The initial valu
                      computation  :: IORef (Dynamics Real) }
 
 data Integrator' = Integrator' { initial'     :: Dynamics Real,
-                       computation' :: IORef (Dynamics Real) }
+                                 computation' :: IORef (Dynamics Real) }
 
 -- | Return the initial value.
 initialize :: Dynamics a -> Dynamics a
@@ -58,6 +58,7 @@ readInteg integ =
   Dynamics $ \ps ->
   do (Dynamics m) <- readIORef (cache integ)
      m ps
+     
 -- -- | Set the derivative for the integral.
 diffInteg :: Integrator -> Dynamics Real -> Dynamics ()
 diffInteg integ diff =
@@ -69,6 +70,19 @@ diffInteg integ diff =
                 RungeKutta2 -> integRK2 diff i y ps
                 RungeKutta4 -> integRK4 diff i y ps
      liftIO $ writeIORef (computation integ) z -- This is the new computation now!
+
+     
+-- -- | Set the derivative for the integral.
+diffInteg2 :: Integrator' -> Dynamics Real -> Dynamics ()
+diffInteg2 integ diff =
+  do let z = Dynamics $ \ps ->
+           do y <- readIORef (computation' integ) -- Give me past values
+              let i = initial' integ -- Give me initial value
+              case method (solver ps) of -- Check the solver method
+                Euler -> integEuler diff i y ps
+                RungeKutta2 -> integRK2 diff i y ps
+                RungeKutta4 -> integRK4 diff i y ps
+     liftIO $ writeIORef (computation' integ) (interpolate z) -- This is the new computation now!
 
 integEuler :: Dynamics Real
              -> Dynamics Real 

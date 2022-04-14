@@ -2,9 +2,11 @@
 \begin{code}
 {-# LANGUAGE FlexibleContexts, FlexibleInstances, UndecidableInstances, BangPatterns, ConstraintKinds, MonoLocalBinds #-}
 module GraduationThesis.Lhs.Implementation where
+import GraduationThesis.Lhs.Interpolation
 import GraduationThesis.Lhs.Design
 import Control.Monad.Trans
 import Data.IORef
+
 \end{code}
 }
 
@@ -177,7 +179,7 @@ This summarizes the boost in functionality for the \texttt{Dynamics} type. These
 \section{Exploiting Impurity}
 \label{sec:integrator}
 
-The \texttt{Dynamics} type directly interacts with a second type that intensively explores \textbf{side effects}. The notion of a side effect correlates to changing a \textbf{state}, i.e., if you see a computer program as a state machine, an operation that goes beyond returning a value, but has an observable interference somewhere else is called a side effect operation or an \textbf{impure} functionality. Examples of common use cases goes from modifying memory regions to performing input-output procedures via system-calls. The nature of purity comes from the mathematical domain, in which a function is a procedure that is determinist, meaning that the output value is always the same if the same input is provided; a false assumption when programming with side effects. An example of an imaginary state machine can be viewed in Figure \ref{fig:stateMachine}.
+The \texttt{Dynamics} type directly interacts with a second type that intensively explores \textbf{side effects}. The notion of a side effect correlates to changing a \textbf{state}, i.e., if you see a computer program as a state machine, an operation that goes beyond returning a value, but has an observable interference somewhere else is called a side effect operation or an \textbf{impure} functionality. Examples of common use cases goes from modifying memory regions to performing input-output procedures via system-calls. The nature of purity comes from the mathematical domain, in which a function is a procedure that is deterministic, meaning that the output value is always the same if the same input is provided; a false assumption when programming with side effects. An example of an imaginary state machine can be viewed in Figure \ref{fig:stateMachine}.
 
 \begin{figure}[ht!]
   \begin{minipage}[c]{0.67\textwidth}
@@ -230,7 +232,7 @@ readInteg integ =
 
 Finally, the function \textit{diffInteg} is a side effect-only function that changes \textbf{which computation} will be used by the integrator. It is worth noticing that after the creation of the integrator, the \texttt{computation} pointer is addressing a simple and, initially, useless computation: given a random record of \texttt{Parameters}, it will fix it to assure it is starting at $t_0$, and will return the initial value in form of a \texttt{Dynamics Double}. To update this behaviour, the \textit{diffInteg} change the content being pointed by the integrator's pointer:
 
-\begin{code}
+\begin{spec}
 diffInteg :: Integrator -> Dynamics Double -> Dynamics ()
 diffInteg integ diff =
   do let z = Dynamics $ \ps ->
@@ -241,7 +243,7 @@ diffInteg integ diff =
                 RungeKutta2 -> integRK2 diff i whatToDo ps
                 RungeKutta4 -> integRK4 diff i whatToDo ps
      liftIO $ writeIORef (computation integ) z     
-\end{code}
+\end{spec}
 
 In the beginning of the function (line 3), it is being created a new computation, so-called \texttt{z} --- a function wrapped in the \texttt{Dynamics} type that receives a \texttt{Parameters} record and computes the result based on the solving method. In \texttt{z}, the first step is to build a copy of the \textbf{same process} being pointed by \texttt{computation} and getting the initial condition of the system (line 5). Finally, after checking the chosen solver, it is executed one iteration of the process by calling \textit{integEuler}, or \textit{integRK2} or \textit{integRK4}. After line 10, this entire process \texttt{z} is being pointed by the \texttt{computation} pointer, being done by the $writeIORef$ function~\footref{foot:IORef}. It may seem confusing that inside \texttt{z} we are \textbf{reading} what is being pointed and later, on the last line of \textit{diffInteg}, this is being used on the final line to update that same pointer. This is necessary, as it will be explained in the next chapter \textit{Enlightenment}, to allow the use of an \textbf{implicit recursion} to assure the sequential aspect needed by the solvers. For now, the core idea is this: the \textit{diffInteg} function alters the \textbf{future} computations; it rewrites which procedure will be pointed by the \texttt{computation} pointer. This new procedure, which we called \texttt{z}, creates an intermediate computation, \texttt{whatToDo} (line 4), that \textbf{reads} what this pointer is addressing, which is \texttt{z} itself.
 
@@ -273,18 +275,18 @@ integEuler :: Dynamics Double
              -> Dynamics Double 
              -> Dynamics Double 
              -> Parameters -> IO Double
-integEuler (Dynamics diff) (Dynamics i) (Dynamics y) ps =
-  case iteration ps of
+integEuler (Dynamics diff) (Dynamics init) (Dynamics y) params =
+  case iteration params of
     0 -> 
-      i ps
+      init params
     n -> do 
-      let iv  = interval ps
-          sl  = solver ps
+      let iv  = interval params
+          sl  = solver params
           ty  = iterToTime iv sl (n - 1) 0
-          psy = ps { time = ty, iteration = n - 1, solver = sl { stage = 0} }
-      a <- y psy
-      b <- diff psy
-      let !v = a + dt (solver ps) * b
+          paramsy = params { time = ty, iteration = n - 1, solver = sl { stage = 0} }
+      a <- y paramsy
+      b <- diff paramsy
+      let !v = a + dt (solver params) * b
       return v
 \end{code}
 

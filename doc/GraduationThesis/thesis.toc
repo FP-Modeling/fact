@@ -20,11 +20,11 @@
 \contentsline {chapter}{\numberline {6}Weakening Discreteness}{34}{chapter.6}%
 \contentsline {section}{\numberline {6.1}Accepting Computer's Limitations}{34}{section.6.1}%
 \contentsline {section}{\numberline {6.2}Tweak I: Interpolation}{37}{section.6.2}%
-\contentsline {chapter}{\numberline {7}The Speed Pill: Caching}{38}{chapter.7}%
-\contentsline {section}{\numberline {7.1}The Saving Strategy}{38}{section.7.1}%
-\contentsline {section}{\numberline {7.2}Tweak II: Memoization}{40}{section.7.2}%
-\contentsline {chapter}{\numberline {8}Conclusion}{45}{chapter.8}%
-\contentsline {chapter}{References}{46}{section*.38}%
+\contentsline {chapter}{\numberline {7}The Speed Pill: Caching}{41}{chapter.7}%
+\contentsline {section}{\numberline {7.1}The Saving Strategy}{41}{section.7.1}%
+\contentsline {section}{\numberline {7.2}Tweak II: Memoization}{43}{section.7.2}%
+\contentsline {chapter}{\numberline {8}Conclusion}{49}{chapter.8}%
+\contentsline {chapter}{References}{50}{section*.39}%
 \babel@toc {american}{}
 \babel@toc {american}{}
 \babel@toc {american}{}

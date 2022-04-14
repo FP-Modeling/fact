@@ -107,10 +107,12 @@
 \ignore{
 \begin{code}
 module Main where
-import GraduationThesis.Lhs.Introduction
-import GraduationThesis.Lhs.Design
 import GraduationThesis.Lhs.Implementation
 import GraduationThesis.Lhs.Enlightenment
+import GraduationThesis.Lhs.Interpolation
+import GraduationThesis.Lhs.Introduction
+import GraduationThesis.Lhs.Caching
+import GraduationThesis.Lhs.Design
 
 main :: IO ()
 main = mainLorenz
