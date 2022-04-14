@@ -9,6 +9,10 @@
   \renewcommand{\hscodestyle}{\small}
 \fi
 
+\ifdefined\doubleSpaced
+  \openup 2em
+\fi
+
 \long\def\ignore#1{}
 
 \selectlanguage{american}\entrue\brfalse

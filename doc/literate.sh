@@ -80,7 +80,12 @@ then
     then
         echo "----------------------------"
         echo "Generating PDF with pdflatex"
-        pdflatex -shell-escape -output-directory='GraduationThesis/' "\def\iscolorful{} \input{GraduationThesis/thesis.lhs}"
+	if [[ $3 == 'doubled' ]]
+        then
+	    pdflatex -shell-escape -output-directory='GraduationThesis/' "\def\iscolorful{}\def\doubleSpaced{} \input{GraduationThesis/thesis.lhs}"
+	else
+            pdflatex -shell-escape -output-directory='GraduationThesis/' "\def\iscolorful{} \input{GraduationThesis/thesis.lhs}"
+	fi
 
         # Generate references
         echo "----------------------------"
@@ -92,8 +97,14 @@ then
         # Generate colorful pdf from .lhs file
         echo "----------------------------"
         echo "Generating PDF with pdflatex"
-        pdflatex -shell-escape -output-directory='GraduationThesis/' "\def\iscolorful{} \input{GraduationThesis/thesis.lhs}"
-        pdflatex -shell-escape -output-directory='GraduationThesis/' "\def\iscolorful{} \input{GraduationThesis/thesis.lhs}"
+	if [[ $3 == 'doubled' ]]
+	then
+	    pdflatex -shell-escape -output-directory='GraduationThesis/' "\def\iscolorful{}\def\doubleSpaced{} \input{GraduationThesis/thesis.lhs}"
+	    pdflatex -shell-escape -output-directory='GraduationThesis/' "\def\iscolorful{}\def\doubleSpaced{} \input{GraduationThesis/thesis.lhs}"
+	else
+            pdflatex -shell-escape -output-directory='GraduationThesis/' "\def\iscolorful{} \input{GraduationThesis/thesis.lhs}"
+            pdflatex -shell-escape -output-directory='GraduationThesis/' "\def\iscolorful{} \input{GraduationThesis/thesis.lhs}"
+	fi
 
         echo "----------------------------"
         echo "Moving PDF to the parent folder"

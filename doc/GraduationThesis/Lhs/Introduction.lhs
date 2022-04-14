@@ -31,8 +31,7 @@ The main goal of the present work is to provide an alternative tool for simulati
 %\item The challenge is to define MoCs that are sufficiently expressive and have strong formal properties that enable systematic validation of designs and %correct-by-construction synthesis of implementations => Functional Languages
 %\end{itemize}
 
-\ignore{
-\begin{spec}
+\begin{code}
 sigma = 10.0
 rho = 28.0
 beta = 8.0 / 3.0
@@ -49,5 +48,4 @@ lorenzModel =
      diffInteg integY (x * (rho - z) - y)
      diffInteg integZ (x * y - beta * z)
      return $ sequence [x, y, z]
-\end{spec}
-}
+\end{code}

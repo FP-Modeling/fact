@@ -8,25 +8,11 @@ import GraduationThesis.Lhs.Design
 \end{code}
 }
 
-Previously, the latter core type of the implementation, the \texttt{Integrator}, was presented and explained in detail as well as why it can model an integral when used with the \texttt{Dynamics} type. This chapter is a follow-up, and its objectives are twofold: reveal and describe which functions execute a given example and, with that final piece unraveled, execute and follow the execution of a set of differential equations to see some action and proof-of-concept.
+Previously, the latter core type of the implementation, the \texttt{Integrator}, was presented and explained in detail as well as why it can model an integral when used with the \texttt{Dynamics} type. This chapter is a follow-up, and its objectives are twofold: reveal and describe which functions execute a given example and, with that final piece unraveled, execute and follow the execution of a set of differential equations to see some action and proof-of-concept execution.
 
 \section{Who is driving the bus?}
 
-With the main functionality of the program out-of-the-way, it remains to understand how and who, i.e., which functions and their behaviour, executes a set of differential equations. When the system is written using the integrator functions described in the last chapter, the final product is called a \textbf{model}. This model comprises memory allocation for the integrator, set reader pointer and change the internal procedure of the integrator to an actual differential equation solving computation. However, the final line of the previous examples is still a mystery: what exactly the \textit{return} and \textit{sequence} do, and what's the meaning behind it?
-
-The $sequence$ function does a \textbf{traverse} operation, meaning that it inverts the order of nested monads inside a value. For instance, applying this function to a list of values of type \texttt{Maybe} would generate a single \texttt{Maybe} value in which its content is a list of the previous content individually wrapped by the \texttt{Maybe} type. This is only possible because the external monad, list in this case, has implemented the \texttt{Traverse} typeclass. Figure \ref{fig:sequence} depicts the example before and after applying the function.
-
-\figuraBib{Sequence}{The \texttt{Traverse} typeclass allows the type to use the \textit{traverse} and \textit{sequence} function, in which both are related to apply inversion with structured data.}{}{fig:sequence}{width=.95\textwidth}%
-
-The main use case of this function when building a model is to combine multiple dynamic computation, i.e., multiple calculation of differential equations, in one single \texttt{Dynamics} typed value. So, because the created readers, as explained in the previous chapter, have type \texttt{Dynamics Double}, the \textit{sequence} function picks the values wrapped inside a "bundler" type, such as list, and invert it to obtain a single result. Thus, a list of \texttt{Dynamics Double} is transformed into a value with the signature \texttt{Dynamics [Double]}. Moreover, only the external structure needs to have implemented the aforementioned \texttt{Traverse} typeclass; and the list monad has the implementation built into the language.
-
-Finally, it is desireable, during a simulation, to initialize all the differential equations with the \textbf{same} initial condition to the same variable used in each differential equation. However, because we have multiple dynamic computations, this is not an easy-task to accomplish. The solution is to wrap all the written \texttt{Dynamics [Double]} with a new \texttt{Dynamics} shell. In this manner, whem applied with a value with the type \texttt{Parameters}, the same application will be happening to all the internal computations. This nested structure, a dynamic value inside another one, is the representation of a model in the project and has its own alias:
-
-\begin{code}
-type Model a = Dynamics (Dynamics a)
-\end{code}
-
-Figure \ref{fig:modelPipe} depicts an example of a mathematical system alongside its implementation with the \texttt{Model} alias. Below it, it is visiually presented the general pipeline used to create any model:
+With the main functionality of the program out-of-the-way, it remains to understand how and who, i.e., which functions and their behaviour, executes a set of differential equations. When the system is written using the integrator functions described in the last chapter, the final product is called a \textbf{model}. This model comprises memory allocation for the integrator, setting a reader pointer and changing the internal procedure of the integrator to an actual differential equation solving computation. As an example, Figure \ref{fig:modelExample} depicts a mathematical system alongside its implementation. Even with some use case example, the final line of it continues to be a mystery: what exactly the \textit{return} and \textit{sequence} functions do, and what's the meaning behind it?
 
 \begin{figure}[ht!]
 \begin{minipage}{.5\textwidth}
@@ -44,6 +30,25 @@ exampleModel =
 $\dot{y} = y \quad \quad y(0) = 1$
 \end{center}
 \end{minipage}
+\label{fig:modelExample}
+\caption{The integrator functions are essential whem modeling any physical system, given they effectively \textbf{model} an integral.}
+\end{figure}
+
+The $sequence$ function does a \textbf{traverse} operation, meaning that it inverts the order of nested monads inside a value. For instance, applying this function to a list of values of type \texttt{Maybe} would generate a single \texttt{Maybe} value in which its content is a list of the previous content individually wrapped by the \texttt{Maybe} type. This is only possible because the external monad, list in this case, has implemented the \texttt{Traversable} typeclass. Figure \ref{fig:sequence} depicts the example before and after applying the function.
+
+\figuraBib{Sequence}{The \texttt{Traversable} typeclass allows the type to use the \textit{traverse} and \textit{sequence} functions, in which both are related to apply inversion with structured data.}{}{fig:sequence}{width=.95\textwidth}%
+
+The main use case of this function when building a model is to combine multiple dynamic computation, i.e., multiple calculations of differential equations, in one single \texttt{Dynamics} typed value. So, because the created readers, as explained in the previous chapter, have type \texttt{Dynamics Double}, the \textit{sequence} function picks the values wrapped inside a "bundler" type, such as list, and invert it to obtain a single result. Thus, a list of \texttt{Dynamics Double} is transformed into a value with the signature \texttt{Dynamics [Double]}. Moreover, only the external structure needs to have implemented the aforementioned \texttt{Traversable} typeclass; and the list monad has the implementation built into the language.
+
+Finally, it is desireable, during a simulation, to initialize all the differential equations with the \textbf{same} initial condition to the same variable used in each differential equation. However, because we have multiple dynamic computations, this is not an easy-task to accomplish. The solution is to wrap all the written \texttt{Dynamics [Double]} with a new \texttt{Dynamics} shell. In this manner, whem applied with a value with the type \texttt{Parameters}, the same application will be happening to all the internal computations. This nested structure, a dynamic value inside another one, is the representation of a model in the project and has its own alias:
+
+\begin{code}
+type Model a = Dynamics (Dynamics a)
+\end{code}
+
+Further, when creating a model, the same steps have to done in the same order, always starting with the integrator functions and finishing with the \textit{return} and \textit{sequence} functions. So, Figure \ref{fig:modelPipe} depicts the general pipeline used to create any model:
+
+\begin{figure}[H]
 \begin{center}
 \includegraphics[width=0.95\linewidth]{GraduationThesis/img/ModelPipeline}
 \end{center}
@@ -122,29 +127,10 @@ With the recursive versions of the systems on-hand, it is straight-forward to ma
 lorenzInterv = Interval { startTime = 0,
                           stopTime = 40 }
 
-lorenzInterv2 = Interval { startTime = 0,
-                           stopTime = 5 }
-
-
-lorenzInterv3 = Interval { startTime = 0,
-                           stopTime = 6 }
-
 lorenzSolver = Solver { dt = 0.01,
                         method = RungeKutta2,
                         stage = 0
                       }
-
-lorenzSolver2 = Solver { dt = 1,
-                         method = RungeKutta2,
-                         stage = 0
-                       }
-
-
-lorenzSolver3 = Solver { dt = 1,
-                         method = Euler,
-                         stage = 0
-                       }
-
 
 sigma = 10.0
 rho = 28.0
