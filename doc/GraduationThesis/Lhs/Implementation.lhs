@@ -29,11 +29,11 @@ instance Functor Dynamics where
 \begin{center}
 \includegraphics[width=0.75\linewidth]{GraduationThesis/img/Functor}
 \end{center}
-\caption{Tthe \textit{fmap} function applies a pure function, \textit{f}, to the output value of a given \texttt{Dynamics}. Also, because the final value is wrapped in the \texttt{IO} monad, it is necessary to use its own \textit{fmap}, meaning that the one on the left is different from the one on the right; each \textit{fmap} corresponds to a different type.}
+\caption{Tthe \textit{fmap} function applies a pure function, \textit{f}, to the output value of a given \texttt{Dynamics}. Also, because the final value is wrapped in the \texttt{IO} monad, it is necessary to use its own \textit{fmap}, meaning that the one on the left is different from the one on the right; where the former refers to the \texttt{Dynamics} type and the latter refers to the \texttt{IO} monad.}
 \label{fig:functor}
 \end{figure}
 
-The next typeclass, \texttt{Applicative}, is the first typeclass that deals with two \texttt{Dynamics}. When implemented, this algebraic operation allows us to pick a transformation contained inside the \texttt{Dynamics} and apply that operation to the second one and using that result as the output. So, a \textbf{lifted} function, i.e., it is involved with structure, can still be applied to another structured type. The minimum requirements for this typeclass is the function \textit{pure}, a function responsible for wrapping any value with the \texttt{Dynamics} wrapper, and the \texttt{<*>} operator, which does the aforementioned interaction between two values. Figure \ref{fig:applicative} shows its implementation as well as provide some intuition via a visual depiction.
+The next typeclass, \texttt{Applicative}, is the first typeclass that deals with two \texttt{Dynamics}. When implemented, this algebraic operation allows us to pick a transformation contained inside the \texttt{Dynamics} and apply that operation to the second one and using that result as the output. So, a \textbf{lifted} function, i.e., a function involved with structure, can still be applied to another structured type. The minimum requirements for this typeclass is the function \textit{pure}, a function responsible for wrapping any value with the \texttt{Dynamics} wrapper, and the \texttt{<*>} operator, which does the aforementioned interaction between two values. Figure \ref{fig:applicative} shows its implementation as well as provide some intuition via a visual depiction.
 
 \begin{figure}[ht!]
 \begin{minipage}{.5\textwidth}
@@ -105,24 +105,15 @@ instance MonadIO Dynamics where
 \label{fig:monadIO}
 \end{figure}
 
-Finally, there are the typeclasses related to the mathematical operations. All of them, \texttt{Num}, \texttt{Fractional}, \texttt{Floating}, will be based on the same function, \textit{liftOP}, described in the next figure, Figure \ref{fig:liftOP}. The main goal is to \textbf{lift} binary and tertiary operations to be using only \texttt{Dynamics} types, i.e., adding structure to these operations on both operands.
+Finally, there are the typeclasses related to the mathematical operations. Because all of them, \texttt{Num}, \texttt{Fractional}, \texttt{Floating}, manipulate values wrapped in \texttt{Dynamics} type, those operations need to be \textbf{lifted}. In the case of binary operations, the \texttt{Functor} typeclass already provide a lifting operation with the \textit{fmap} function. However, tertiary functions, i.e., functions that require 3 parameters, will be lifted by the same function, \textit{liftOP2}:
 
-\begin{figure}[ht!]
-\begin{minipage}{.58\textwidth}
 \begin{code}
-liftOP :: (a -> b) -> Dynamics a -> Dynamics b
-liftOP f (Dynamics x) =
-  Dynamics $ \ps -> fmap f (x ps)
+liftOP2 :: (a -> b -> c) -> Dynamics a -> Dynamics b -> Dynamics c
+liftOP2 f (Dynamics dx) (Dynamics dy) =
+  Dynamics $ \ps -> do { a <- dx ps; b <- dy ps; return $ f a b }
 \end{code}
-\end{minipage}
-\begin{minipage}{.41\textwidth}
-\begin{center}
-  \includegraphics[width=0.95\linewidth]{GraduationThesis/img/LiftOP}
-\end{center}
-\end{minipage}
-\caption{To make binary and tertiary operations to work, it is necessary to wrapp the operands with the desired type, \texttt{Dynamics} in this case. The implementation of \textit{liftOP2}, which has the signature $(a \rightarrow b \rightarrow c) \rightarrow Dynamics\; a \rightarrow Dynamics\; b \rightarrow Dynamics\; c$, is analogous.}
-\label{fig:liftOP}
-\end{figure}
+
+In this function, two dynamic values, \texttt{dx} and \texttt{dy}, contain the parameters to the function \texttt{f}. So, in order to extract those, we apply the received \texttt{Parameters} record to values, and use them with the provided function, wrapping everything again in \texttt{Dynamics} via the \textit{return} function.
 
 \ignore{
 \begin{code}
@@ -131,10 +122,6 @@ instance Eq (Dynamics a) where
 
 instance Show (Dynamics a) where
   showsPrec _ _ = showString "<< Dynamics >>"
-
-liftOP2 :: (a -> b -> c) -> Dynamics a -> Dynamics b -> Dynamics c
-liftOP2 f (Dynamics x) (Dynamics y) =
-  Dynamics $ \ps -> do { a <- x ps; b <- y ps; return $ f a b }
 
 instance (Num a) => Num (Dynamics a) where
   x + y = liftOP2 (+) x y
@@ -179,7 +166,7 @@ This summarizes the boost in functionality for the \texttt{Dynamics} type. These
 \section{Exploiting Impurity}
 \label{sec:integrator}
 
-The \texttt{Dynamics} type directly interacts with a second type that intensively explores \textbf{side effects}. The notion of a side effect correlates to changing a \textbf{state}, i.e., if you see a computer program as a state machine, an operation that goes beyond returning a value, but has an observable interference somewhere else is called a side effect operation or an \textbf{impure} functionality. Examples of common use cases goes from modifying memory regions to performing input-output procedures via system-calls. The nature of purity comes from the mathematical domain, in which a function is a procedure that is deterministic, meaning that the output value is always the same if the same input is provided; a false assumption when programming with side effects. An example of an imaginary state machine can be viewed in Figure \ref{fig:stateMachine}.
+The \texttt{Dynamics} type directly interacts with a second type that intensively explores \textbf{side effects}. The notion of a side effect correlates to changing a \textbf{state}, i.e., if you see a computer program as a state machine, an operation that goes beyond returning a value --- it has an observable interference somewhere else --- is called a side effect operation or an \textbf{impure} functionality. Examples of common use cases goes from modifying memory regions to performing input-output procedures via system-calls. The nature of purity comes from the mathematical domain, in which a function is a procedure that is deterministic, meaning that the output value is always the same if the same input is provided; a false assumption when programming with side effects. An example of an imaginary state machine can be viewed in Figure \ref{fig:stateMachine}.
 
 \begin{figure}[ht!]
   \begin{minipage}[c]{0.67\textwidth}
@@ -191,11 +178,11 @@ The \texttt{Dynamics} type directly interacts with a second type that intensivel
   \end{minipage}
 \end{figure}
 
-In low-level and imperative languages, such as C and Fortran, impurity is present across the program and can be easily and naturally added to a program via what it's called \textbf{pointers} --- addresses to memory regions where values, or even other pointers, can be stored. In contrast, functional programming languages advocate to a more explicit use of such aspect, given that it prioritizes pure and mathematical functions instead of allowing the developer to mix these two facets. So, it makes it clear to the developer that he is sure of what he is doing and want to continue, clearly separating these two different styles of programming.
+In low-level and imperative languages, such as C and Fortran, impurity is present across the program and can be easily and naturally added to a program via \textbf{pointers} --- addresses to memory regions where values, or even other pointers, can be stored. In contrast, functional programming languages advocate to a more explicit use of such aspect, given that it prioritizes pure and mathematical functions instead of allowing the developer to mix these two facets. So, the developer has to take extra effort to add an effectful function into the program, clearly separating these two different styles of programming.
 
-The second core type of the present work, the \texttt{Integrator}, is based on this idea of side effect operations, manipulating data directly in memory, always consulting and modifying data in the impure world. Foremost, it represents the recursive description of a differential equation, as explained in chapter 2, \textit{Design Philosophy} section \ref{sec:diff}, meaning that the \texttt{Integrator} models the calculation of an \textbf{integral}. It accomplishes this task by driving the numerical algorithms of a given solver method, implying that this is where the \textit{operational} semantics reside.
+The second core type of the present work, the \texttt{Integrator}, is based on this idea of side effect operations, manipulating data directly in memory, always consulting and modifying data in the impure world. Foremost, it represents the recursive description of a differential equation, as explained in chapter 2, \textit{Design Philosophy} section \ref{sec:diff}, meaning that the \texttt{Integrator} type models the calculation of an \textbf{integral}. It accomplishes this task by driving the numerical algorithms of a given solver method, implying that this is where the \textit{operational} semantics of our DSL reside.
 
-With this in mind, the \texttt{Integrator} type is for responsible executing a given solver method to calculate a given integral. This type comprises the initial value of the system, i.e., the value of a given function at time $t_0$, and a pointer to a memory region for future use, called \texttt{computation}. In Haskell, a pointer can be made by using the special monad \texttt{IORef}. This memory region is being allocated to be used with the type \texttt{Dynamics Double}. Also, the initial value is also represented by \texttt{Dynamics Double}, and a number can be directly lifted to this type because the typeclass \texttt{Num} is implemented (section \ref{sec:typeclasses}).
+With this in mind, the \texttt{Integrator} type is responsible for executing a given solver method to calculate a given integral. This type comprises the initial value of the system, i.e., the value of a given function at time $t_0$, and a pointer to a memory region for future use, called \texttt{computation}. In Haskell, a pointer can be made by using the special monad \texttt{IORef}. This memory region is being allocated to be used with the type \texttt{Dynamics Double}. Also, the initial value is also represented by \texttt{Dynamics Double}, and a number can be directly lifted to this type because the typeclass \texttt{Num} is implemented (section \ref{sec:typeclasses}).
 
 \begin{spec}
 data Integrator = Integrator { initial     :: Dynamics Double,
@@ -216,9 +203,9 @@ newInteg i =
      return integ
 \end{spec}
 
-The first step to create an integrator is to manage the initial value, which is a function with the type \texttt{Parameters -> IO Double} wrapped in \texttt{Dynamics}. After acquiring a given initial value \texttt{i}, the integrator needs to assure that any given parameter record is the beginning of the computation process, i.e., it starts from $t_0$. The \texttt{initialize} function fulfills this role, doing a reset in \texttt{time}, \texttt{iteration} and \texttt{stage} in a given parameter record. This is necessary because all the implemented solvers presumes \textbf{sequential steps}. So, in order to not allow this error-prone behaviour, the integrator makes sure that the initial state of the system is configured correctly. The next step is to allocate memory to this value, a procedure that will get you the initial value, while modifying the parameter record dependency of the function accordingly. This idea is important: what's being stored in this memory region is a \textbf{function} or a computation, and not data or values.
+The first step to create an integrator is to manage the initial value, which is a function with the type \texttt{Parameters -> IO Double} wrapped in \texttt{Dynamics}. After acquiring a given initial value \texttt{i}, the integrator needs to assure that any given parameter record is the beginning of the computation process, i.e., it starts from $t_0$. The \texttt{initialize} function fulfills this role, doing a reset in \texttt{time}, \texttt{iteration} and \texttt{stage} in a given parameter record. This is necessary because all the implemented solvers presumes \textbf{sequential steps}, starting from the initial condition. So, in order to not allow this error-prone behaviour, the integrator makes sure that the initial state of the system is configured correctly. The next step is to allocate memory to this value, a procedure that will get you the initial value, while modifying the parameter record dependency of the function accordingly. This idea is important: what's being stored in this memory region is a \textbf{function} or a computation, and not data or values.
 
-The following stage is to do a type conversion, given that in order to create the \texttt{Integrator} record, it is necessary to have the type \texttt{IORef (Dynamics Double)}. At first glance, this can seem to be an issue because the result of the \texttt{newIORef} is wrapped with the \texttt{IO} monad~\footnote{\label{foot:IORef}Check the \href{https://hackage.haskell.org/package/base-4.16.1.0/docs/Data-IORef.html}{documentation} of the \texttt{IORef} type.}. This conversion is the reason why the \texttt{IO} monad is being used in the implementation, and hence forced us to implement the typeclass \texttt{MonadIO} in the previous section. The function \texttt{liftIO} is capable of removing the \texttt{IO} wrapper and adding an arbitrary monad in its place, \texttt{Dynamics} in this case. After the first arrow in the \texttt{do-notation} block (given from the \texttt{Monad} typeclass), \texttt{comp} has the desired \texttt{Dynamics} type. The remaining step of this creation step is to construct the integrator itself by building up the record with the correct fields, e.g., the dynamic version of the initial value and the pointer to the constructed computation written in memory.
+The following stage is to do a type conversion, given that in order to create the \texttt{Integrator} record, it is necessary to have the type \texttt{IORef (Dynamics Double)}. At first glance, this can seem to be an issue because the result of the \texttt{newIORef} is wrapped with the \texttt{IO} monad~\footnote{\label{foot:IORef}Check the \href{https://hackage.haskell.org/package/base-4.16.1.0/docs/Data-IORef.html}{documentation} of the \texttt{IORef} type.}. This conversion is the reason why the \texttt{IO} monad is being used in the implementation, and hence forced us to implement the typeclass \texttt{MonadIO} in the previous section. The function \texttt{liftIO} is capable of removing the \texttt{IO} wrapper and adding an arbitrary monad in its place, \texttt{Dynamics} in this case. After the first arrow in the \texttt{do-notation} block (given from the \texttt{Monad} typeclass), \texttt{comp} has the desired \texttt{Dynamics} type. The remaining step of this creation process is to construct the integrator itself by building up the record with the correct fields, e.g., the dynamic version of the initial value and the pointer to the constructed computation written in memory.
 
 To read the content of this region, it is necessary to provide the integrator to the $readInteg$ function. Its implementation is straightforward: build a new \texttt{Dynamics} that applies the given record of \texttt{Parameters} to what's being stored in the region. This is accomplished by using \texttt{do-notation} with the $readIORef$ function~\footref{foot:IORef}.
 
@@ -230,7 +217,7 @@ readInteg integ =
      m ps
 \end{spec}
 
-Finally, the function \textit{diffInteg} is a side effect-only function that changes \textbf{which computation} will be used by the integrator. It is worth noticing that after the creation of the integrator, the \texttt{computation} pointer is addressing a simple and, initially, useless computation: given a random record of \texttt{Parameters}, it will fix it to assure it is starting at $t_0$, and will return the initial value in form of a \texttt{Dynamics Double}. To update this behaviour, the \textit{diffInteg} change the content being pointed by the integrator's pointer:
+Finally, the function \textit{diffInteg} is a side-effect-only function that changes \textbf{which computation} will be used by the integrator. It is worth noticing that after the creation of the integrator, the \texttt{computation} pointer is addressing a simple and, initially, useless computation: given an arbitrary record of \texttt{Parameters}, it will fix it to assure it is starting at $t_0$, and will return the initial value in form of a \texttt{Dynamics Double}. To update this behaviour, the \textit{diffInteg} change the content being pointed by the integrator's pointer:
 
 \begin{spec}
 diffInteg :: Integrator -> Dynamics Double -> Dynamics ()
@@ -245,7 +232,7 @@ diffInteg integ diff =
      liftIO $ writeIORef (computation integ) z     
 \end{spec}
 
-In the beginning of the function (line 3), it is being created a new computation, so-called \texttt{z} --- a function wrapped in the \texttt{Dynamics} type that receives a \texttt{Parameters} record and computes the result based on the solving method. In \texttt{z}, the first step is to build a copy of the \textbf{same process} being pointed by \texttt{computation} and getting the initial condition of the system (line 5). Finally, after checking the chosen solver, it is executed one iteration of the process by calling \textit{integEuler}, or \textit{integRK2} or \textit{integRK4}. After line 10, this entire process \texttt{z} is being pointed by the \texttt{computation} pointer, being done by the $writeIORef$ function~\footref{foot:IORef}. It may seem confusing that inside \texttt{z} we are \textbf{reading} what is being pointed and later, on the last line of \textit{diffInteg}, this is being used on the final line to update that same pointer. This is necessary, as it will be explained in the next chapter \textit{Enlightenment}, to allow the use of an \textbf{implicit recursion} to assure the sequential aspect needed by the solvers. For now, the core idea is this: the \textit{diffInteg} function alters the \textbf{future} computations; it rewrites which procedure will be pointed by the \texttt{computation} pointer. This new procedure, which we called \texttt{z}, creates an intermediate computation, \texttt{whatToDo} (line 4), that \textbf{reads} what this pointer is addressing, which is \texttt{z} itself.
+In the beginning of the function (line 3), we create a new computation, so-called \texttt{z} --- a function wrapped in the \texttt{Dynamics} type that receives a \texttt{Parameters} record and computes the result based on the solving method. In \texttt{z}, the first step is to build a copy of the \textbf{same process} being pointed by \texttt{computation} and get the initial condition of the system (line 5). Finally, after checking the chosen solver, it is executed one iteration of the process by calling \textit{integEuler}, or \textit{integRK2} or \textit{integRK4}. After line 10, this entire process \texttt{z} is being pointed by the \texttt{computation} pointer, being done by the $writeIORef$ function~\footref{foot:IORef}. It may seem confusing that inside \texttt{z} we are \textbf{reading} what is being pointed and later, on the last line of \textit{diffInteg}, this is being used on the final line to update that same pointer. This is necessary, as it will be explained in the next chapter \textit{Enlightenment}, to allow the use of an \textbf{implicit recursion} to assure the sequential aspect needed by the solvers. For now, the core idea is this: the \textit{diffInteg} function alters the \textbf{future} computations; it rewrites which procedure will be pointed by the \texttt{computation} pointer. This new procedure, which we called \texttt{z}, creates an intermediate computation, \texttt{whatToDo} (line 4), that \textbf{reads} what this pointer is addressing, which is \texttt{z} itself.
 
 Initially, this strange behaviour may cause the idea that this computation will never halt. However, Haskell's \textit{laziness} assures that a given computation will not be computed unless it is necessary to continue execution and this is \textbf{not} the case in the current stage, given that we are just setting the environment in the memory to further calculate the solution of the system. Figure \ref{fig:integDiff} illustrates this idea:
 
@@ -261,21 +248,21 @@ The remaining topic of this chapter is to describe in detail how the solver meth
 \item Forth-order Runge-Kutta Method
 \end{itemize}
 
-To explain how the solvers work and their nuances, it is useful to go into the implementation of the simplest one --- the Euler method. However, the implementation of the solvers use a slightly different function for the next step or iteration in the algorithm. Hence, it is worthwhile to remember how this method originally iterates in terms of its mathematical description and compare it to the new function. From equation \ref{eq:nextStep} in chapter \textit{Design}, we can obtain a different function to next step, by subtracting the index from both sides of the equation:
+To explain how the solvers work and their nuances, it is useful to go into the implementation of the simplest one --- the Euler method. However, the implementation of the solvers use a slightly different function for the next step or iteration in the algorithm. Hence, it is worthwhile to remember how this method originally iterates in terms of its mathematical description and compare it to the new function. From equation \ref{eq:nextStep} in chapter \textit{Design Philosophy}, we can obtain a different function to next step, by subtracting the index from both sides of the equation:
 
 \begin{equation}
 y_{n+1} = y_n + hf(t_n,y_n) \rightarrow y_n = y_{n-1} + hf(t_{n-1}, y_{n-1})
 \label{eq:solverEquation}
 \end{equation}
 
-The value of the current iteration, $y_n$, can be described in terms of the sum of the previous value and the product between the time step $h$ with the differential equation from the previous iteration and time. With this difference taken into account, the following code is the implementation of the Euler method. In terms of main functionality, the family of Runge-Kutta methods are analogous:
+The value of the current iteration, $y_n$, can be described in terms of the sum of the previous value and the product between the time step $h$ with the differential equation from the previous iteration and time. With this difference taken into account, the following code is the implementation of the Euler method. In terms of main functionality, the family of Runge-Kutta methods is analogous:
 
 \begin{code}
 integEuler :: Dynamics Double
              -> Dynamics Double 
              -> Dynamics Double 
              -> Parameters -> IO Double
-integEuler (Dynamics diff) (Dynamics init) (Dynamics y) params =
+integEuler (Dynamics diff) (Dynamics init) (Dynamics compute) params =
   case iteration params of
     0 -> 
       init params
@@ -283,16 +270,16 @@ integEuler (Dynamics diff) (Dynamics init) (Dynamics y) params =
       let iv  = interval params
           sl  = solver params
           ty  = iterToTime iv sl (n - 1) 0
-          paramsy = params { time = ty, iteration = n - 1, solver = sl { stage = 0} }
-      a <- y paramsy
+          prevParams = params { time = ty, iteration = n - 1, solver = sl { stage = 0} }
+      a <- compute prevParams
       b <- diff paramsy
       let !v = a + dt (solver params) * b
       return v
 \end{code}
 
-On line 5, it is possible to see which functions are available in order to execute a step in the solver. The function \texttt{diff} is the representation of the differential equation itself. The initial value, i.e., $y(t_0)$, can be obtained by applying any \texttt{Parameters} record to the \texttt{init} function. The next function, \texttt{compute}, execute everything previously defined in \textit{diffInteg}; thus effectively executing a new step using the solver \textbf{again}. The main difference is which record we will apply in that computation, meaning that we call a new and different solver step in the current one. This mechanism --- of executing again a solver step, inside the solver itself --- is the aforementioned implicit recursion, described in the earlier section. By changing the record to the \textbf{previous} moment and iteration, it is guaranteed that for any step the previous one can be computed; a requirement when using numerical methods.
+On line 5, it is possible to see which functions are available in order to execute a step in the solver. The function \texttt{diff} is the representation of the differential equation itself. The initial value, $y(t_0)$, can be obtained by applying any \texttt{Parameters} record to the \texttt{init} function. The next function, \texttt{compute}, execute everything previously defined in \textit{diffInteg}; thus effectively executing a new step using the solver \textbf{again}. The main difference is which parametric record we will apply to that computation, meaning that we call a new and different solver step in the current one, potentially building a chain of solver step calls. This mechanism --- of executing again a solver step, inside the solver itself --- is the aforementioned implicit recursion, described in the earlier section. By changing the record to the \textbf{previous} moment and iteration, it is guaranteed that for any step the previous one can be computed; a requirement when using numerical methods.
 
-With this in mind, the solver function treats the initial value case as the base case of the recursion, whilst it treats normally the remaining ones (line 6). In the base case, the calculation can be done by doing an application of \texttt{params} to \texttt{init}. Otherwise, it is necessary to know the result from the previous iteration in order to generate the current one. To address this requirement, the solver builds another parameters record (line 10 to 13) and call another application of the solver with it (line 14). Also, it calculates the value from applying this record to \texttt{diff} (line 15), the differential equation, and finally computes the result for the current iteration (line 16). It is worth noting that the use of \texttt{let!} is mandatory, given that this overlap Haskell's laziness that is on by standard, making it execute everything in order to get the value \texttt{v} (line 17).
+With this in mind, the solver function treats the initial value case as the base case of the recursion, whilst it treats normally the remaining ones (line 9). In the base case (lines 7 and 8), the calculation can be done by doing an application of \texttt{params} to \texttt{init}. Otherwise, it is necessary to know the result from the previous iteration in order to generate the current one. To address this requirement, the solver builds another parameters record (line 10 to 13) and call another application of the solver with it (line 14). Also, it calculates the value from applying this record to \texttt{diff} (line 15), the differential equation, and finally computes the result for the current iteration (line 16). It is worth noting that the use of \texttt{let!} is mandatory, given that it forces evaluation of the expression instead of lazyly postponing the computation, making it execute everything in order to get the value \texttt{v} (line 17).
 
 \ignore{
 \begin{code}
@@ -404,4 +391,4 @@ integRK4 (Dynamics f) (Dynamics i) (Dynamics y) ps =
 \end{code}
 }
 
-This finishes this chapter, where we incremented the capabilities of the \texttt{Dynamics} type and used this enhanced version interacted to a brand-new type, \texttt{Integrator}. The combination of the two allowed the creation of a set of functions that together represents the mathematical integral operation. The solver methods are involved within this implementation, and they used an implicit recursion to maintain their sequential behaviour. When combined with side effects, the implicit recursion makes it hard to grasp an intuitive understanding. Further, it is still not clear how to use the presented abstractions to \textbf{execute} an use case. The next chapter, \textit{Enlightenment}, will be addressed both of those problems by introducing the \textbf{driver} of the simulation and by explaining a step-by-step a Lorenz Attractor example.
+This finishes this chapter, where we incremented the capabilities of the \texttt{Dynamics} type and use this enhanced version to interact with a brand-new type, the \texttt{Integrator}. The combination of the two allowed the creation of a set of functions that together represents the mathematical integral operation. The solver methods are involved within this implementation, and they used an implicit recursion to maintain their sequential behaviour. When combined with side effects, the implicit recursion makes it hard to grasp an intuitive understanding. Further, it is still not clear how to use the presented abstractions to \textbf{execute} an use case. The next chapter, \textit{Enlightenment}, will address both of those problems by introducing the \textbf{driver} of the simulation and by explaining a step-by-step a Lorenz Attractor example.

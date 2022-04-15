@@ -69,7 +69,7 @@
   \input{GraduationThesis/Lhs/Implementation.lhs}
 \fi
 
-\literateChapter{Enlightenment}
+\literateChapter{Denotative Understanding}
 %include GraduationThesis/Lhs/Enlightenment.lhs
 
 \ifdefined\iscolorful

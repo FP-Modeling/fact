@@ -108,8 +108,8 @@ instance Show (Dynamics a) where
   showsPrec _ x = showString "<< Dynamics >>"
 
 liftOP :: (a -> b) -> Dynamics a -> Dynamics b
-liftOP f (Dynamics x) =
-  Dynamics $ \ps -> fmap f (x ps)
+liftOP = fmap
+--  Dynamics $ \ps -> fmap f (x ps)
 
 liftOP2 :: (a -> b -> c) -> Dynamics a -> Dynamics b -> Dynamics c
 liftOP2 f (Dynamics x) (Dynamics y) =

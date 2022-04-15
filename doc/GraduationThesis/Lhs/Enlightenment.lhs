@@ -8,11 +8,11 @@ import GraduationThesis.Lhs.Design
 \end{code}
 }
 
-Previously, the latter core type of the implementation, the \texttt{Integrator}, was presented and explained in detail as well as why it can model an integral when used with the \texttt{Dynamics} type. This chapter is a follow-up, and its objectives are twofold: reveal and describe which functions execute a given example and, with that final piece unraveled, execute and follow the execution of a set of differential equations to see some action and proof-of-concept execution.
+Previously, we presented in detail the latter core type of the implementation, the \texttt{Integrator}, as well as why it can model an integral when used with the \texttt{Dynamics} type. This chapter is a follow-up, and its objectives are twofold: reveal and describe which functions execute a given example and, with that final piece unraveled, execute and follow the execution of a set of differential equations to see some action and proof-of-concept execution.
 
 \section{Who is driving the bus?}
 
-With the main functionality of the program out-of-the-way, it remains to understand how and who, i.e., which functions and their behaviour, executes a set of differential equations. When the system is written using the integrator functions described in the last chapter, the final product is called a \textbf{model}. This model comprises memory allocation for the integrator, setting a reader pointer and changing the internal procedure of the integrator to an actual differential equation solving computation. As an example, Figure \ref{fig:modelExample} depicts a mathematical system alongside its implementation. Even with some use case example, the final line of it continues to be a mystery: what exactly the \textit{return} and \textit{sequence} functions do, and what's the meaning behind it?
+With the main functionality of the program already established, it remains to understand how and who, i.e., which functions and their behaviour, executes a set of differential equations. When the system is written using the integrator functions described in the last chapter, the final product is called a \textbf{model}. This model comprises memory allocation for the integrator, setting a reader pointer and changing the internal procedure of the integrator to an actual differential equation solving computation. As an example, Figure \ref{fig:modelExample} depicts a mathematical system alongside its implementation. Even with some use case example, the final line of it continues to be a mystery: what exactly the \textit{return} and \textit{sequence} functions do, and what's the meaning behind it?
 
 \begin{figure}[ht!]
 \begin{minipage}{.5\textwidth}
@@ -77,11 +77,11 @@ subRunDynamics (Dynamics m) iv sl =
      map (m . parameterise) [nl .. nu]
 \end{spec}
 
-On line 3, it is being created the initial \texttt{Parameters} record using the simulation related types, such as \texttt{Interval} and \texttt{Solver}, explained in chapter \textit{Design Philosophy}. This record will be used in all computations for all variables of the system simultaneously. The function ends by calling a second function, \texttt{subRunDynamics}. This auxiliary function calculates, in a \textbf{sequential} manner, the result using the chosen solving method for all iteration steps by applying a \textbf{map} operation. This procedure, being the \texttt{Functor} of the list monad, applying a function to the internal members of it (line 15). In this case, the \textit{parameterise} function (line 11) is being composed the dynamic application, in which a custom value of the type \texttt{Parameters} is created to each iteration and this is applied to the received \texttt{Dynamics} value. The final result is a list of answers in order, each one wrapped in the \texttt{IO} monad.
+On line 3, we  create the initial \texttt{Parameters} record using the simulation related types, such as \texttt{Interval} and \texttt{Solver}, explained in chapter \textit{Design Philosophy}. This record will be used in all computations for all variables of the system simultaneously. The function ends by calling a second function, \texttt{subRunDynamics}. This auxiliary function calculates, in a \textbf{sequential} manner, the simulation results using the chosen solving method for all iteration steps by applying a \textbf{map} operation. This procedure, being the \texttt{Functor} of the list monad, applying a function to the internal members of it (line 15). In this case, the \textit{parameterise} function (line 11) is being composed by the dynamic application, in which a custom value of the type \texttt{Parameters} is created to each iteration and this is applied to the received \texttt{Dynamics} value. The final result is a list of answers in order, each one wrapped in the \texttt{IO} monad.
 
-There are two utilitarian functions that participate in this process. The \textit{iterationBnds} function (line 10) uses the established time step to convert the \textbf{time} interval to an \textbf{iteration} interval in the format of a tuple, i.e., the continuous interval becomes the tuple $(0, \frac{stopTime - startTime}{timeStep})$. Moreover, the \textit{iterToTime} function (line 12) converts from the domain of discrete steps to the domain of time. This conversion is based on the time step being used, as well as which method and in which stage it is for that specific iteration.
+There are two utilitarian functions that participate in this process. The \textit{iterationBnds} function (line 10) uses the established time step to convert the \textbf{time} interval to an \textbf{iteration} interval in the format of a tuple, i.e., the continuous interval becomes the tuple $(0, \frac{stopTime - startTime}{timeStep})$. Moreover, the \textit{iterToTime} function (line 12) converts from the domain of discrete steps to the domain of continuous time. This conversion is based on the time step being used, as well as which method and in which stage it is for that specific iteration.
 
-Additionally, there are analogous versions of these two functions, so-called \textit{runDynamicsFinal} and \textit{subRunDynamicsFinal}, that return only the final result of the simulation, i.e., $y(stopTime)$.
+Additionally, there are analogous versions of these two functions, so-called \textit{runDynamicsFinal} and \textit{subRunDynamicsFinal}, that return only the final result of the simulation, i.e., $y(stopTime)$, instead of the outputs at the time step samples.
 
 \ignore{
 \begin{code}
@@ -110,9 +110,9 @@ subRunDynamicsFinal (Dynamics m) iv sl =
 \end{code}
 }
 
-\section{Our best friend: an Example}
+\section{An attractive example}
 
-For the guided journey, the same example described in the chapter \textit{Introduction} will be used in this section. So, we will be solving a Lorenz system, composed by a set of chaotic solutions, called \textbf{the Lorenz Attractor}. In these type of system, the ordinary differential equations are used to model chaotic systems, providing solutions based on parameter values and initial conditions. The original differential equations, as well as the recursive description, are presented in Figure \ref{fig:lorenzEq}:
+For the guided journey, the same example described in the chapter \textit{Introduction} will be used in this section. So, we will be solving a system, composed by a set of chaotic solutions, called \textbf{the Lorenz Attractor}. In these type of system, the ordinary differential equations are used to model chaotic systems, providing solutions based on parameter values and initial conditions. The original differential equations, as well as the integral form, are presented in Figure \ref{fig:lorenzEq}:
 
 \begin{figure}[ht!]
 \begin{center}
@@ -120,7 +120,7 @@ $$\frac{dx}{dt} = \sigma(y(t) - x(t)) \rightarrow \int \frac{dx}{dt} = \int \sig
 $$\frac{dy}{dt} = x(t)(\rho - z(t)) \rightarrow \int \frac{dy}{dt} = \int x(t)(\rho - z(t)) dt \rightarrow y(t) = \int x(t)(\rho - z(t)) dt$$
 $$\frac{dz}{dt} = x(t)y(t) - \beta z(t) \rightarrow \int \frac{dz}{dt} = \int x(t)y(t) - \beta z(t) dt \rightarrow z(t) = \int x(t)y(t) - \beta z(t) dt$$
 \end{center}
-\caption{When applying integration of both sides of the equation, it is possible to obtain the \textbf{recursive} version of the Lorenz's equations}
+\caption{When applying the fundamental theorem of calculus, it is possible to obtain the integral version of the Lorenz's equations}
 \label{fig:lorenzEq}
 \end{figure}
 
