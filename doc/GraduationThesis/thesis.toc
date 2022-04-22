@@ -24,6 +24,8 @@
 \contentsline {section}{\numberline {7.1}The Saving Strategy}{40}{section.7.1}%
 \contentsline {section}{\numberline {7.2}Tweak II: Memoization}{42}{section.7.2}%
 \contentsline {chapter}{\numberline {8}Conclusion}{48}{chapter.8}%
+\contentsline {section}{\numberline {8.1}Future Improvements}{48}{section.8.1}%
+\contentsline {section}{\numberline {8.2}Final Thoughts}{48}{section.8.2}%
 \contentsline {chapter}{References}{49}{section*.38}%
 \babel@toc {american}{}
 \babel@toc {american}{}
