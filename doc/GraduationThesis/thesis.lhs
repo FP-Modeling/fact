@@ -32,17 +32,17 @@
 
 \orientador{\prof José Edil Guimarães}{CIC/UnB}%
 \coordenador[a]{\prof[a] Ada Lovelace}{Bibliothèque universelle de Genève}%
-\diamesano{00}{onzembro}{2022}%
+\diamesano{14}{maio}{2022}%
 
 \membrobanca{\prof Donald Knuth}{Stanford University}%
 \membrobanca{\dr Leslie Lamport}{Microsoft Research}%
 
 \autor{Eduardo L.}{Rocha}%
 
-\titulo{Continuous Time Modeling Made Functional: Tackle Cyber-Physical Systems with Haskell}%
+\titulo{Continuous Time Modeling Made Functional: Solving Differential Equations with Haskell}%
 
-\palavraschave{equações diferenciais, sistemas contínuos, ponto fixo, retroalimentação}
-\keywords{differential equations, continuous systems, fix point, feedback loop}%
+\palavraschave{equações diferenciais, sistemas contínuos, GPAC, integrador}
+\keywords{differential equations, continuous systems, GPAC, integrator}%
 
 \newcommand{\unbcic}{\texttt{UnB-CIC}}%
 

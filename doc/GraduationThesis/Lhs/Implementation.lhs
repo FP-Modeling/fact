@@ -29,7 +29,7 @@ instance Functor Dynamics where
 \begin{center}
 \includegraphics[width=0.75\linewidth]{GraduationThesis/img/Functor}
 \end{center}
-\caption{Tthe \textit{fmap} function applies a pure function, \textit{f}, to the output value of a given \texttt{Dynamics}. Also, because the final value is wrapped in the \texttt{IO} monad, it is necessary to use its own \textit{fmap}, meaning that the one on the left is different from the one on the right; where the former refers to the \texttt{Dynamics} type and the latter refers to the \texttt{IO} monad.}
+\caption{The \textit{fmap} function applies a pure function, \textit{f}, to the output value of a given \texttt{Dynamics}. Also, because the final value is wrapped in the \texttt{IO} monad, it is necessary to use its own \textit{fmap}, meaning that the one on the left is different from the one on the right; where the former refers to the \texttt{Dynamics} type and the latter refers to the \texttt{IO} monad.}
 \label{fig:functor}
 \end{figure}
 

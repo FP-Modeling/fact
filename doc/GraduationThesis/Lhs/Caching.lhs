@@ -83,7 +83,7 @@ To estimate how this lack of optimization affects performance, we can calculate 
 
 \begin{table}[H]
 \centering
-\begin{tabular}{|c|c|}
+\begin{tabular}{cc}
 \hline
 Iteration & Total Solver Steps \\ \hline
 1         & 1            \\ \hline
