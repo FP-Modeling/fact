@@ -10,7 +10,7 @@
 \contentsline {section}{\numberline {2.1}Shannon's Foundation: GPAC}{6}{section.2.1}%
 \contentsline {section}{\numberline {2.2}The Shape of Information}{8}{section.2.2}%
 \contentsline {section}{\numberline {2.3}Modeling Reality}{12}{section.2.3}%
-\contentsline {section}{\numberline {2.4}Cybernization of Mathematics}{14}{section.2.4}%
+\contentsline {section}{\numberline {2.4}Making Mathematics Cyber}{14}{section.2.4}%
 \contentsline {chapter}{\numberline {3}Effectful Integrals}{17}{chapter.3}%
 \contentsline {section}{\numberline {3.1}Uplifting the Dynamics Type}{17}{section.3.1}%
 \contentsline {section}{\numberline {3.2}Exploiting Impurity}{20}{section.3.2}%

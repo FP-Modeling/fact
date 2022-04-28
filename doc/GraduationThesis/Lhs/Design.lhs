@@ -4,14 +4,14 @@ module GraduationThesis.Lhs.Design where
 \end{code}
 }
 
-In the previous chapter, the importance of making a bridge between two different sets of abstractions --- computers and the physical domain --- was clearly established. In this chapter, the core philosophy behind the implementation of this link will be explained, starting with an introduction to GPAC, followed by the strong type system used in Haskell, going all the way to understanding how to model the main entities of the problem. In the end, the presented modeling strategy will justify the data types used in the solution, paving the floor for the next chapter \textit{Effectful Integrals}.
+In the previous chapter, the importance of making a bridge between two different sets of abstractions --- computers and the physical domain --- was clearly established. This chapter will explain the core philosophy behind the implementation of this link, starting with an introduction to GPAC, followed by the strong type system used in Haskell, going all the way to understanding how to model the main entities of the problem. In the end, the presented modeling strategy will justify the data types used in the solution, paving the floor for the next chapter \textit{Effectful Integrals}.
 
 \section{Shannon's Foundation: GPAC}
 \label{sec:gpac}
 
-The General Purpose Computer or GPAC is a model for the Differential Analyzer --- a mechanical machine controlled by a human operator~\cite{Graca2016}. This machine is composed by a set of shafts interconnected in such a manner that a given differential equation is expressed by a shaft and other mechanical units transmit their values across the entire machine~\cite{Shannon, Graca2004}. For instance, shafts that represent independent variables directly interact with shafts that depicts dependent variables. The machine is primarly composed by four types of units: gear boxes, adders, integrators and input tables~\cite{Shannon}. These units provide useful operations to the machine, such as multiplication, addition, integration and saving the computed values. The main goal of this machine is to solve ordinary differential equations via numerical solutions.
+The General Purpose Computer or GPAC is a model for the Differential Analyzer --- a mechanical machine controlled by a human operator~\cite{Graca2016}. This machine is composed by a set of shafts interconnected in such a manner that a given differential equation is expressed by a shaft and other mechanical units transmit their values across the entire machine~\cite{Shannon, Graca2004}. For instance, shafts that represent independent variables directly interact with shafts that depicts dependent variables. The machine is primarily composed by four types of units: gear boxes, adders, integrators and input tables~\cite{Shannon}. These units provide useful operations to the machine, such as multiplication, addition, integration and saving the computed values. The main goal of this machine is to solve ordinary differential equations via numerical solutions.
 
-In order to add a formal basis to the machine, Shannon built the GPAC model, a mathematical model sustained by proofs and axioms~\cite{Shannon}. The end result was a set of rules for which types of equations can be modeled as well as which units are the minimum necessary for modeling them and how they can be combined. All algebraic functions (e.g. quotients of polynomials and irrational algebraic functions) and algebraic-trascendental functions (e.g. exponentials, logarithms, trigonometric, Bessel, elliptic and probability functions) can me modeled using a GPAC circuit~\cite{Shannon, Edil2018}. Moreover, the four preceding mechanical units were renamed and together created the minimum set of \textbf{circuits} for a given a GPAC~\cite{Edil2018}. Figure \ref{fig:gpacBasic} portrays visual representations of these basic units, followed by precise descriptions of their behaviour, inputs and outputs.
+In order to add a formal basis to the machine, Shannon built the GPAC model, a mathematical model sustained by proofs and axioms~\cite{Shannon}. The end result was a set of rules for which types of equations can be modeled as well as which units are the minimum necessary for modeling them and how they can be combined. All algebraic functions (e.g. quotients of polynomials and irrational algebraic functions) and algebraic-trascendental functions (e.g. exponentials, logarithms, trigonometric, Bessel, elliptic and probability functions) can be modeled using a GPAC circuit~\cite{Shannon, Edil2018}. Moreover, the four preceding mechanical units were renamed and together created the minimum set of \textbf{circuits} for a given a GPAC~\cite{Edil2018}. Figure \ref{fig:gpacBasic} portrays visual representations of these basic units, followed by precise descriptions of their behaviour, inputs and outputs.
 
 \figuraBib{GPACBasicUnits}{The combination of these four basic units compose any GPAC circuit}{Edil2018}{fig:gpacBasic}{width=.95\textwidth}%
 
@@ -22,7 +22,7 @@ In order to add a formal basis to the machine, Shannon built the GPAC model, a m
   \item Integrator: Given two inputs --- $u(x)$ and $v(x)$ --- and an initial condition $w_0$ at time $t_0$, the unit generates the output $w(t) = w_0 + \int_{t_0}^{t} u(t_u) \,dv(t_v)$, where $u$ is the \textit{integrand} and $v$ is the \textit{variable of integration}. The arguments $t_u$ and $t_v$ corresponds to the idea of local time as perceived by the modules that generated the input signals $u$ and $v$ respectively.
 \end{itemize}
 
-Also, it was defined composition rules that restricts how these units can be hooked to one another. Originally, Shannon established that a valid GPAC is the one in which two inputs and two outputs are not interconnected and the inputs are only driven by either the independent variable $t$ (usually \textit{time}) or by a single unit output~\cite{Shannon, Graca2003, Edil2018}. However, Daniel's GPAC extension, FF-GPAC~\cite{Graca2003}, added new contraints related to no-feedback GPAC configurations. These structures, so-called \textit{polynomial circuits}~\cite{Graca2004, Edil2018}, are being displayed in Figure \ref{fig:gpacComposition} and they are made by only using constant function units, adders and multipliers.
+Also, it was defined composition rules that restricts how these units can be hooked to one another. Originally, Shannon established that a valid GPAC is the one in which two inputs and two outputs are not interconnected and the inputs are only driven by either the independent variable $t$ (usually \textit{time}) or by a single unit output~\cite{Shannon, Graca2003, Edil2018}. However, Daniel's GPAC extension, FF-GPAC~\cite{Graca2003}, added new constraints related to no-feedback GPAC configurations. These structures, so-called \textit{polynomial circuits}~\cite{Graca2004, Edil2018}, are being displayed in Figure \ref{fig:gpacComposition} and they are made by only using constant function units, adders and multipliers.
 
 \figuraBib{GPACComposition}{Polynomial circuits resembles combinational circuits, in which the circuit respond instantly to changes on its inputs}{Edil2018}{fig:gpacComposition}{width=.55\textwidth}%
 
@@ -38,7 +38,7 @@ During the detailing of the DSL, parallels will be established to map the aforem
 \section{The Shape of Information}
 \label{sec:types}
 
-Types in programming languages format of information. This attribute is used to make constraints and add security layer around data manipulation. Figure \ref{fig:simpleTypes} illustrates types with an imaginary representation of their shape and Figure \ref{fig:functions} shows how types can be used to restrain which data can be plumbered into and from a function.
+Types in programming languages represent the format of information. This attribute is used to make constraints and add security layer around data manipulation. Figure \ref{fig:simpleTypes} illustrates types with an imaginary representation of their shape and Figure \ref{fig:functions} shows how types can be used to restrain which data can be plumbered into and from a function. In the latter image, the function \textit{lessThan10} has the type signature \texttt{Int -> Bool}, meaning that it accepts \texttt{Int} data as input and produces \texttt{Bool} data as the output. This provides a security layer in compile time, given that using data with different types as input, e.g, \texttt{Char} or \texttt{Double}, is regarded as a \textbf{type error}.
 
 \begin{figure}[ht!]
 \centering
@@ -59,7 +59,7 @@ Types in programming languages format of information. This attribute is used to 
 
 Primitive types, e.g., \texttt{Int}, \texttt{Double} and \texttt{Char}, can be \textbf{composed} to create more powerful data types, capable of modeling complicated data structures. In this context, composition means binding or gluing existent types together to create more sophisticated abstractions, such as recursive structures and records of information. Two \textbf{algebraic data types} are the type composition mechanism provided by Haskell to bind existent types together.
 
-The sum type, also known as tagged union in type theory, is an algebraic data type that introduces \textbf{choice} across multiple options using a single label. For instance, the boolean data type has two options or representatives: \texttt{False} or \texttt{True}, where these are mutually exclusive. When using this type either of them will be of type \texttt{Bool}. A given sum type can have any number of representatives, but only one of them can be used at a given moment. Figure \ref{fig:sumType} depicts more use cases of sum types with their syntax in the language, in which a given entry of the type can only assume one of the available possibilities.
+The sum type, also known as tagged union in type theory, is an algebraic data type that introduces \textbf{choice} across multiple options using a single label. For instance, a type named \texttt{Parity} can represent the parity of a natural number. It has two options or representatives: \texttt{Even} \textbf{or} \texttt{Odd}, where these are mutually exclusive. When using this type either of them will be of type \texttt{Parity}. A given sum type can have any number of representatives, but only one of them can be used at a given moment. Figure \ref{fig:sumType} depicts examples of sum types with their syntax in the language, in which a given entry of the type can only assume one of the available possibilities. Another use case depicted in the image is the type \texttt{DigitalStates}, which describes the possible states in digital circuits as one of three options: \texttt{High}, \texttt{Low} and \texttt{Z}.
 
 \begin{figure}[ht!]
 \centering
@@ -79,7 +79,7 @@ The sum type, also known as tagged union in type theory, is an algebraic data ty
 \label{fig:sumType}
 \end{figure}
 
-The second type composition mechanism available is the product type, which \textbf{combines} using a type constructor. While the sum type adds choice in the language, this data type requires multiple types to assemble a new one in a mutually inclusive manner. For example, the type \texttt{Name} can be visualized as a combination of two separate strings, \texttt{Firstname} and \texttt{Lastname}, combined by the wrapper \texttt{Fullname}. In order to have any possible name, it is necessary to provide \textbf{both} parts. Effectively, the product type executes a cartesian product with its parts. Figure \ref{fig:productType} illustrates common examples of using combined data.
+The second type composition mechanism available is the product type, which \textbf{combines} using a type constructor. While the sum type adds choice in the language, this data type requires multiple types to assemble a new one in a mutually inclusive manner. For example, a digital clock composed by two numbers, hours and minutes, can be portrayed by the type \texttt{ClockTime}, which is a combination of two separate numbers combined by the wrapper \texttt{Time}. In order to have any possible time, it is necessary to provide \textbf{both} parts. Effectively, the product type executes a cartesian product with its parts. Figure \ref{fig:productType} illustrates the syntax used in Haskell to create product types as well as another example of combined data, the type \texttt{SpacePosition}. It represents position in three dimensional space, combining spatial coordinates in a single place. 
 
 \begin{figure}[ht!]
 \centering
@@ -103,11 +103,11 @@ The second type composition mechanism available is the product type, which \text
 \label{fig:productType}
 \end{figure}
 
-Within algebraic data types, it is possible to abstract the \textbf{structure} out, meaning that the outer shell of the type can be understood as a common pattern changing only the internal content. For instance, if a given application can take advantage of fractional values but want to use the same configuration as the one presented in the \texttt{SpacePosition} data type, it's possible to add this customization. This feature is known as \textit{parametric polymorphism}, a powerful tool available in Haskell's type system. An example is presented in Figure \ref{fig:parametricPoly} using the \texttt{SpacePosition} type structure, but changing its internal types, using \texttt{Float}, \texttt{Int} and \texttt{Double} internally.
+Within algebraic data types, it is possible to abstract the \textbf{structure} out, meaning that the outer shell of the type can be understood as a common pattern changing only the internal content. For instance, if a given application can take advantage of fractional values but want to use the same configuration as the one presented in the \texttt{SpacePosition} data type, it's possible to add this customization. This feature is known as \textit{parametric polymorphism}, a powerful tool available in Haskell's type system. An example is presented in Figure \ref{fig:parametricPoly} using the \texttt{SpacePosition} type structure, where its internal types are being parametrized, thus allowing the use of other types internally, such as \texttt{Float}, \texttt{Int} and \texttt{Double}.
 
 \begin{figure}[ht!]
 \centering
-\begin{minipage}{.57\textwidth}
+\begin{minipage}{.5\textwidth}
   \centering
   \begin{spec}
   data SpacePosition a = Point a a a
@@ -117,11 +117,11 @@ Within algebraic data types, it is possible to abstract the \textbf{structure} o
                                  z :: a }
   \end{spec}
 \end{minipage}
-\begin{minipage}{.4\textwidth}
+\begin{minipage}{.45\textwidth}
   \centering
   \includegraphics[width=0.95\linewidth]{GraduationThesis/img/ParametricPoly}
 \end{minipage}
-\caption{Depending on the application, different representations of the same structure need to used due to the domain of interest and/or memory contraints.}
+\caption{Depending on the application, different representations of the same structure need to used due to the domain of interest and/or memory constraints.}
 \label{fig:parametricPoly}
 \end{figure}
 
@@ -129,7 +129,7 @@ In some situations, changing the type of the structure is not the desired proper
 
 \begin{figure}[ht!]
 \centering
-\begin{minipage}{.4\textwidth}
+\begin{minipage}{.46\textwidth}
   \centering
   \begin{spec}
   data ClockTime = Time Int Int
@@ -140,7 +140,7 @@ In some situations, changing the type of the structure is not the desired proper
 
   \end{spec}
 \end{minipage}
-\begin{minipage}{.57\textwidth}
+\begin{minipage}{.53\textwidth}
   \centering
   \includegraphics[width=0.95\linewidth]{GraduationThesis/img/AdHocPoly}
 \end{minipage}
@@ -148,30 +148,25 @@ In some situations, changing the type of the structure is not the desired proper
 \label{fig:adHocPoly}
 \end{figure}
 
-Algebraic data types, when combined with polymorphism, are a powerful tool in programming, being a useful way to model the domain of interest. However, both sum and product types cannot portray by themselves the intuition of a \textbf{procedure}. A data transformation process, as showed in Figure \ref{fig:functions}, can be utilized in a variety of different ways. Imagine, for instance, a system where validation can vary according to the current situation. Any validation algorithm would be using the same data, such as a record called \texttt{SystemData}, and returning a boolean as the result of the validation, but the internal guts of these functions would be totally different. This is being represented in Figure \ref{fig:pipeline}.
+Algebraic data types, when combined with polymorphism, are a powerful tool in programming, being a useful way to model the domain of interest. However, both sum and product types cannot portray by themselves the intuition of a \textbf{procedure}. A data transformation process, as showed in Figure \ref{fig:functions}, can be utilized in a variety of different ways. Imagine, for instance, a system where validation can vary according to the current situation. Any validation algorithm would be using the same data, such as a record called \texttt{SystemData}, and returning a boolean as the result of the validation, but the internal guts of these functions would be totally different. This is being represented in Figure \ref{fig:pipeline}. In Haskell, this motivates the use of functions as \textbf{first class citizens}, meaning that they can be treated equally in comparison with data types that carries information, such as being used as arguments to another functions, so-called high order functions.
 
 \figuraBib{Pipeline}{Replacements for the validation function within a pipeline like the above is common}{}{fig:pipeline}{width=.75\textwidth}%
-
-In Haskell, this motivates the use of functions as \textbf{first class citizens}, meaning that they can be treated equally in comparison with data types that carries information, such as being used as arguments to another functions, so-called high order functions.
 
 \section{Modeling Reality}
 \label{sec:diff}
 
-The continuous time problem explained in the introduction was initially addressed by mathematics, which represents physical quantities by \textbf{differential equations}. This set of equations establishes a relationship between functions and their respective derivatives; the function express the variable of interest and its derivative describe how it changes over time. It is common in the engineering and physics domain to know the rate of change of a given variable, but the function itself is still unknown. These variables describe the state of the system, e.g, velocity in the rate of change in space, water flow, eletrical current, etc. When those variables are allowed to vary continuously --- in arbitrarily small increments --- differential equations arise as the standard tool to describe them.
+The continuous time problem explained in the introduction was initially addressed by mathematics, which represents physical quantities by \textbf{differential equations}. This set of equations establishes a relationship between functions and their respective derivatives; the function express the variable of interest and its derivative describe how it changes over time. It is common in the engineering and physics domain to know the rate of change of a given variable, but the function itself is still unknown. These variables describe the state of the system, e.g, velocity in the rate of change in space, water flow, electrical current, etc. When those variables are allowed to vary continuously --- in arbitrarily small increments --- differential equations arise as the standard tool to describe them.
 
-While some differential equations have more than one independent variable per function, being classified as a \textbf{partial diffential equation}, some phenomena can be modeled with only one indepedent variable per function in a given set, being described as a set of \textbf{ordinary differential equations}. However, because the majority of such equations does not have an analitical solution --- can be described as a combination of other analitical formulas --- numerical procedures are used to solve the system. These mechanisms \textbf{quantize} the physical time duration into an interval of floating point numbers, spaced by a \textbf{time step} and starting from an \textbf{initial value}. Afterward, the derivative is used to calculate the slope or the direction in which the tangent of the function is moving in time in order to predict the value of the next step, i.e., determine which point better represents the function in the next time step. The order of the method varies its precision during the prediction of the steps, e.g, the Runge-Kutta method of 4th order is more precise than the Euler method or the Runge-Kutta of 2nd order.
+While some differential equations have more than one independent variable per function, being classified as a \textbf{partial differential equation}, some phenomena can be modeled with only one independent variable per function in a given set, being described as a set of \textbf{ordinary differential equations}. However, because the majority of such equations does not have an analytical solution --- can be described as a combination of other analytical formulas --- numerical procedures are used to solve the system. These mechanisms \textbf{quantize} the physical time duration into an interval of floating point numbers, spaced by a \textbf{time step} and starting from an \textbf{initial value}. Afterward, the derivative is used to calculate the slope or the direction in which the tangent of the function is moving in time in order to predict the value of the next step, i.e., determine which point better represents the function in the next time step. The order of the method varies its precision during the prediction of the steps, e.g, the Runge-Kutta method of 4th order is more precise than the Euler method or the Runge-Kutta of 2nd order.
 
- Thus, numerical methods have been developed over the years in order to discover the second if the first is well-known at a given moment in time, within an interval of approximation.
-
-
-The first-order Euler method is the simplest of such methods and it calculates the next step by the following mathematical relations:
+The first-order Euler method is the simplest of such methods, and it calculates the next step by the following mathematical relations:
 
 \begin{equation}
 \dot{y}(t) = f(t, y(t)) \quad y(t_0) = y_0
 \label{eq:diffEq}
 \end{equation}
 
-This equality assumes that the next step following the derivative's direction will not be that different from the actual value of the function $y$ if the time step is small enough. Further, it is assumed that in case of a small enough time step, the diference between time samples is $h$, i.e., the time step, with the following equation representing one step of the method: 
+This equality assumes that the next step following the derivative's direction will not be that different from the actual value of the function $y$ if the time step is small enough. Further, it is assumed that in case of a small enough time step, the difference between time samples is $h$, i.e., the time step, with the following equation representing one step of the method: 
 
 \begin{equation}
 y_{n + 1} = y_n + hf(t_n, y_n)
@@ -199,13 +194,13 @@ $$ \frac{dy}{dt} = y + t $$
 $$ \int \frac{dy}{dt} dt = \int (y(t) + t) dt $$
 $$ y(t) = \int (y(t) + t) dt $$
 
-When arranged in this manner the target integral is now \textbf{recursive}, meaning that the function of interest can be expressed in terms of itself. Also, the same aspect of being a function from time to outcome is preserved.
+When arranged in this manner the target integral is now in its \textbf{integral} form, which makes the function $y(t)$ be written in terms of itself. Also, the same aspect of being a function from time to outcome is preserved.
 
-\section{Cybernization of Mathematics}
+\section{Making Mathematics Cyber}
 
-Our primary goal is to combine the knowledge levegered in section \ref{sec:types} --- modeling capabilities of algebraic type system --- with the core notion of differential equations presented in section \ref{sec:diff}.
+Our primary goal is to combine the knowledge levered in section \ref{sec:types} --- modeling capabilities of algebraic type system --- with the core notion of differential equations presented in section \ref{sec:diff}. Ideally, the type system will model equation \ref{eq:diffEq}, detailed in the previous section.
 
-Any representation of a physical system that can be modeled by a set of differential equations, being written in terms the rate of change and the function or recursively, has an outcome value at any given moment of time. The type \texttt{Dynamics} in Figure \ref{fig:firstDynamics} is a first draft of representing the continuous physical dynamics~\cite{LeeModeling} --- the evolution of a system state in time:
+Any representation of a physical system that can be modeled by a set of differential equations has an outcome value at any given moment in time. The type \texttt{Dynamics} in Figure \ref{fig:firstDynamics} is a first draft of representing the continuous physical dynamics~\cite{LeeModeling} --- the evolution of a system state in time:
 
 \begin{figure}[ht!]
 \centering
@@ -226,7 +221,7 @@ Any representation of a physical system that can be modeled by a set of differen
 \label{fig:firstDynamics}
 \end{figure}
 
-This type seems to capture the concept, whilst being compatible to the definition of a tagged system presented by Lee and Sangiovanni~\cite{LeeSangiovanni}. However, in order to use numerical methods to solve the problem, additional information at a given moment is needed, such as which method is being used, in which stage the method is and when the final time will be reached. With this in mind, new types are introduced. Figure \ref{fig:dynamicsAux} shows the auxiliary types to build a new \texttt{Dynamics}:
+This type seems to capture the concept, whilst being compatible with the definition of a tagged system presented by Lee and Sangiovanni~\cite{LeeSangiovanni}. However, because numerical methods assume that the time variable is \texttt{discrete}, i.e., it is in form of \textbf{iteration}, they use equation \ref{eq:nextStep} in order to solve differential equations step-wise. Thus, some tweaks to this type are needed, such as the number of the current iteration, which method is being used, in which stage the method is and when the final time will be reached. With this in mind, new types are introduced. Figure \ref{fig:dynamicsAux} shows the auxiliary types to build a new \texttt{Dynamics}:
 
 \begin{figure}[ht!]
 \centering
@@ -259,7 +254,7 @@ data Parameters = Parameters { interval  :: Interval,
   \centering
   \includegraphics[width=0.95\linewidth]{GraduationThesis/img/DynamicsAuxTypes}
 \end{minipage}
-\caption{The \texttt{Parameters} type represents a given moment in time, carrying over all the necessary information to execute a solver step until the time limit is reached. Some useful typeclasses are being derived to these types, given that Haskell is capable of infering the implementation of typeclasses in simple cases.}
+\caption{The \texttt{Parameters} type represents a given moment in time, carrying over all the necessary information to execute a solver step until the time limit is reached. Some useful typeclasses are being derived to these types, given that Haskell is capable of inferring the implementation of typeclasses in simple cases.}
 \label{fig:dynamicsAux}
 \end{figure}
 
@@ -267,7 +262,7 @@ The above auxiliary types serve a common purpose: to provide at any given moment
 
 Further, the new \texttt{Dynamics} type can also be parametrically polymorphic, removing the limitation of only using \texttt{Double} values as the outcome. Figure \ref{fig:dynamics} depicts the final type for the physical dynamics. The \texttt{IO} wrapper is needed to cope with memory management and side effects, all of which will be explained in the next chapter.
 
-\begin{figure}[ht!]
+\begin{figure}[H]
 \centering
 \begin{minipage}{.44\textwidth}
   \centering
@@ -284,4 +279,4 @@ data Dynamics a =
 \label{fig:dynamics}
 \end{figure}
 
-This summarizes the bridge between the mathematical world and how we are modeling this domain in Haskell. The next chapter, \textit{The Side Effect Beast}, will start from this foundation, by adding typeclasses to the \texttt{Dynamics} type, and will later describe the last core type before explaining the solver execution: the \texttt{Integrator} type.
+This summarizes the bridge between GPAC, the mathematical world and how we are modeling this domain in Haskell. The next chapter, \textit{Effectful Integrals}, will start from this foundation, by adding typeclasses to the \texttt{Dynamics} type, and will later describe the last core type before explaining the solver execution: the \texttt{Integrator} type. These improvements for the \texttt{Dynamics} type and the new \texttt{Integrator} type will later be mapped to their GPAC counterparts, explaining that they resemble the basic units previously mentioned in section \ref{sec:gpac}.
