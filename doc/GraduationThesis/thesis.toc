@@ -5,32 +5,32 @@
 \contentsline {section}{\numberline {1.1}Context}{1}{section.1.1}%
 \contentsline {section}{\numberline {1.2}Proposal}{2}{section.1.2}%
 \contentsline {section}{\numberline {1.3}Goal}{4}{section.1.3}%
-\contentsline {section}{\numberline {1.4}Outline}{6}{section.1.4}%
-\contentsline {chapter}{\numberline {2}Design Philosophy}{7}{chapter.2}%
-\contentsline {section}{\numberline {2.1}The Shape of Information}{7}{section.2.1}%
-\contentsline {section}{\numberline {2.2}Modeling Reality}{11}{section.2.2}%
-\contentsline {section}{\numberline {2.3}Cybernization of Mathematics}{13}{section.2.3}%
-\contentsline {chapter}{\numberline {3}The Side Effect Beast}{15}{chapter.3}%
+\contentsline {section}{\numberline {1.4}Outline}{5}{section.1.4}%
+\contentsline {chapter}{\numberline {2}Design Philosophy}{6}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Shannon's Foundation: GPAC}{6}{section.2.1}%
+\contentsline {section}{\numberline {2.2}The Shape of Information}{7}{section.2.2}%
+\contentsline {section}{\numberline {2.3}Modeling Reality}{10}{section.2.3}%
+\contentsline {section}{\numberline {2.4}Cybernization of Mathematics}{13}{section.2.4}%
+\contentsline {chapter}{\numberline {3}Effectful Integrals}{15}{chapter.3}%
 \contentsline {section}{\numberline {3.1}Uplifting the Dynamics Type}{15}{section.3.1}%
 \contentsline {section}{\numberline {3.2}Exploiting Impurity}{18}{section.3.2}%
 \contentsline {section}{\numberline {3.3}Using Recursion to solve Math}{22}{section.3.3}%
-\contentsline {chapter}{\numberline {4}Denotative Understanding}{25}{chapter.4}%
+\contentsline {chapter}{\numberline {4}Execution Walkthrough}{25}{chapter.4}%
 \contentsline {section}{\numberline {4.1}Who is driving the bus?}{25}{section.4.1}%
 \contentsline {section}{\numberline {4.2}An attractive example}{28}{section.4.2}%
-\contentsline {chapter}{\numberline {5}Drawbacks}{33}{chapter.5}%
-\contentsline {section}{\numberline {5.1}Lorenz's Butterfly}{33}{section.5.1}%
-\contentsline {section}{\numberline {5.2}Time Step's In-betweens}{34}{section.5.2}%
-\contentsline {section}{\numberline {5.3}Sluggishness}{34}{section.5.3}%
-\contentsline {chapter}{\numberline {6}Weakening Discreteness}{36}{chapter.6}%
-\contentsline {section}{\numberline {6.1}Accepting Computer's Limitations}{36}{section.6.1}%
-\contentsline {section}{\numberline {6.2}Tweak I: Interpolation}{39}{section.6.2}%
-\contentsline {chapter}{\numberline {7}The Speed Pill: Caching}{43}{chapter.7}%
-\contentsline {section}{\numberline {7.1}The Saving Strategy}{43}{section.7.1}%
-\contentsline {section}{\numberline {7.2}Tweak II: Memoization}{45}{section.7.2}%
-\contentsline {chapter}{\numberline {8}Conclusion}{51}{chapter.8}%
-\contentsline {section}{\numberline {8.1}Future Improvements}{51}{section.8.1}%
-\contentsline {section}{\numberline {8.2}Final Thoughts}{51}{section.8.2}%
-\contentsline {chapter}{References}{52}{section*.39}%
+\contentsline {section}{\numberline {4.3}Lorenz's Butterfly}{33}{section.4.3}%
+\contentsline {section}{\numberline {4.4}Time Step's In-betweens}{33}{section.4.4}%
+\contentsline {section}{\numberline {4.5}Sluggishness}{34}{section.4.5}%
+\contentsline {chapter}{\numberline {5}Weakening Discreteness}{35}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Accepting Computer's Limitations}{35}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Tweak I: Interpolation}{38}{section.5.2}%
+\contentsline {chapter}{\numberline {6}Caching the Speed Pill}{42}{chapter.6}%
+\contentsline {section}{\numberline {6.1}The Saving Strategy}{42}{section.6.1}%
+\contentsline {section}{\numberline {6.2}Tweak II: Memoization}{44}{section.6.2}%
+\contentsline {chapter}{\numberline {7}Conclusion}{50}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Future Improvements}{50}{section.7.1}%
+\contentsline {section}{\numberline {7.2}Final Thoughts}{52}{section.7.2}%
+\contentsline {chapter}{References}{53}{section*.39}%
 \babel@toc {american}{}
 \babel@toc {american}{}
 \babel@toc {american}{}

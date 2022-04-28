@@ -23,7 +23,7 @@ iterToTime interv solver n st =
 \end{code}
 }
 
-The previous chapter presented issues with the current implementation. This chapter, \textit{Weakening Discreteness}, tackles the problem related to the size of the time step, and how it affects the results at the stop time of the simulation. After this chapter, only the second problem will remain to be addressed. This task will be accomplished by chapter 7, \textit{The Speed Pill: Memoization}.
+The previous chapter presented issues with the current implementation. This chapter, \textit{Weakening Discreteness}, tackles the problem related to the size of the time step, and how it affects the results at the stop time of the simulation. After this chapter, only the second problem will remain to be addressed. This task will be accomplished by chapter 6, \textit{Caching the Speed Pill}.
 
 \section{Accepting Computer's Limitations}
 
@@ -34,7 +34,7 @@ integEuler :: Dynamics Real
              -> Dynamics Real 
              -> Dynamics Real 
              -> Parameters -> IO Real
-integEuler (Dynamics diff) (Dynamics init) (Dynamics y) params =
+integEuler (Dynamics diff) (Dynamics init) (Dynamics y) ps =
   case iteration params of
     0 -> 
       init params

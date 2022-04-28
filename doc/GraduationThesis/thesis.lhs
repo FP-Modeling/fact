@@ -62,25 +62,18 @@
   \input{GraduationThesis/Lhs/Design.lhs}
 \fi
 
-\literateChapter{The Side Effect Beast}
+\literateChapter{Effectful Integrals}
 %include GraduationThesis/Lhs/Implementation.lhs
 
 \ifdefined\iscolorful
   \input{GraduationThesis/Lhs/Implementation.lhs}
 \fi
 
-\literateChapter{Denotative Understanding}
+\literateChapter{Execution Walkthrough}
 %include GraduationThesis/Lhs/Enlightenment.lhs
 
 \ifdefined\iscolorful
   \input{GraduationThesis/Lhs/Enlightenment.lhs}
-\fi
-
-\literateChapter{Drawbacks}
-%include GraduationThesis/Lhs/Drawbacks.lhs
-
-\ifdefined\iscolorful
-  \input{GraduationThesis/Lhs/Drawbacks.lhs}
 \fi
 
 \literateChapter{Weakening Discreteness}
@@ -90,7 +83,7 @@
   \input{GraduationThesis/Lhs/Interpolation.lhs}
 \fi
 
-\literateChapter{The Speed Pill: Caching}
+\literateChapter{Caching the Speed Pill}
 %include GraduationThesis/Lhs/Caching.lhs
 
 \ifdefined\iscolorful
