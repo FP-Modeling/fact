@@ -34,7 +34,7 @@ With these two core properties in mind, the proposed DSL will attempt to transla
 The main goal of the present work is to build an executable software that can solve differential equations and resembles the core idea of the GPAC model. The programming language of choice was \textbf{Haskell}, due to a variety of different reasons. First, this is already being used in the CPS domain in some degree, as showed by the ForSyDe framework~\cite{Sander2017, Seyed2020}. Second, Lee describes a lot of properties~\cite{LeeModeling} that matches the functional programming paradigm almost perfectly:
 
 \begin{itemize}
- \item Prevent misconnected MoCs by using great interfaces in between $\Rightarrow$ Such interfaces can be built by using Haskell's \textbf{strong type system}
+ \item Prevent misconnected MoCs by using great interfaces in between $\Rightarrow$ Such interfaces can be built using Haskell's \textbf{strong type system}
  \item Enable composition of MoCs $\Rightarrow$ Composition is a robust feature in functional programming languages
  \item It should be possible to conjoin a functional model with an implementation model $\Rightarrow$ Functions programming languages makes the separation between the \textit{denotational} aspect of the program, i.e., its meaning, from the \textit{operational} aspect clear
  \item All too often the semantics emerge accidentally from the software implementation rather than being built-in from the start $\Rightarrow$ A denotative approach with no regard for implementation details is common in the functional paradigm
@@ -44,6 +44,7 @@ The main goal of the present work is to build an executable software that can so
 Thus, we believe that the use of functional programming for modeling continuous time is not a coincidence; properties that are established as fundamental to leverage better abstractions for CPS simulation seem to be within the functional programming paradigm. Furthermore, this implementation is heavily based on \texttt{Aivika}~\footnote{https://github.com/dsorokin/aivika} --- an open source multi-method library for simulating a variety of paradigms, including partial support for physical dynamics, written in Haskell. Our version is modified for our needs, such as demonstrating similarities between the implementation and GPAC, shrinking some functionality in favor of focusing on continuous time modeling, and re-thinking the overall organization of the project for better understanding. So, this reduced and refactored version of \texttt{Aivika}, so-called \texttt{Rivika}, will be a Haskell Embedded Domain-Specific Language (HEDSL) within the model-based engineering domain. So, the built DSL will explore Haskell's specific features and details, such as the type system and typeclasses, to solve differential equations. Figure \ref{fig:introExample} shows a side-by-side comparison between a physical system that follows the guidelines settled by an enhanced version of GPAC and a model created by the final version of \texttt{Rivika}.
 
 \begin{figure}[ht!]
+\vspace{1cm}
 \begin{minipage}[t]{.65\textwidth}
 \begin{spec}
 sigma = 10.0

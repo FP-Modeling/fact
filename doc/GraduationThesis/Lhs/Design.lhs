@@ -4,29 +4,36 @@ module GraduationThesis.Lhs.Design where
 \end{code}
 }
 
-In the previous chapter, the importance of making a bridge between two different sets of abstractions, computers and the physical domain, was clearly established. In this chapter, the core philosophy behind the implementation of this link will be explained, starting with an introduction to the strong type system used in Haskell, going all the way to understanding how to model the main entities of the problem. In the end, the presented modeling strategy will justify the data types used in the solution, paving the floor for the next chapter \textit{Implementation}.
+In the previous chapter, the importance of making a bridge between two different sets of abstractions --- computers and the physical domain --- was clearly established. In this chapter, the core philosophy behind the implementation of this link will be explained, starting with an introduction to GPAC, followed by the strong type system used in Haskell, going all the way to understanding how to model the main entities of the problem. In the end, the presented modeling strategy will justify the data types used in the solution, paving the floor for the next chapter \textit{Effectful Integrals}.
 
 \section{Shannon's Foundation: GPAC}
+\label{sec:gpac}
 
-Hence, it will have to take into consideration the analog units used in GPAC, as well as their composition rules. There are four different basic units to build a GPAC circuit~\cite{Edil2018}:
+The General Purpose Computer or GPAC is a model for the Differential Analyzer --- a mechanical machine controlled by a human operator~\cite{Graca2016}. This machine is composed by a set of shafts interconnected in such a manner that a given differential equation is expressed by a shaft and other mechanical units transmit their values across the entire machine~\cite{Shannon, Graca2004}. For instance, shafts that represent independent variables directly interact with shafts that depicts dependent variables. The machine is primarly composed by four types of units: gear boxes, adders, integrators and input tables~\cite{Shannon}. These units provide useful operations to the machine, such as multiplication, addition, integration and saving the computed values. The main goal of this machine is to solve ordinary differential equations via numerical solutions.
+
+In order to add a formal basis to the machine, Shannon built the GPAC model, a mathematical model sustained by proofs and axioms~\cite{Shannon}. The end result was a set of rules for which types of equations can be modeled as well as which units are the minimum necessary for modeling them and how they can be combined. All algebraic functions (e.g. quotients of polynomials and irrational algebraic functions) and algebraic-trascendental functions (e.g. exponentials, logarithms, trigonometric, Bessel, elliptic and probability functions) can me modeled using a GPAC circuit~\cite{Shannon, Edil2018}. Moreover, the four preceding mechanical units were renamed and together created the minimum set of \textbf{circuits} for a given a GPAC~\cite{Edil2018}. Figure \ref{fig:gpacBasic} portrays visual representations of these basic units, followed by precise descriptions of their behaviour, inputs and outputs.
+
+\figuraBib{GPACBasicUnits}{The combination of these four basic units compose any GPAC circuit}{Edil2018}{fig:gpacBasic}{width=.95\textwidth}%
 
 \begin{itemize}
   \item Constant Function: This unit generates a real constant output for any time \textit{t}.
-  \item Adder: It generates the sum of two given inputs with both varying in time.
-  \item Multiplier: The product of two given inputs is generated for all moments in time.
+  \item Adder: It generates the sum of two given inputs with both varying in time, i.e., it produces $w = u + v$ for all variations of $u$ and $v$.
+  \item Multiplier: The product of two given inputs is generated for all moments in time, i.e., $w = uv$ is the output.
   \item Integrator: Given two inputs --- $u(x)$ and $v(x)$ --- and an initial condition $w_0$ at time $t_0$, the unit generates the output $w(t) = w_0 + \int_{t_0}^{t} u(t_u) \,dv(t_v)$, where $u$ is the \textit{integrand} and $v$ is the \textit{variable of integration}. The arguments $t_u$ and $t_v$ corresponds to the idea of local time as perceived by the modules that generated the input signals $u$ and $v$ respectively.
 \end{itemize}
 
-Finally, there are composition rules that restricts how these units can be hooked to one another. Originally, Shannon established that a valid GPAC is the one in which two inputs and two outputs are not interconnected and the inputs are only driven by either the independent variable $t$ (usually \textit{time}) or by a single unit output. However, Daniel's GPAC extension, FF-GPAC~\cite{Graca2003}, added new contraints related to no-feedback GPAC configurations, so-called \textit{polynomial circuits}~\cite{Edil2018}:
+Also, it was defined composition rules that restricts how these units can be hooked to one another. Originally, Shannon established that a valid GPAC is the one in which two inputs and two outputs are not interconnected and the inputs are only driven by either the independent variable $t$ (usually \textit{time}) or by a single unit output~\cite{Shannon, Graca2003, Edil2018}. However, Daniel's GPAC extension, FF-GPAC~\cite{Graca2003}, added new contraints related to no-feedback GPAC configurations. These structures, so-called \textit{polynomial circuits}~\cite{Graca2004, Edil2018}, are being displayed in Figure \ref{fig:gpacComposition} and they are made by only using constant function units, adders and multipliers.
+
+\figuraBib{GPACComposition}{Polynomial circuits resembles combinational circuits, in which the circuit respond instantly to changes on its inputs}{Edil2018}{fig:gpacComposition}{width=.55\textwidth}%
 
 \begin{itemize}
   \item An input of a polynomial circuit should be the input $t$ or the output of an integrator. Feedback can only be done from the output of integrators to inputs of polynomial circuits.
+  \item Each polynomial circuit admit multiple inputs
   \item Each integrand input of an integrator should be generated by the output of a polynomial unit.
   \item Each variable of integration of an integrator is the input \textit{t}.
 \end{itemize}
 
-During the detailing of the DSL, parallels will be established to map the aforementioned basic units and composition rules to the developed software. In this manner, all the mathematical formalism leveraged for analog computers will be the inspiration behind the implementation in the digital computer. This does not hold as a perfect aligment between the GPAC theory and the final product, but attempts to build a tool with formalism taken into account; one of the most frequent critiques in the CPS domain, as explained in the previous section.
-
+During the detailing of the DSL, parallels will be established to map the aforementioned basic units and composition rules to the developed software. In this manner, all the mathematical formalism leveraged for analog computers will be the inspiration behind the implementation in the digital computer. This does not hold as a perfect aligment between the GPAC theory and the final product, but attempts to build a tool with formalism taken into account; one of the most frequent critiques in the CPS domain, as explained in the previous chapter.
 
 \section{The Shape of Information}
 \label{sec:types}

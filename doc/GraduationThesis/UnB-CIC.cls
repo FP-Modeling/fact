@@ -1011,7 +1011,7 @@
 	\begin{figure}[#1]%
 		\begin{center}%
 			\includegraphics[#6]{#2}%
-			\caption[#3.]{#3\ifx#4\empty\else~(Fonte: ~\cite{#4})\fi.\label{#5}}%
+			\caption[#3.]{#3\ifx#4\empty\else~(Reference: ~\cite{#4})\fi.\label{#5}}%
 		\end{center}%
 	\end{figure}%
 }%
