@@ -4,7 +4,7 @@ module GraduationThesis.Lhs.Design where
 \end{code}
 }
 
-In the previous chapter, the importance of making a bridge between two different sets of abstractions --- computers and the physical domain --- was clearly established. This chapter will explain the core philosophy behind the implementation of this link, starting with an introduction to GPAC, followed by the strong type system used in Haskell, going all the way to understanding how to model the main entities of the problem. In the end, the presented modeling strategy will justify the data types used in the solution, paving the floor for the next chapter \textit{Effectful Integrals}.
+In the previous chapter, the importance of making a bridge between two different sets of abstractions --- computers and the physical domain --- was clearly established. This chapter will explain the core philosophy behind the implementation of this link, starting with an introduction to GPAC, followed by the strong type system used in Haskell, going all the way to understanding how to model the main entities of the problem. At the end, the presented modeling strategy will justify the data types used in the solution, paving the floor for the next chapter \textit{Effectful Integrals}.
 
 \section{Shannon's Foundation: GPAC}
 \label{sec:gpac}
@@ -22,7 +22,7 @@ In order to add a formal basis to the machine, Shannon built the GPAC model, a m
   \item Integrator: Given two inputs --- $u(x)$ and $v(x)$ --- and an initial condition $w_0$ at time $t_0$, the unit generates the output $w(t) = w_0 + \int_{t_0}^{t} u(t_u) \,dv(t_v)$, where $u$ is the \textit{integrand} and $v$ is the \textit{variable of integration}. The arguments $t_u$ and $t_v$ corresponds to the idea of local time as perceived by the modules that generated the input signals $u$ and $v$ respectively.
 \end{itemize}
 
-Also, it was defined composition rules that restricts how these units can be hooked to one another. Originally, Shannon established that a valid GPAC is the one in which two inputs and two outputs are not interconnected and the inputs are only driven by either the independent variable $t$ (usually \textit{time}) or by a single unit output~\cite{Shannon, Graca2003, Edil2018}. However, Daniel's GPAC extension, FF-GPAC~\cite{Graca2003}, added new constraints related to no-feedback GPAC configurations. These structures, so-called \textit{polynomial circuits}~\cite{Graca2004, Edil2018}, are being displayed in Figure \ref{fig:gpacComposition} and they are made by only using constant function units, adders and multipliers.
+Also, it was defined composition rules that restricts how these units can be hooked to one another. Originally, Shannon established that a valid GPAC is the one in which two inputs and two outputs are not interconnected and the inputs are only driven by either the independent variable $t$ (usually \textit{time}) or by a single unit output~\cite{Shannon, Graca2003, Edil2018}. However, Daniel's GPAC extension, FF-GPAC~\cite{Graca2003}, added new constraints related to no-feedback GPAC configurations while still using the same four basic units. These structures, so-called \textit{polynomial circuits}~\cite{Graca2004, Edil2018}, are being displayed in Figure \ref{fig:gpacComposition} and they are made by only using constant function units, adders and multipliers.
 
 \figuraBib{GPACComposition}{Polynomial circuits resembles combinational circuits, in which the circuit respond instantly to changes on its inputs}{Edil2018}{fig:gpacComposition}{width=.55\textwidth}%
 
@@ -38,7 +38,7 @@ During the detailing of the DSL, parallels will be established to map the aforem
 \section{The Shape of Information}
 \label{sec:types}
 
-Types in programming languages represent the format of information. This attribute is used to make constraints and add security layer around data manipulation. Figure \ref{fig:simpleTypes} illustrates types with an imaginary representation of their shape and Figure \ref{fig:functions} shows how types can be used to restrain which data can be plumbered into and from a function. In the latter image, the function \textit{lessThan10} has the type signature \texttt{Int -> Bool}, meaning that it accepts \texttt{Int} data as input and produces \texttt{Bool} data as the output. This provides a security layer in compile time, given that using data with different types as input, e.g, \texttt{Char} or \texttt{Double}, is regarded as a \textbf{type error}.
+Types in programming languages represent the format of information. This attribute is used to make constraints and add a security layer around data manipulation. Figure \ref{fig:simpleTypes} illustrates types with an imaginary representation of their shape and Figure \ref{fig:functions} shows how types can be used to restrain which data can be plumbered into and from a function. In the latter image, the function \textit{lessThan10} has the type signature \texttt{Int -> Bool}, meaning that it accepts \texttt{Int} data as input and produces \texttt{Bool} data as the output. This provides a security layer in compile time, given that using data with different types as input, e.g, \texttt{Char} or \texttt{Double}, is regarded as a \textbf{type error}.
 
 \begin{figure}[ht!]
 \centering
@@ -125,7 +125,7 @@ Within algebraic data types, it is possible to abstract the \textbf{structure} o
 \label{fig:parametricPoly}
 \end{figure}
 
-In some situations, changing the type of the structure is not the desired property of interest. There are applications where some sort of \textbf{behaviour} is a necessity, e.g., the ability of comparing two instances of a custom type. This nature of polymorphism is known as \textit{ad hoc polymorphism}, which is implemented in Haskell via what is similar to java-like interfaces, so-called \textbf{typeclasses}. However, establishing a contract with a typeclass differs from an interface in a fundamental aspect: rather than inheritance being given to the type, \textbf{mathematical formalism} is assured for it. As an example, the implementation of the typeclass \texttt{Eq} gives to the type all comparable operations ($==$ and $!=$), as well as any theorems or proofs in regard to such operations. Figure \ref{fig:adHocPoly} shows the implementation of \texttt{Ord} typeclass for the presented \texttt{ClockTime}, giving it capabilities for sorting instances of such type.
+In some situations, changing the type of the structure is not the desired property of interest. There are applications where some sort of \textbf{behaviour} is a necessity, e.g., the ability of comparing two instances of a custom type. This nature of polymorphism is known as \textit{ad hoc polymorphism}, which is implemented in Haskell via what is similar to java-like interfaces, so-called \textbf{typeclasses}. However, establishing a contract with a typeclass differs from an interface in a fundamental aspect: rather than inheritance being given to the type, it has a lawful implementation, meaning that \textbf{mathematical formalism} is assured for it. As an example, the implementation of the typeclass \texttt{Eq} gives to the type all comparable operations ($==$ and $!=$), as well as any theorems or proofs in regard to such operations. Figure \ref{fig:adHocPoly} shows the implementation of \texttt{Ord} typeclass for the presented \texttt{ClockTime}, giving it capabilities for sorting instances of such type.
 
 \begin{figure}[ht!]
 \centering
@@ -140,11 +140,11 @@ In some situations, changing the type of the structure is not the desired proper
 
   \end{spec}
 \end{minipage}
-\begin{minipage}{.53\textwidth}
+\begin{minipage}{.4\textwidth}
   \centering
   \includegraphics[width=0.95\linewidth]{GraduationThesis/img/AdHocPoly}
 \end{minipage}
-\caption{The minimum requirement for the \texttt{Ord} typeclass is the $<=$ operator, meaning that the functions $<$, $<=$, $>$, $>=$, \texttt{max} and \texttt{min} are now unlocked for the type \texttt{ClockTime} after the implementation. Providing an implementation means being inside the \texttt{Ord} "plane".}
+\caption{The minimum requirement for the \texttt{Ord} typeclass is the $<=$ operator, meaning that the functions $<$, $<=$, $>$, $>=$, \texttt{max} and \texttt{min} are now unlocked for the type \texttt{ClockTime} after the implementation.}
 \label{fig:adHocPoly}
 \end{figure}
 
@@ -166,7 +166,7 @@ The first-order Euler method is the simplest of such methods, and it calculates 
 \label{eq:diffEq}
 \end{equation}
 
-This equality assumes that the next step following the derivative's direction will not be that different from the actual value of the function $y$ if the time step is small enough. Further, it is assumed that in case of a small enough time step, the difference between time samples is $h$, i.e., the time step, with the following equation representing one step of the method: 
+As showed, both the derivative and the function --- the mathematical formulation of the system --- varies according to \textbf{time}. Both acts as functions in which for a given time value, it produces a numerical outcome. Moreover, this equality assumes that the next step following the derivative's direction will not be that different from the actual value of the function $y$ if the time step is small enough. Further, it is assumed that in case of a small enough time step, the difference between time samples is $h$, i.e., the time step, with the following equation representing one step of the method: 
 
 \begin{equation}
 y_{n + 1} = y_n + hf(t_n, y_n)
@@ -187,14 +187,6 @@ $$ y_{5} = y_4 + 1 * f(4, y_4) \rightarrow y_{5} = 16 + 1 * 16 + 4 \rightarrow y
 \caption{The initial value is used as a starting point for the procedure. The algorithm continues until the time of interest is reached in the unknown function. Due to its large time step, the final answer is really far-off from the expected result.}
 \label{fig:eulerExample}
 \end{figure}
-
-As showed in equation \ref{eq:diffEq}, both the derivative and the function --- the mathematical formulation of the system --- varies according to \textbf{time}. Both acts as functions in which for a given time value, it produces an outcome, a numerical value in this case. These two entities, the rate of change and the behaviour, can be simplified into a single relationship, when applying integration on both sides of the equality:
-
-$$ \frac{dy}{dt} = y + t $$
-$$ \int \frac{dy}{dt} dt = \int (y(t) + t) dt $$
-$$ y(t) = \int (y(t) + t) dt $$
-
-When arranged in this manner the target integral is now in its \textbf{integral} form, which makes the function $y(t)$ be written in terms of itself. Also, the same aspect of being a function from time to outcome is preserved.
 
 \section{Making Mathematics Cyber}
 
@@ -279,4 +271,4 @@ data Dynamics a =
 \label{fig:dynamics}
 \end{figure}
 
-This summarizes the bridge between GPAC, the mathematical world and how we are modeling this domain in Haskell. The next chapter, \textit{Effectful Integrals}, will start from this foundation, by adding typeclasses to the \texttt{Dynamics} type, and will later describe the last core type before explaining the solver execution: the \texttt{Integrator} type. These improvements for the \texttt{Dynamics} type and the new \texttt{Integrator} type will later be mapped to their GPAC counterparts, explaining that they resemble the basic units previously mentioned in section \ref{sec:gpac}.
+This summarizes the main pilars in the design: FF-GPAC, the mathematical defintion and how we are modeling this domain in Haskell. The next chapter, \textit{Effectful Integrals}, will start from this foundation, by adding typeclasses to the \texttt{Dynamics} type, and will later describe the last core type before explaining the solver execution: the \texttt{Integrator} type. These improvements for the \texttt{Dynamics} type and the new \texttt{Integrator} type will later be mapped to their GPAC counterparts, explaining that they resemble the basic units previously mentioned in section \ref{sec:gpac}.

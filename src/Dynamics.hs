@@ -89,17 +89,14 @@ appComposition (Dynamics df) (Dynamics da)
   
 instance Monad Dynamics where
   return  = returnD
-  m >>= k = bindD m k
+  m >>= k = bindD k m
 
 returnD :: a -> Dynamics a
 returnD a = Dynamics $ const (return a)
 
-bindD :: Dynamics a -> (a -> Dynamics b) -> Dynamics b
-bindD (Dynamics m) k = 
-  Dynamics $ \ps -> 
-  do a <- m ps
-     let Dynamics m' = k a
-     m' ps
+bindD :: (a -> Dynamics b ) -> Dynamics a -> Dynamics b
+bindD k (Dynamics m) = 
+  Dynamics $ \ps -> m ps >>= \a -> (\(Dynamics m') -> m' ps) $ k a
 
 instance Eq (Dynamics a) where
   x == y = error "Can't compare dynamics." 
@@ -112,8 +109,10 @@ liftOP = fmap
 --  Dynamics $ \ps -> fmap f (x ps)
 
 liftOP2 :: (a -> b -> c) -> Dynamics a -> Dynamics b -> Dynamics c
-liftOP2 f (Dynamics x) (Dynamics y) =
-  Dynamics $ \ps -> do { a <- x ps; b <- y ps; return $ f a b }
+-- liftOP2 func da db = (func <$> da) <*> db
+liftOP2 func da db = fmap func da <*> db
+-- liftOP2 f (Dynamics x) (Dynamics y) =
+  -- Dynamics $ \ps -> do { a <- x ps; b <- y ps; return $ f a b }
   
 instance (Num a) => Num (Dynamics a) where
   x + y = liftOP2 (+) x y
