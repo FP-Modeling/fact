@@ -25,6 +25,12 @@ iterToTime interv solver n st =
 
 The previous chapter presented issues with the current implementation. This chapter, \textit{Weakening Discreteness}, tackles the problem related to the size of the time step, and how it affects the results at the stop time of the simulation. After this chapter, only the second problem will remain to be addressed. This task will be accomplished by chapter 6, \textit{Caching the Speed Pill}.
 
+\section{Time Step's In-betweens}
+
+The first drawback is related to the time steps and the stop time the user is interested in. As explained in the previous chapters, the size of the time step is used across the simulation to walk through the iteration axis, a discrete version of the time axis. Hence, this size interfers with which interval of time the integrator is capable of computing, given that it is limited to values that are \textbf{multiple} of the size of the time step. This means that multiple end points will generate the same answer, affecting the accuracy of the simulator.
+
+For instance, a simulation that runs in the inverval of 0 to 6 seconds with a time step of 1 will have the same output as if the interval was from 0 to 5.5 seconds, considering the same size of time step. Because the time of interest in in between two multiples of the time step, 5 and 6 in this case, and the simulator always \textbf{rounds} the iteration according to the time step, arbitrary in-between values are not modeled correctly. 
+
 \section{Accepting Computer's Limitations}
 
 The aforementioned time step problem araises from the \textbf{conversion} from continuous time to discrete iterations. A new look at one of the solver functions demonstrate that checking the iteration is a fundamental part of the used numerical methods. Below, the current iteration in being checked in the sixth line:

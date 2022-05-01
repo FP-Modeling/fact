@@ -6,6 +6,8 @@ import Simulation
 import Integrator
 import IO
 import Dynamics
+import Prelude hiding (Real)
+import Types
 
 lorenzInterv = Interval { startTime = 0,
                           stopTime = 40 }
@@ -61,6 +63,59 @@ lorenzModel' =
      diffInteg integZ (x * y - beta * z)
      sequence [x, y, z]
 
+t :: Dynamics Real
+t = Dynamics $ \ps -> return (time ps)
+
+
+exampleInterv = Interval { startTime = 0,
+                          stopTime = 5 }
+
+exampleSolver = Solver { dt = 1,
+                        method = Euler,
+                        stage = 0
+                       }
+
+exampleModel :: Model [Real]
+exampleModel =
+  do integ <- newInteg 1
+     let y = readInteg integ
+     diffInteg integ (y + t)
+     return $ sequence [y]
+
+
+exampleModel2 :: Dynamics [Dynamics Real]
+exampleModel2 =
+  do integX <- newInteg 1
+     integY <- newInteg 1
+     let x = readInteg integX
+         y = readInteg integY
+     diffInteg integX (x * y)
+     diffInteg integY (y + t)
+     return [x, y]
+
+
+type Vector = [Double]
+
+exampleModel3 :: Model2 Vector
+exampleModel3 =
+  do integX <- newInteg 1
+     integY <- newInteg 1
+     let x = readInteg integX
+         y = readInteg integY
+     diffInteg integX (x * y)
+     diffInteg integY (y + t)
+     sequence [x, y]
+
+exampleModel4 :: Model Vector
+exampleModel4 =
+  do integX <- newInteg 1
+     integY <- newInteg 1
+     let x = readInteg integX
+         y = readInteg integY
+     diffInteg integX (x * y)
+     diffInteg integY (y + t)
+     return $ sequence [x, y]
+
 mainLorenz =
   do ans <- runDynamicsFinal lorenzModel lorenzInterv2 lorenzSolver2
      print ans
@@ -72,6 +127,10 @@ mainLorenz2 =
 mainLorenz3 =
   do ans <- runDynamics lorenzModel lorenzInterv3 lorenzSolver2
      print ans
+
+exampleTest3 = runDynamicsTest exampleModel3 exampleInterv exampleSolver
+
+exampleTest4 = runDynamics exampleModel4 exampleInterv exampleSolver
 
 allResultsLorenz = runDynamics lorenzModel lorenzInterv lorenzSolver
 

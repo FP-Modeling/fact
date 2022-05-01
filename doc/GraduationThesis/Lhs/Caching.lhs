@@ -53,6 +53,25 @@ stageHiBnd sc = snd $ stageBnds sc
 
 Chapter 5, \textit{Drawbacks}, leveraged two major concerns with the proposed software: depending too much on the size of the time step and speed making the software impractical. This chapter, \textit{The Speed Pill: Caching}, addresses the latter: the sluggishness issue in \texttt{Rivika}. At the end of it, the simulation will be orders of magnitude faster by using a common modern caching strategy to speed up computing processes: memoization.
 
+\section{Performance}
+
+The second issue is related to performance; the simulation takes too \textbf{long} to execute. For instance, to execute the Lorenz's Attractor example with an unreasonable time step size of 1, the simulator can take around \textbf{10 seconds} to compute in modern hardware an interval of 0 to 5 seconds of the physical system. Increasing this interval shows an exponencitial growth in execution time, as depicted by the table in Table \ref{tab:execTimes}. Thus, with this exponentinal growth, it is totally impractical to execute longer simulations, diminishing the usability of the proposed software.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{cc}
+\hline
+Stop Time (seconds) & Execution Time (seconds) \\ \hline
+5                   & 9.69                     \\ \hline
+6                   & 124.63                   \\ \hline
+7                   & 1584.56                  \\ \hline
+8                   & 19970.17                 \\ \hline
+\end{tabular}
+\caption{\label{tab:execTimes}Small increases in the stop time of the simulation provoke exponential penalties in performance. The above values were obtained in a compouter running a 6-th quad-core \texttt{i5} Intel processor.}
+\end{table}
+
+These two problems cripple the potential uses cases for \texttt{Rivika}, given that we cannot always trust its results due to dependency in the used time step size, and maybe we can't even foresee the acquired results within deadlines, because its time execution time growths exponentially. The next chapters will not only explain the origin of these concerns, but will also totally address them. After these tweaks, very granular time steps sizes will be available for use, as well as not \texttt{Rivika} will depend less on the size of the time step to execute integrals.
+
 \section{The Saving Strategy}
 
 Before explaining the solution, it is worth describing \textbf{why} and \textbf{where} this problem araises. First, we took need to take a look back onto the solvers' functions, such as the \textit{integEuler} function, introduced in chapter 3, \textit{The Side-Effect Beast}:

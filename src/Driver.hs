@@ -56,16 +56,17 @@ subRunDynamics (Dynamics m) iv sl =
      if (iterToTime iv sl nu 0) - (stopTime iv) < 0.00001
      then map (m . parameterise) [nl .. nu]
      else (init $ map (m . parameterise) [nl .. nu]) ++ [m ps]     
-     
-runDynamicsTest :: Dynamics a -> Interval -> Solver -> IO [a]
-runDynamicsTest m iv sl = sequence $ subRunDynamics m iv sl
 
-subRunDynamicsTest :: Dynamics a -> Interval -> Solver -> [IO a]
-subRunDynamicsTest (Dynamics m) iv sl =
+
+type Model2 a = Dynamics a
+
+runDynamicsTest :: Model2 a -> Interval -> Solver -> IO [a]
+-- runDynamicsTest (Dynamics m) iv sl = sequence $ subRunDynamicsTest m iv sl
+runDynamicsTest (Dynamics m) iv sl =
   do let (nl, nu) = iterationBnds iv (dt sl)
          parameterise n = Parameters { interval = iv,
                                        time = iterToTime iv sl n 0,
                                        iteration = n,
                                        solver = sl { stage = 0 }}
-     map (m . parameterise) [nl .. nu]
+     sequence $ map (m . parameterise) [nl .. nu]
 

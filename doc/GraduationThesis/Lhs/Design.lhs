@@ -22,7 +22,7 @@ In order to add a formal basis to the machine, Shannon built the GPAC model, a m
   \item Integrator: Given two inputs --- $u(x)$ and $v(x)$ --- and an initial condition $w_0$ at time $t_0$, the unit generates the output $w(t) = w_0 + \int_{t_0}^{t} u(t_u) \,dv(t_v)$, where $u$ is the \textit{integrand} and $v$ is the \textit{variable of integration}. The arguments $t_u$ and $t_v$ corresponds to the idea of local time as perceived by the modules that generated the input signals $u$ and $v$ respectively.
 \end{itemize}
 
-Also, it was defined composition rules that restricts how these units can be hooked to one another. Originally, Shannon established that a valid GPAC is the one in which two inputs and two outputs are not interconnected and the inputs are only driven by either the independent variable $t$ (usually \textit{time}) or by a single unit output~\cite{Shannon, Graca2003, Edil2018}. However, Daniel's GPAC extension, FF-GPAC~\cite{Graca2003}, added new constraints related to no-feedback GPAC configurations while still using the same four basic units. These structures, so-called \textit{polynomial circuits}~\cite{Graca2004, Edil2018}, are being displayed in Figure \ref{fig:gpacComposition} and they are made by only using constant function units, adders and multipliers.
+Also, it was defined composition rules that restricts how these units can be hooked to one another. Originally, Shannon established that a valid GPAC is the one in which two inputs and two outputs are not interconnected and the inputs are only driven by either the independent variable $t$ (usually \textit{time}) or by a single unit output~\cite{Shannon, Graca2003, Edil2018}. However, Daniel's GPAC extension, FF-GPAC~\cite{Graca2003}, added new constraints related to no-feedback GPAC configurations while still using the same four basic units. These structures, so-called \textit{polynomial circuits}~\cite{Graca2004, Edil2018}, are being displayed in Figure \ref{fig:gpacComposition} and they are made by only using constant function units, adders and multipliers. Also, such circuits are \textit{combinational}, meaning that they compute values a \textit{point-wise} manner between the given inputs.
 
 \figuraBib{GPACComposition}{Polynomial circuits resembles combinational circuits, in which the circuit respond instantly to changes on its inputs}{Edil2018}{fig:gpacComposition}{width=.55\textwidth}%
 
@@ -179,11 +179,11 @@ So, the next step of the function $y_{n+1}$ can be computed by the sum of the pr
 $$ \dot{y} = y + t \quad \quad y(0) = 1 $$
 $$ \downarrow $$
 $$ y_{n + 1} = y_n + hf(t_n, y_n) \quad h = 1 \quad t_{n + 1} = t_n + h \quad f(t,y) = y + t $$
-$$ y_{1} = y_0 + 1 * f(0, y_0) \rightarrow y_{1} = 1 + 1 * 1 + 0 \rightarrow y_{1} = 2 $$
-$$ y_{2} = y_1 + 1 * f(1, y_1) \rightarrow y_{2} = 2 + 1 * 2 + 1 \rightarrow y_{2} = 5 $$
-$$ y_{3} = y_2 + 1 * f(2, y_2) \rightarrow y_{3} = 4 + 1 * 4 + 2 \rightarrow y_{3} = 10 $$
-$$ y_{4} = y_3 + 1 * f(3, y_3) \rightarrow y_{4} = 8 + 1 * 8 + 3 \rightarrow y_{4} = 19 $$
-$$ y_{5} = y_4 + 1 * f(4, y_4) \rightarrow y_{5} = 16 + 1 * 16 + 4 \rightarrow y_{5} = 36 $$
+$$ y_{1} = y_0 + 1 * f(0, y_0) \rightarrow y_{1} = 1 + 1 * (1 + 0) \rightarrow y_{1} = 2 $$
+$$ y_{2} = y_1 + 1 * f(1, y_1) \rightarrow y_{2} = 2 + 1 * (2 + 1) \rightarrow y_{2} = 5 $$
+$$ y_{3} = y_2 + 1 * f(2, y_2) \rightarrow y_{3} = 5 + 1 * (5 + 2) \rightarrow y_{3} = 12 $$
+$$ y_{4} = y_3 + 1 * f(3, y_3) \rightarrow y_{4} = 12 + 1 * (12 + 3) \rightarrow y_{4} = 27 $$
+$$ y_{5} = y_4 + 1 * f(4, y_4) \rightarrow y_{5} = 27 + 1 * (27 + 4) \rightarrow y_{5} = 58 $$
 \caption{The initial value is used as a starting point for the procedure. The algorithm continues until the time of interest is reached in the unknown function. Due to its large time step, the final answer is really far-off from the expected result.}
 \label{fig:eulerExample}
 \end{figure}

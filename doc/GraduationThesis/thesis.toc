@@ -18,21 +18,22 @@
 \contentsline {section}{\numberline {3.4}GPAC Bind II: Integrator}{24}{section.3.4}%
 \contentsline {section}{\numberline {3.5}Using Recursion to solve Math}{26}{section.3.5}%
 \contentsline {chapter}{\numberline {4}Execution Walkthrough}{29}{chapter.4}%
-\contentsline {section}{\numberline {4.1}Who is driving the bus?}{29}{section.4.1}%
-\contentsline {section}{\numberline {4.2}An attractive example}{32}{section.4.2}%
-\contentsline {section}{\numberline {4.3}Lorenz's Butterfly}{37}{section.4.3}%
-\contentsline {section}{\numberline {4.4}Time Step's In-betweens}{37}{section.4.4}%
-\contentsline {section}{\numberline {4.5}Sluggishness}{38}{section.4.5}%
-\contentsline {chapter}{\numberline {5}Weakening Discreteness}{39}{chapter.5}%
-\contentsline {section}{\numberline {5.1}Accepting Computer's Limitations}{39}{section.5.1}%
-\contentsline {section}{\numberline {5.2}Tweak I: Interpolation}{42}{section.5.2}%
-\contentsline {chapter}{\numberline {6}Caching the Speed Pill}{46}{chapter.6}%
-\contentsline {section}{\numberline {6.1}The Saving Strategy}{46}{section.6.1}%
-\contentsline {section}{\numberline {6.2}Tweak II: Memoization}{48}{section.6.2}%
-\contentsline {chapter}{\numberline {7}Conclusion}{54}{chapter.7}%
-\contentsline {section}{\numberline {7.1}Future Improvements}{54}{section.7.1}%
-\contentsline {section}{\numberline {7.2}Final Thoughts}{56}{section.7.2}%
-\contentsline {chapter}{References}{57}{section*.42}%
+\contentsline {section}{\numberline {4.1}From Models to Models}{29}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Driving the Model}{32}{section.4.2}%
+\contentsline {section}{\numberline {4.3}An attractive example}{33}{section.4.3}%
+\contentsline {section}{\numberline {4.4}Lorenz's Butterfly}{39}{section.4.4}%
+\contentsline {chapter}{\numberline {5}Travelling across Domains}{40}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Time Step's In-betweens}{40}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Accepting Computer's Limitations}{40}{section.5.2}%
+\contentsline {section}{\numberline {5.3}Tweak I: Interpolation}{43}{section.5.3}%
+\contentsline {chapter}{\numberline {6}Caching the Speed Pill}{47}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Performance}{47}{section.6.1}%
+\contentsline {section}{\numberline {6.2}The Saving Strategy}{48}{section.6.2}%
+\contentsline {section}{\numberline {6.3}Tweak II: Memoization}{49}{section.6.3}%
+\contentsline {chapter}{\numberline {7}Conclusion}{56}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Future Improvements}{56}{section.7.1}%
+\contentsline {section}{\numberline {7.2}Final Thoughts}{58}{section.7.2}%
+\contentsline {chapter}{References}{59}{section*.44}%
 \babel@toc {american}{}
 \babel@toc {american}{}
 \babel@toc {american}{}

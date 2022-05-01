@@ -77,7 +77,7 @@
   \input{GraduationThesis/Lhs/Enlightenment.lhs}
 \fi
 
-\literateChapter{Weakening Discreteness}
+\literateChapter{Travelling across Domains}
 %include GraduationThesis/Lhs/Interpolation.lhs
 
 \ifdefined\iscolorful
