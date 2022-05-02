@@ -173,7 +173,7 @@ subRunDynamics (Dynamics m) iv sl =
                            time = stopTime iv,
                            iteration = nu,
                            solver = sl { stage = -1}}
-     if (iterToTime iv sl nu 0) - (stopTime iv) < epslon
+     if (iterToTime iv sl nu 0) - (stopTime iv) < 0.00001
      then map (m . parameterise) [nl .. nu]
      else (init $ map (m . parameterise) [nl .. nu]) ++ [m ps]     
 \end{code}
@@ -297,7 +297,7 @@ diffInteg integ diff =
            do whatToDo <- readIORef (cache integ)
               let i = initial integ
               case method (solver ps) of
-                Euler -> integEuler diff i y ps
+                Euler -> integEuler diff i whatToDo ps
                 RungeKutta2 -> integRK2 diff i whatToDo ps
                 RungeKutta4 -> integRK4 diff i whatToDo ps
      liftIO $ writeIORef (computation integ) z
