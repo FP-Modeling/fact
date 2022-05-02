@@ -1,4 +1,3 @@
-
 -- Copyright (c) 2009, 2010, 2011 David Sorokin <david.sorokin@gmail.com>
 -- 
 -- All rights reserved.
@@ -31,22 +30,16 @@
 -- SUCH DAMAGE.
 
 -- |
--- Module     : Simulation.Aivika.Dynamics
+-- Module     : Dynamics
 -- Copyright  : Copyright (c) 2009-2011, David Sorokin <david.sorokin@gmail.com>
 -- License    : BSD3
--- Maintainer : David Sorokin <david.sorokin@gmail.com>
--- Stability  : experimental
--- Tested with: GHC 6.12.1
---
--- Aivika is a multi-paradigm simulation library. It allows us to integrate 
--- a system of ordinary differential equations. Also it can be applied to
--- the Discrete Event Simulation. It supports the event-oriented, 
--- process-oriented and activity-oriented paradigms. Aivika also supports 
--- the Agent-based Modeling. Finally, it can be applied to System Dynamics.
---
+-- Maintainer : Eduardo Lemos Rocha <dudulr10@gmail.com>
+-- Stability  : stable
+-- Tested with: GHC 8.10.7
+-- |
+
 module Dynamics 
-       (-- * Dynamics
-        Dynamics(..),
+       (Dynamics(..),
         Parameters(..)) where
 
 import Control.Monad
@@ -58,14 +51,6 @@ import Types
 import Solver
 import Simulation
 
---
--- The Dynamics Monad
---
--- A value of the Dynamics monad represents an abstract dynamic 
--- process, i.e. a time varying polymorstic function. This is 
--- a key point of the Aivika simulation library.
---
-
 -- | It defines the simulation time appended with additional information.
 data Parameters = Parameters { interval  :: Interval, -- ^ the simulation interval
                                solver    :: Solver,   -- ^ the solver configuration
@@ -73,8 +58,6 @@ data Parameters = Parameters { interval  :: Interval, -- ^ the simulation interv
                                iteration :: Iteration -- ^ the current iteration
                              } deriving (Eq, Show)
 
--- | A value in the 'Dynamics' monad represents a dynamic process, i.e.
--- a polymorstic time varying function.
 newtype Dynamics a = Dynamics {apply :: Parameters -> IO a}
 
 instance Functor Dynamics where
@@ -100,53 +83,49 @@ bindD k (Dynamics m) =
   Dynamics $ \ps -> m ps >>= \a -> (\(Dynamics m') -> m' ps) $ k a
 
 instance Eq (Dynamics a) where
-  x == y = error "Can't compare dynamics." 
+  x == y = error "<< Can't compare dynamics >>" 
 
 instance Show (Dynamics a) where
   showsPrec _ x = showString "<< Dynamics >>"
 
-liftOP :: (a -> b) -> Dynamics a -> Dynamics b
-liftOP = fmap
---  Dynamics $ \ps -> fmap f (x ps)
+unaryOP :: (a -> b) -> Dynamics a -> Dynamics b
+unaryOP = fmap
 
-liftOP2 :: (a -> b -> c) -> Dynamics a -> Dynamics b -> Dynamics c
--- liftOP2 func da db = (func <$> da) <*> db
-liftOP2 func da db = fmap func da <*> db
--- liftOP2 f (Dynamics x) (Dynamics y) =
-  -- Dynamics $ \ps -> do { a <- x ps; b <- y ps; return $ f a b }
+binaryOP :: (a -> b -> c) -> Dynamics a -> Dynamics b -> Dynamics c
+binaryOP func da db = fmap func da <*> db
   
 instance (Num a) => Num (Dynamics a) where
-  x + y = liftOP2 (+) x y
-  x - y = liftOP2 (-) x y
-  x * y = liftOP2 (*) x y
-  negate = liftOP negate
-  abs = liftOP abs
-  signum = liftOP signum
+  x + y = binaryOP (+) x y
+  x - y = binaryOP (-) x y
+  x * y = binaryOP (*) x y
+  negate = unaryOP negate
+  abs = unaryOP abs
+  signum = unaryOP signum
   fromInteger i = return $ fromInteger i
 
 instance (Fractional a) => Fractional (Dynamics a) where
-  x / y = liftOP2 (/) x y
-  recip = liftOP recip
+  x / y = binaryOP (/) x y
+  recip = unaryOP recip
   fromRational t = return $ fromRational t
 
 instance (Floating a) => Floating (Dynamics a) where
   pi = return pi
-  exp = liftOP exp
-  log = liftOP log
-  sqrt = liftOP sqrt
-  x ** y = liftOP2 (**) x y
-  sin = liftOP sin
-  cos = liftOP cos
-  tan = liftOP tan
-  asin = liftOP asin
-  acos = liftOP acos
-  atan = liftOP atan
-  sinh = liftOP sinh
-  cosh = liftOP cosh
-  tanh = liftOP tanh
-  asinh = liftOP asinh
-  acosh = liftOP acosh
-  atanh = liftOP atanh
+  exp = unaryOP exp
+  log = unaryOP log
+  sqrt = unaryOP sqrt
+  x ** y = binaryOP (**) x y
+  sin = unaryOP sin
+  cos = unaryOP cos
+  tan = unaryOP tan
+  asin = unaryOP asin
+  acos = unaryOP acos
+  atan = unaryOP atan
+  sinh = unaryOP sinh
+  cosh = unaryOP cosh
+  tanh = unaryOP tanh
+  asinh = unaryOP asinh
+  acosh = unaryOP acosh
+  atanh = unaryOP atanh
 
 instance MonadIO Dynamics where
   liftIO m = Dynamics $ const m     

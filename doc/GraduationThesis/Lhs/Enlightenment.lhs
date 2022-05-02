@@ -7,6 +7,32 @@ import GraduationThesis.Lhs.Caching
 import GraduationThesis.Lhs.Design
 
 type Vector = [Double]
+
+lorenzInterv = Interval { startTime = 0,
+                          stopTime = 40 }
+
+lorenzSolver = Solver { dt = 0.01,
+                        method = RungeKutta2,
+                        stage = 0
+                      }
+
+sigma = 10.0
+rho = 28.0
+beta = 8.0 / 3.0
+
+lorenzModel :: Model Vector
+lorenzModel =
+  do integX <- newInteg 1.0
+     integY <- newInteg 1.0
+     integZ <- newInteg 1.0
+     let x = readInteg integX
+         y = readInteg integY
+         z = readInteg integZ
+     diffInteg integX (sigma * (y - x))
+     diffInteg integY (x * (rho - z) - y)
+     diffInteg integZ (x * y - beta * z)
+     return $ sequence [x, y, z]
+lorenzSystem = runDynamics lorenzModel lorenzInterv lorenzSolver
 \end{code}
 }
 
@@ -74,6 +100,7 @@ exampleModel =
      diffInteg integX (x * y)
      diffInteg integY (y + t)
      sequence [x, y]
+
 \end{spec}
 \end{minipage}
 \begin{minipage}{.47\textwidth}
@@ -147,22 +174,6 @@ $$ \frac{dz}{dt} = x(t)y(t) - \beta z(t) $$
 $$$$
 
 It is straight-forward to map it to the described domain-specific language (DSL). The remaining details are simulation-related, i.e., which solver method will be used, the interval of the simulation, as well as the size of the time step. Taking into account that the constants $\sigma$, $\rho$ and $\beta$ need to be set, the code below summarizes it, and Figure \ref{fig:gpacLorenz} shows its FF-GPAC circuit:
-
-\ignore{
-\begin{code}
-lorenzInterv = Interval { startTime = 0,
-                          stopTime = 40 }
-
-lorenzSolver = Solver { dt = 0.01,
-                        method = RungeKutta2,
-                        stage = 0
-                      }
-
-sigma = 10.0
-rho = 28.0
-beta = 8.0 / 3.0
-\end{code}
-}
 
 \begin{spec}
 lorenzInterv = Interval { startTime = 0,

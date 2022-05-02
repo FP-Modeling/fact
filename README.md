@@ -4,6 +4,18 @@
 
 Rivika is a **reduced** and updated version of [aivika](https://github.com/dsorokin/aivika). This project has the main goal of incresing the understanding of aivika incrementally, using the earlier versions of the code (the earliest version is only available in [hackage](https://hackage.haskell.org/package/aivika-0.1)). Hence, it is necessary to update the code, since the `ghc` compiler changed a lot since back these versions where developed.
 
+## How to use
+
+It mandatory to have [stack](https://docs.haskellstack.org/en/stable/README/) installed. From the root of the project, the following command starts the REPL environment:
+
+`stack repl`
+
+Moreover, the project can be compiled and executed using the following command (the `main` function is redirecting to the Chemical Reaction example):
+
+`stack run`
+
+All the examples in the `Examples` folder are acessible via the REPL environment.
+
 ## Literate Programming
 
 There are two types of documentation: `thesis.lhs` and `manual.lhs`, both of which use [literate programming](https://en.wikipedia.org/wiki/Literate_programming), given that Haskell has [great support](https://wiki.haskell.org/Literate_programming) to this feature. The former is the graduation thesis of one contributor, and latter is the manual of the software.
@@ -22,3 +34,15 @@ The most convenient way to compile the documentation and the executable from the
 - `/literate.sh thesis colorful` - It is necessary to have installed [pygments](https://pygments.org/download/) (must be in your PATH variable). It will generate a colorful version of the document from `thesis.lhs` using the minted package.
 
 **All commands need to be executed inside the doc folder**. All of these commands use the same file, `manual.lhs` or `thesis.lhs`, to execute different things. In this way, documentation and source code come from the same file.
+
+### Shortcut
+
+As a shortcut, the colorful version of the thesis can be compiled using the following sequence of commands in a linux machine (Ubuntu) from the root folder:
+
+``` 
+sudo apt-get install texlive-latex-base
+sudo apt-get install texlive-fonts-extra
+cd doc
+./literate.sh thesis colorful
+```
+

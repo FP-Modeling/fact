@@ -6,6 +6,8 @@ import Simulation
 
 type Model a = Dynamics (Dynamics a)
 
+epslon = 0.00001
+
 -- | Run the simulation and return the result in the last 
 -- time point using the specified simulation specs.
 runDynamicsFinal :: Model a -> Interval -> Solver -> IO a
@@ -25,7 +27,7 @@ subRunDynamicsFinal (Dynamics m) iv sl =
                             time = t,
                             iteration = n,
                             solver = sl { stage = 0 }}
-     if t - (stopTime iv) < 0.00001
+     if t - (stopTime iv) < epslon
      then x
      else m Parameters { interval = iv,
                          time = stopTime iv,
@@ -53,20 +55,24 @@ subRunDynamics (Dynamics m) iv sl =
                            time = stopTime iv,
                            iteration = nu,
                            solver = sl { stage = -1}}
-     if (iterToTime iv sl nu 0) - (stopTime iv) < 0.00001
+     if (iterToTime iv sl nu 0) - (stopTime iv) < epslon
      then map (m . parameterise) [nl .. nu]
      else (init $ map (m . parameterise) [nl .. nu]) ++ [m ps]     
 
+type BasicModel a = Dynamics a
 
-type Model2 a = Dynamics a
-
-runDynamicsTest :: Model2 a -> Interval -> Solver -> IO [a]
--- runDynamicsTest (Dynamics m) iv sl = sequence $ subRunDynamicsTest m iv sl
-runDynamicsTest (Dynamics m) iv sl =
-  do let (nl, nu) = iterationBnds iv (dt sl)
+basicRunDynamics :: BasicModel a -> Interval -> Solver -> IO [a]
+basicRunDynamics (Dynamics m) iv sl =
+  do let (nl, nu) = basicIterationBnds iv (dt sl)
          parameterise n = Parameters { interval = iv,
                                        time = iterToTime iv sl n 0,
                                        iteration = n,
                                        solver = sl { stage = 0 }}
-     sequence $ map (m . parameterise) [nl .. nu]
+         ps = Parameters { interval = iv,
+                           time = stopTime iv,
+                           iteration = nu,
+                           solver = sl { stage = -1}}
+     if (iterToTime iv sl nu 0) - (stopTime iv) < epslon
+     then sequence $ map (m . parameterise) [nl .. nu]
+     else sequence $ ((init $ map (m . parameterise) [nl .. nu]) ++ [m ps])
 

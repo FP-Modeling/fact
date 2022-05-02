@@ -292,7 +292,7 @@ integEuler :: Dynamics Double
 integEuler (Dynamics diff) (Dynamics init) (Dynamics compute) ps =
   case iteration ps of
     0 -> 
-      init params
+      init ps
     n -> do 
       let iv  = interval ps
           sl  = solver ps

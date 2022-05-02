@@ -20,6 +20,10 @@ iterationBnds :: Interval -> TimeStep -> (Iteration, Iteration)
 iterationBnds interv dt = (0, ceiling ((stopTime interv - 
                                startTime interv) / dt))
 
+basicIterationBnds :: Interval -> TimeStep -> (Iteration, Iteration)
+basicIterationBnds interv dt = (0, round ((stopTime interv - 
+                                    startTime interv) / dt))
+
 -- | Auxiliary functions for boundaries of iterations                   
 iterationLoBnd :: Interval -> TimeStep -> Iteration
 iterationLoBnd interv dt = fst $ iterationBnds interv dt

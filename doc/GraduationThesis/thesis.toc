@@ -29,11 +29,13 @@
 \contentsline {chapter}{\numberline {6}Caching the Speed Pill}{47}{chapter.6}%
 \contentsline {section}{\numberline {6.1}Performance}{47}{section.6.1}%
 \contentsline {section}{\numberline {6.2}The Saving Strategy}{48}{section.6.2}%
-\contentsline {section}{\numberline {6.3}Tweak II: Memoization}{49}{section.6.3}%
-\contentsline {chapter}{\numberline {7}Conclusion}{56}{chapter.7}%
-\contentsline {section}{\numberline {7.1}Future Improvements}{56}{section.7.1}%
-\contentsline {section}{\numberline {7.2}Final Thoughts}{58}{section.7.2}%
-\contentsline {chapter}{References}{59}{section*.44}%
+\contentsline {section}{\numberline {6.3}Tweak II: Model and Driver}{49}{section.6.3}%
+\contentsline {section}{\numberline {6.4}Tweak III: Memoization}{51}{section.6.4}%
+\contentsline {section}{\numberline {6.5}Improvements}{57}{section.6.5}%
+\contentsline {chapter}{\numberline {7}Conclusion}{59}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Future Improvements}{59}{section.7.1}%
+\contentsline {section}{\numberline {7.2}Final Thoughts}{61}{section.7.2}%
+\contentsline {chapter}{References}{62}{section*.45}%
 \babel@toc {american}{}
 \babel@toc {american}{}
 \babel@toc {american}{}

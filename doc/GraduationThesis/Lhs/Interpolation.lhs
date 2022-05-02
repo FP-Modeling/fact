@@ -111,24 +111,19 @@ Naturally, it remains to re-implement the driver functions. The outer functions 
 
 \ignore{
 \begin{code}
-runDynamics :: Model a -> Interval -> Solver -> IO [a]
-runDynamics (Dynamics m) iv sl = 
-  do d <- m Parameters { interval = iv,
-                         time = startTime iv,
-                         iteration = 0,
-                         solver = sl { stage = 0 }}
-     sequence $ subRunDynamics d iv sl
-     
 iterationLoBnd :: Interval -> Double -> Int
 iterationLoBnd interv dt = fst $ iterationBnds interv dt
 
 iterationHiBnd :: Interval -> Double -> Int
 iterationHiBnd interv dt = snd $ iterationBnds interv dt                   
 
+iterationBnds :: Interval -> Double -> (Int, Int)
+iterationBnds interv dt = (0, ceiling ((stopTime interv - 
+                               startTime interv) / dt))
 \end{code}
 }
 
-\begin{code}
+\begin{spec}
 iterationBnds :: Interval -> Double -> (Int, Int)
 iterationBnds interv dt = (0, ceiling ((stopTime interv - 
                                startTime interv) / dt))
@@ -147,7 +142,7 @@ subRunDynamics (Dynamics m) iv sl =
      if (iterToTime iv sl nu 0) - (stopTime iv) < 0.00001
      then map (m . parameterise) [nl .. nu]
      else (init $ map (m . parameterise) [nl .. nu]) ++ [m ps]     
-\end{code}
+\end{spec}
 
 The new implementation of \textit{iterationBnds} is pretty similar to the previous one, with the difference being the replacement of the \textit{round} function for the \textit{ceiling} function. As explained in the previous section, the rounding not only adds some random behaviour to occur depeding on user input, but also can tell the integrator to stop executing before even surpassing the value of interest. For instance, the time 5.3 seconds will never be reached because its rounded version is 5. The opposite is true when using \textit{ceiling}: it is assured that the value of interest will be in the interval of computed values. So, when dealing with 5.3, the integrator will calculate all values up to 6 seconds if the time step is 1. Further, because our goal is to apply an interpolation function, having extra values that go beyond the request time comes in handy, as we will see shortly.
 
@@ -158,7 +153,7 @@ This parameters record, however, will only be used if, and \textbf{only} if, we 
 Next, the integrator needs to be modified in order to cope with negative value in solver stages. The following \textit{interpolate} function will be an add-on to the integrator:
 
 \begin{code}
-interpolate :: Dynamics Real -> Dynamics Real
+interpolate :: Dynamics Double -> Dynamics Double
 interpolate (Dynamics m) = 
   Dynamics $ \ps -> 
   if stage (solver ps) >= 0 then 

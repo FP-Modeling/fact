@@ -12,19 +12,12 @@ import Solver
 import Utils
 import Memo
            
---
--- Integratorral type
---
-
--- | The 'Integrator' type represents an integral.
+-- | The Integrator type represents an integral with caching.
 data Integrator = Integrator { initial :: Dynamics Real,   -- ^ The initial value.
-                     cache   :: IORef (Dynamics Real),
-                     computation  :: IORef (Dynamics Real) }
+                               cache   :: IORef (Dynamics Real),
+                               computation  :: IORef (Dynamics Real)
+                             }
 
-data Integrator' = Integrator' { initial'     :: Dynamics Real,
-                                 computation' :: IORef (Dynamics Real) }
-
--- | Return the initial value.
 initialize :: Dynamics a -> Dynamics a
 initialize (Dynamics m) =
   Dynamics $ \ps ->
@@ -37,7 +30,6 @@ initialize (Dynamics m) =
                 iteration = 0,
                 solver = sl { stage = 0 }}
 
--- -- | Create a new integral with the specified initial value.
 newInteg :: Dynamics Real -> Dynamics Integrator
 newInteg i = 
   do r1 <- liftIO $ newIORef $ initialize i 
@@ -52,14 +44,12 @@ newInteg i =
      liftIO $ writeIORef (cache integ) y
      return integ
 
--- | Return the integral's value.
 readInteg :: Integrator -> Dynamics Real
 readInteg integ = 
   Dynamics $ \ps ->
   do (Dynamics m) <- readIORef (cache integ)
      m ps
      
--- -- | Set the derivative for the integral.
 diffInteg :: Integrator -> Dynamics Real -> Dynamics ()
 diffInteg integ diff =
   do let z = Dynamics $ \ps ->
@@ -70,19 +60,6 @@ diffInteg integ diff =
                 RungeKutta2 -> integRK2 diff i y ps
                 RungeKutta4 -> integRK4 diff i y ps
      liftIO $ writeIORef (computation integ) z -- This is the new computation now!
-
-     
--- -- | Set the derivative for the integral.
-diffInteg2 :: Integrator' -> Dynamics Real -> Dynamics ()
-diffInteg2 integ diff =
-  do let z = Dynamics $ \ps ->
-           do y <- readIORef (computation' integ) -- Give me past values
-              let i = initial' integ -- Give me initial value
-              case method (solver ps) of -- Check the solver method
-                Euler -> integEuler diff i y ps
-                RungeKutta2 -> integRK2 diff i y ps
-                RungeKutta4 -> integRK4 diff i y ps
-     liftIO $ writeIORef (computation' integ) (interpolate z) -- This is the new computation now!
 
 integEuler :: Dynamics Real
              -> Dynamics Real 
@@ -208,3 +185,32 @@ integRK4 (Dynamics f) (Dynamics i) (Dynamics y) ps =
     _ -> 
       error "Incorrect stase: integRK4"
 
+
+-- | The Integrator' type represents an integral without caching.
+data Integrator' = Integrator' { initial'     :: Dynamics Real,
+                                 computation' :: IORef (Dynamics Real)
+                               }
+
+newInteg' :: Dynamics Double -> Dynamics Integrator'
+newInteg' i = 
+  do comp <- liftIO $ newIORef $ initialize i 
+     let integ = Integrator'{ initial'     = i, 
+                              computation' = comp }
+     return integ
+
+readInteg' :: Integrator' -> Dynamics Real
+readInteg' integ = 
+  Dynamics $ \ps ->
+  do (Dynamics m) <- readIORef (computation' integ)
+     m ps
+     
+diffInteg' :: Integrator' -> Dynamics Real -> Dynamics ()
+diffInteg' integ diff =
+  do let z = Dynamics $ \ps ->
+           do y <- readIORef (computation' integ)
+              let i = initial' integ
+              case method (solver ps) of
+                Euler -> integEuler diff i y ps
+                RungeKutta2 -> integRK2 diff i y ps
+                RungeKutta4 -> integRK4 diff i y ps
+     liftIO $ writeIORef (computation' integ) z

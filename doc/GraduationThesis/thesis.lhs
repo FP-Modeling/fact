@@ -31,12 +31,12 @@
 \newminted[code]{haskell}{breaklines,autogobble,linenos=true, numberblanklines=false, fontsize=\footnotesize}
 \newminted[spec]{haskell}{breaklines,autogobble,linenos=true, numberblanklines=false, fontsize=\footnotesize}
 
-\orientador{\prof José Edil Guimarães}{CIC/UnB}%
-\coordenador[a]{\prof[a] Ada Lovelace}{Bibliothèque universelle de Genève}%
-\diamesano{14}{maio}{2022}%
+\orientador{\prof José Edil Guimarães}{ENE/Unb}%
+\coordenador{\prof João José Costa Gondim}{CIC/Unb}%
+\diamesano{11}{may}{2022}%
 
-\membrobanca{\prof Donald Knuth}{Stanford University}%
-\membrobanca{\dr Leslie Lamport}{Microsoft Research}%
+\membrobanca{\prof Vander Ramos Alves}{CIC/Unb}%
+\membrobanca{\dr George Ungureanu}{KTH Royal Institute of Technology}%
 
 \autor{Eduardo L.}{Rocha}%
 
@@ -109,7 +109,9 @@ import GraduationThesis.Lhs.Caching
 import GraduationThesis.Lhs.Design
 
 main :: IO ()
-main = mainLorenz
+main =
+  do ans <- lorenzSystem
+     print ans
 \end{code}
 }
 
