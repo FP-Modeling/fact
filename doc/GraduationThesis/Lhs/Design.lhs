@@ -13,7 +13,7 @@ The General Purpose Computer or GPAC is a model for the Differential Analyzer --
 
 In order to add a formal basis to the machine, Shannon built the GPAC model, a mathematical model sustained by proofs and axioms~\cite{Shannon}. The end result was a set of rules for which types of equations can be modeled as well as which units are the minimum necessary for modeling them and how they can be combined. All algebraic functions (e.g. quotients of polynomials and irrational algebraic functions) and algebraic-trascendental functions (e.g. exponentials, logarithms, trigonometric, Bessel, elliptic and probability functions) can be modeled using a GPAC circuit~\cite{Shannon, Edil2018}. Moreover, the four preceding mechanical units were renamed and together created the minimum set of \textbf{circuits} for a given a GPAC~\cite{Edil2018}. Figure \ref{fig:gpacBasic} portrays visual representations of these basic units, followed by precise descriptions of their behaviour, inputs and outputs.
 
-\figuraBib{GPACBasicUnits}{The combination of these four basic units compose any GPAC circuit}{Edil2018}{fig:gpacBasic}{width=.95\textwidth}%
+\figuraBib{GPACBasicUnits}{The combination of these four basic units compose any GPAC circuit (taken from~\cite{Edil2018} with permission)}{}{fig:gpacBasic}{width=.95\textwidth}%
 
 \begin{itemize}
   \item Constant Function: This unit generates a real constant output for any time \textit{t}.
@@ -24,7 +24,7 @@ In order to add a formal basis to the machine, Shannon built the GPAC model, a m
 
 Also, it was defined composition rules that restricts how these units can be hooked to one another. Originally, Shannon established that a valid GPAC is the one in which two inputs and two outputs are not interconnected and the inputs are only driven by either the independent variable $t$ (usually \textit{time}) or by a single unit output~\cite{Shannon, Graca2003, Edil2018}. However, Daniel's GPAC extension, FF-GPAC~\cite{Graca2003}, added new constraints related to no-feedback GPAC configurations while still using the same four basic units. These structures, so-called \textit{polynomial circuits}~\cite{Graca2004, Edil2018}, are being displayed in Figure \ref{fig:gpacComposition} and they are made by only using constant function units, adders and multipliers. Also, such circuits are \textit{combinational}, meaning that they compute values a \textit{point-wise} manner between the given inputs.
 
-\figuraBib{GPACComposition}{Polynomial circuits resembles combinational circuits, in which the circuit respond instantly to changes on its inputs}{Edil2018}{fig:gpacComposition}{width=.55\textwidth}%
+\figuraBib{GPACComposition}{Polynomial circuits resembles combinational circuits, in which the circuit respond instantly to changes on its inputs (taken from~\cite{Edil2018} with permission)}{}{fig:gpacComposition}{width=.55\textwidth}%
 
 \begin{itemize}
   \item An input of a polynomial circuit should be the input $t$ or the output of an integrator. Feedback can only be done from the output of integrators to inputs of polynomial circuits.

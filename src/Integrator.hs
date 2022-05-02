@@ -213,4 +213,4 @@ diffInteg' integ diff =
                 Euler -> integEuler diff i y ps
                 RungeKutta2 -> integRK2 diff i y ps
                 RungeKutta4 -> integRK4 diff i y ps
-     liftIO $ writeIORef (computation' integ) z
+     liftIO $ writeIORef (computation' integ) (interpolate z)

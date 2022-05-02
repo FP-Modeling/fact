@@ -5,76 +5,31 @@ import GraduationThesis.Lhs.Design
 
 type Model a = Dynamics (Dynamics a)
 
-iterToTime :: Interval -> Solver -> Int -> Int -> Double
-iterToTime interv solver n st =
-  if st < 0 then 
-    error "Incorrect stage: iterToTime"
-  else
-    (startTime interv) + n' * (dt solver) + delta (method solver) st
-      where n' = fromInteger (toInteger n)
-            delta Euler       0 = 0
-            delta RungeKutta2 0 = 0
-            delta RungeKutta2 1 = dt solver
-            delta RungeKutta4 0 = 0
-            delta RungeKutta4 1 = dt solver / 2
-            delta RungeKutta4 2 = dt solver / 2
-            delta RungeKutta4 3 = dt solver                          
-
 \end{code}
 }
 
-The previous chapter presented issues with the current implementation. This chapter, \textit{Weakening Discreteness}, tackles the problem related to the size of the time step, and how it affects the results at the stop time of the simulation. After this chapter, only the second problem will remain to be addressed. This task will be accomplished by chapter 6, \textit{Caching the Speed Pill}.
+The previous chapter ended anouncing that drawbacks are present in the current implementation. This chapter will introduce the first concern: numerical methods do not reside in the continuous domain, the one we are actually interested in. After this chapter, this domain issue will be addressed by via \textbf{interpolation}, with a few tweaks in the driver presented in chapter 4.
 
-\section{Time Step's In-betweens}
+\section{Time Domains}
 
-The first drawback is related to the time steps and the stop time the user is interested in. As explained in the previous chapters, the size of the time step is used across the simulation to walk through the iteration axis, a discrete version of the time axis. Hence, this size interfers with which interval of time the integrator is capable of computing, given that it is limited to values that are \textbf{multiple} of the size of the time step. This means that multiple end points will generate the same answer, affecting the accuracy of the simulator.
+When dealing with continuous time, \texttt{Rivika} changes the domain in which \textbf{time} is being modeled. Figure \ref{fig:timeDomains} shows the domains that the implementation interact with during execution:
 
-For instance, a simulation that runs in the inverval of 0 to 6 seconds with a time step of 1 will have the same output as if the interval was from 0 to 5.5 seconds, considering the same size of time step. Because the time of interest in in between two multiples of the time step, 5 and 6 in this case, and the simulator always \textbf{rounds} the iteration according to the time step, arbitrary in-between values are not modeled correctly. 
+\figuraBib{TimeDomains}{During simulation, functions change the time domain to the one that better fits certain entities, such as the \texttt{Solver} and the driver. The image is heavily inspired by a figure in~\cite{Edil2017}}{}{fig:timeDomains}{width=.85\textwidth}%
 
-\section{Accepting Computer's Limitations}
+The problems starts in the physical domain. The goal is to obtain a value of an unknown function $y(t)$ at time $t_x$. However, because the solution is based on \textbf{numerical methods} a sampling process occurs and the continuous time domain is transformed into a \textbf{discrete} time domain, where the solver methods reside --- those are represented by the functions \textit{integEuler}, \textit{integRK2} and \textit{integRK4}. A solver depends on the chosen time step to execute a numerical algorithm. Thus, time is modeled by the sum of $t_0$ with $n\Delta$, where $n$ is a natural number. Hence, from the solver perspective, time is always dependent on the time step, i.e., only values that can be described as $t_0 + n\Delta$ can be properly visualized by the solver. Finally, there's the \textbf{iteration} domain, used by the driver functions, \textit{runDynamics} and \textit{runDynamicsFinal}. When executing the driver, one of its first steps is to call the functions \textit{iteraionsBnds}, which convert the simulation time interval to a tuple of numbers that represent the amount of iterations based on the time step of the solver. This functions is presented bellow:
 
-The aforementioned time step problem araises from the \textbf{conversion} from continuous time to discrete iterations. A new look at one of the solver functions demonstrate that checking the iteration is a fundamental part of the used numerical methods. Below, the current iteration in being checked in the sixth line:
 
-\begin{spec}
-integEuler :: Dynamics Real
-             -> Dynamics Real 
-             -> Dynamics Real 
-             -> Parameters -> IO Real
-integEuler (Dynamics diff) (Dynamics init) (Dynamics y) ps =
-  case iteration params of
-    0 -> 
-      init params
-    n -> do 
-      let iv  = interval ps
-          sl  = solver ps
-          ty  = iterToTime iv sl (n - 1) 0
-          psy = ps { time = ty, iteration = n - 1, solver = sl { stage = 0} }
-      a <- y psy
-      b <- diff psy
-      let !v = a + dt (solver ps) * b
-      return v
-\end{spec}
-
-Further, when the driver creates dynamic computations and start the execution process, it uses a list of integers to define which iteration that computation represents. The \textit{subRunDynamics} function uses function composition, represented by the function \texttt{(.)} in Haskell, to create a \texttt{Parameters} record from a number in the created list and the record is applied to the dynamic computation.
-
-\begin{spec}
-subRunDynamics :: Dynamics a -> Interval -> Solver -> [IO a]
-subRunDynamics (Dynamics m) iv sl =
-  do let (nl, nu) = iterationBnds iv (dt sl)
-         parameterise n = Parameters { interval = iv,
-                                       time = iterToTime iv sl n 0,
-                                       iteration = n,
-                                       solver = sl { stage = 0 }}
-     map (m . parameterise) [nl .. nu]
-\end{spec}
-
-With the solver and driver in mind, it is easier to understand the dependency on the time step. When the function \textit{iterationBnds} calculates the first and last iterations to build the list, it uses the time interval and the solver time step. Also, the function \textit{iterToTime} uses these same dependencies in addition to the current iteration and stage. The code below shows the implementation of such functions:
-
-\begin{spec}
+\begin{code}
 iterationBnds :: Interval -> Double -> (Int, Int)
 iterationBnds interv dt = (0, round ((stopTime interv - 
                                startTime interv) / dt))
+\end{code}
 
+To achieve the total number of iterations, the function \textit{iterationBnds} does a \textbf{round} operation on the sampled result of iterations, based on the time interval (\textit{startTime} and \textit{stopTime}) and the time step (\texttt{dt}). The second member of the tuple is always the answer, given that it is assumed that the first member of the tuple is always zero.
+
+The function that allows us to go back to the discrete time domain being in the iteration axis is the \textit{iterToTime} function. It uses the solver information, the iteration and the interval to transition back to time, as depicted by the following code:
+
+\begin{code}
 iterToTime :: Interval -> Solver -> Int -> Int -> Double
 iterToTime interv solver n st =
   if st < 0 then 
@@ -89,25 +44,19 @@ iterToTime interv solver n st =
             delta RungeKutta4 1 = dt solver / 2
             delta RungeKutta4 2 = dt solver / 2
             delta RungeKutta4 3 = dt solver                          
-\end{spec}
+\end{code}
 
-The returned tuple in \textit{iterationBnds} represents how many iterations will be necessary to simulate the given interval using an arbitrary size of time step. The first of the tuple is always zero because only the total amount of iterations is described by the second member. This number can be calculated by discovering how many steps are in the interval. However, this can lead to floating number of iterations if the difference between \textit{stopTime} and \textit{startTime} is \textbf{not} a multiple of the size of the used time step. More importantly, because the \textit{round} function is based on this result, it means that a flooring or ceiling procedures will take place depending on this result, directly affecting how far the simulation will go.
+A transformation from iteration to time depends on the chosen solver method due to their next step functions. For instance, the second and forth order of the Runge-Kutta methods have more stages, and it uses fractions of the time step for more granular use of the derivative function. This is why lines 11 and 12 it is being used half of the time step. Moreover, all discrete time calculations assume that the value starts from the beginning of the simulation (\textit{startTime}). The result is obtained by the sum of the initial value, the solver-dependent \textit{delta} function and the iteration times the solver time step (line 6).
 
-In the second function, \textit{iterToTime}, a similar manipulation happens, with the difference being that the iteration and stage are being converted back to the time axis based on the solver method. This means that this conversion is not perfect, because all the values that cannot be represented by that specific sum --- initial time plus the time step times the iteration plus the solver stage internal step --- will be lost along the way.
-
-The implications of this approach are twofold: the size of the time step directly affects the simulations results if it does not match the interval. For instance, using a time step of 1 in an interval from 0 to 5.3, \textit{iterationBnds} will generate a list from 0 to 5 iterations because of the rounding behaviour. Additionally, \textit{iterToTime} is uncapable of getting back any time that it is not multiple of the time step and cannot be obtained by using the internal solver steps, such as in the Runge-Kutta methods. Intuitively and at first glance, the solution seems simple: just shrink the time step enough to all the number in the interval be multiple of it, like 0.1 as the time step. This, however, is a temporary solution to a permanent problem.
-
-The issue is that, regardless of the time step, it is always possible to make the \textbf{stop time} granular enough to not be a multiple of the time step. Thus, functions that depend on this property make adjustments that in fact calculates the wrong result for that specific time point of interest. The ideal solution would be to have an \textbf{infitesimal} size for the time step; an impossible achievment due to the computer's \textbf{limitation} of representing real numbers as floating points with double precision. Hence, it is not possible to completely cope with the problem, and it exemplifies one of the biggest challenges within the CPS domain: the mathematical requirements to model the continuous are just not available in digital computers.
-
-Thus, the proposed solution described in the next section is not perfect, but atenuates the wrong outcome to some extent by changing the \textit{diffInteg} integrator function to check for this corner case, as well as adapting the driver to also be aware of this situation. In summary, if we can't grasp the time point exactly, then we will try to approximate the solution by \textbf{interpolating} two close results that we have access.
+There is, however, a missing transition: from the discrete time domain to the domain of interest in CPS --- the continuous time axis. This means that if the time value $t_x$ is not present from the solver point of view, it is not possible to obtain $y(t_x)$. The proposed solution is to add an \textbf{interpolation} function into the pipeline, which addresses this transition. Thus, values in between solver steps will be transfered back to the continuous domain.
 
 \section{Tweak I: Interpolation}
 
-This tweak in the current implementation is divided into two parts: the driver and the integrator. Both entities need to cope with this limitation, and they will communicate with each other to properly adapt the outcome. As mentioned previously, we will add an interpolation function to alliviate the errors that arise when the end of the simulation is not achievable via the size of the time step. However, this interpolation procedure needs to occur only in special situations, when it is not possible to model that specific point in time is not a multiple of the time step. Otherwise, the execution should continue as it is.
+This tweak in the current implementation is divided into two parts: the driver and the integrator. These entities will communicate with each other to properly adapt the outcome. As mentioned previously, we will add an interpolation function to change from the discrete domain to the continuous one. However, this interpolation procedure needs to occur only in special situations: when it is not possible to model that specific point in time in the discrete time domain. Otherwise, the execution should continue as it is.
 
-So, the proposed mechanism is the following: the driver will identify these corner cases and communicate to the integrator --- via the \texttt{stage} field in the solver data type --- that the interpolation needs to be added into the pipeline of execution. When this flag is not activated, i.e., the \texttt{stage} informs to continue execution normally, the implementation goes as the previous chapters detailed, and this behaviour is altered \textbf{only} in particular scenarios, that the driver has control upon.
+So, the proposed mechanism is the following: the driver will identify these corner cases and communicate to the integrator --- via the \texttt{stage} field in the solver data type --- that the interpolation needs to be added into the pipeline of execution. When this flag is not on, i.e., the \texttt{stage} informs to continue execution normally, the implementation goes as the previous chapters detailed. This behaviour is altered \textbf{only} in particular scenarios, which the driver will be responsible for identifying.
 
-Naturally, it remains to re-implement the driver functions. The outer functions of the driver, e.g, \textit{runDynamics} and \textit{runDynamcsFinal}, are not affected by this modification, given that those functions only interact with the outer \texttt{Dynamics} of the \texttt{Model} alias. In contrast, their auxiliary functions, e.g., \textit{subRunDynamics} and \textit{subRunDynamicsFinal}, will be now responsible for telling the integrator that extra executions are required. The code below shows the new version of \textit{subRunDynamics}, as well as its new auxiliary function \textit{iterationBnds}:
+Hence, it remains to re-implement the driver functions. The driver will notify the integrator that an interpolation needs to be taken place Furthermore, the function \textit{iterationBnds} will also be modified to use \textit{ceiling} instead of \textit{round}. The reason will be explained further on the line. The code below shows these changes:
 
 \ignore{
 \begin{code}
@@ -120,6 +69,8 @@ iterationHiBnd interv dt = snd $ iterationBnds interv dt
 iterationBnds :: Interval -> Double -> (Int, Int)
 iterationBnds interv dt = (0, ceiling ((stopTime interv - 
                                startTime interv) / dt))
+
+epslon = 0.00001                          
 \end{code}
 }
 
@@ -128,9 +79,11 @@ iterationBnds :: Interval -> Double -> (Int, Int)
 iterationBnds interv dt = (0, ceiling ((stopTime interv - 
                                startTime interv) / dt))
 
-subRunDynamics :: Dynamics a -> Interval -> Solver -> [IO a]
-subRunDynamics (Dynamics m) iv sl =
-  do let (nl, nu) = iterationBnds iv (dt sl)
+epslon = 0.00001                          
+
+runDynamics :: Model a -> Interval -> Solver -> IO [a]
+runDynamics (Dynamics m) iv sl =
+  do let (nl, nu) = basicIterationBnds iv (dt sl)
          parameterise n = Parameters { interval = iv,
                                        time = iterToTime iv sl n 0,
                                        iteration = n,
@@ -139,18 +92,19 @@ subRunDynamics (Dynamics m) iv sl =
                            time = stopTime iv,
                            iteration = nu,
                            solver = sl { stage = -1}}
-     if (iterToTime iv sl nu 0) - (stopTime iv) < 0.00001
-     then map (m . parameterise) [nl .. nu]
-     else (init $ map (m . parameterise) [nl .. nu]) ++ [m ps]     
+     if (iterToTime iv sl nu 0) - (stopTime iv) < epslon
+     then sequence $ map (m . parameterise) [nl .. nu]
+     else sequence $ ((init $ map (m . parameterise) [nl .. nu]) ++ [m ps])
 \end{spec}
 
-The new implementation of \textit{iterationBnds} is pretty similar to the previous one, with the difference being the replacement of the \textit{round} function for the \textit{ceiling} function. As explained in the previous section, the rounding not only adds some random behaviour to occur depeding on user input, but also can tell the integrator to stop executing before even surpassing the value of interest. For instance, the time 5.3 seconds will never be reached because its rounded version is 5. The opposite is true when using \textit{ceiling}: it is assured that the value of interest will be in the interval of computed values. So, when dealing with 5.3, the integrator will calculate all values up to 6 seconds if the time step is 1. Further, because our goal is to apply an interpolation function, having extra values that go beyond the request time comes in handy, as we will see shortly.
+The new implementation of \textit{iterationBnds} is pretty similar to the previous one, with the difference being the replacement of the \textit{round} function for the \textit{ceiling} function. As explained in the previous section, the rounding is used to go to the iteration domain. However, because the interpolation \textbf{requires} both solver steps --- the one that came before $t_x$ and the one immediately
+afterwards --- the number of iterations needs always to surpass the requested time. For instance, the time 5.3 seconds will demand the fifth and sixth iterations with a time step of 1 second. When using \textit{ceiling}, it is assured that the value of interest will be in the interval of computed values. So, when dealing with 5.3, the integrator will calculate all values up to 6 seconds.
 
-If we switch our focus to the new version of \textit{subRunDynamics}, it is clear that lines 4 to 10 are equal to the previous implementation. On line 11, a new record of type \texttt{Parameters} is being created, especifically to these special cases of mismatch between stop time and size of the time step. The differences within this special record are relevant: the time field is being fulfilled with the actual stop time and the stage field of the solver is being set to \textbf{-1}. The latter is how the driver tells the integrator to do something non-ordinary with this parametric record. Later, as we will see, the integrator will check for negative values for the stage and execute a slightly different pipeline.
+Lines 5 to 11 are equal to the previous implementation of the \textit{runDynamics} function. On line 12, a new record of type \texttt{Parameters} is being created, especifically to these special cases of mismatch between discrete and continuous time. The differences within this special record are relevant: the time field is being fulfilled with the actual stop time and the stage field of the solver is being set to \textbf{-1}. The latter is how the driver tells the integrator to apply the interpolation function. Later, as we will see, the integrator will check for negative values for the stage and execute a slightly different pipeline.
 
-This parameters record, however, will only be used if, and \textbf{only} if, we detect that a divergence took place, based on the configuration of the simulation. This is being checked in line 15, where it is being compared the conversion of the last iteration to time with the provided stop time in the \texttt{Interval} type. If they are not discrepant, it means that the simulation can proceed normally. Otherwise, the stop time is between the two last iterations, and cannot be represented because of a too big time step. So, the solution is to cut the last iteration, given that we know that it surpasses the end of the simulation, and add a new member to the list of outcomes, a computation where the \texttt{ps} record is being applied. This major step is happening on line 17.
+This parameters record, however, will only be used if, and \textbf{only} if, we detect that a divergence took place, based on the configuration of the simulation. This is being checked in line 16, where it is being compared the conversion of the last iteration to time with the provided stop time in the \texttt{Interval} type record. If they are not discrepant by an \texttt{epslon} value, it means that the simulation can proceed normally. Otherwise, the stop time is between the two last iterations, and cannot be represented discreetly. So, the solution is to cut the last iteration, given that we know that it surpasses the end of the simulation, and add a new member to the list of outcomes, a computation where the altered \texttt{ps} record is being applied. This major step is happening on line 18.
 
-Next, the integrator needs to be modified in order to cope with negative value in solver stages. The following \textit{interpolate} function will be an add-on to the integrator:
+Next, the integrator needs to be modified in order to cope with negative value in solver stages. The following \textit{interpolate} function will be an added to the integrator:
 
 \begin{code}
 interpolate :: Dynamics Double -> Dynamics Double
@@ -179,7 +133,7 @@ interpolate (Dynamics m) =
           return $ y1 + (y2 - y1) * (t - t1) / (t2 - t1)
 \end{code}
 
-Lines 4 to 6 are the normal workflow for positive values in the \texttt{stage} field. If a corner comes in, the reminaing code applies \textbf{linear interpolation} to it. It accomplishes this by first comparing the next and previous times that the integrator can model based on the time step (lines 14 and 15). These time points are calculated by their correspondent iterations (lines 12 and 13) that comprise the time point of iterest (line 9). Then, the integrator calculates the outcomes in these two bounds, i.e., do applications of the previous and next modeled times points with their respective parametic records (lines 16 to 21). Finally, lines 22 to 24 execute the linear interpolation with the obtained values that contain the non-modeled time point. It is worth noting that this interpolation will \textbf{always} other in the special cases.
+Lines 4 to 6 are the normal workflow for positive values in the \texttt{stage} field. If a corner comes in, the reminaing code applies \textbf{linear interpolation} to it. It accomplishes this by first comparing the next and previous discrete times (lines 14 and 15) relative to \texttt{x} (line 11) --- the discrete counterpart of the time of interest \texttt{t} (line 9). These time points are calculated by their correspondent iterations (lines 12 and 13). Then, the integrator calculates the outcomes in these two bounds, i.e., do applications of the previous and next modeled times points with their respective parametic records (lines 16 to 21). Finally, lines 22 to 24 execute the linear interpolation with the obtained values that contain the non-discrete time point.
 
 The last step in this tweak is to add this function into the integrator function \textit{diffInteg}. The code is almost identical to the one presented in chapter 3, \textit{The Side Effect Beast}. The main difference is in line 10, where the interpolation function is being applied to \texttt{z}:
 

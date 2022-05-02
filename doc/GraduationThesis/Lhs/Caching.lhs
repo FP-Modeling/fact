@@ -54,24 +54,26 @@ Chapter 5, \textit{Travelling across Domains}, leveraged leveraging a major conc
 
 \section{Performance}
 
-The simulations from \texttt{Rivika} take too long to execute. For instance, to execute the Lorenz's Attractor example using the second-order Runge-Kutta method, with an unrealistic time step size for real simulations (time step of $1$ second), the simulator can take around \textbf{8 seconds} to compute 0 to 5 seconds of the physical system with a testbench using a 6-th generation quad-core (\texttt{i5}) Intel processor and 16GB of RAM. Increasing this interval shows an exponential growth in execution time, as depicted by Table \ref{tab:execTimes} (values obtained with the interpolation tweak). Although the memory values are also impractical, it is hard to reason about those number due to Haskell's \textbf{garbage collector}~\footnote{Garbage Collector \href{https://wiki.haskell.org/GHC/Memory\_Management}{\textcolor{blue}{wiki page}}.}, a memory manager that deals with Haskell's \textbf{immutability}. Thus, the memory values serve just to solidify the notion that \texttt{Rivika} is inneficient, showing an exponentinal growth in resource use, which makes it impractical to execute longer simulations and diminishes the usability of the proposed software.
+The simulations from \texttt{Rivika} take too long to execute. For instance, to execute the Lorenz's Attractor example using the second-order Runge-Kutta method, with an unrealistic time step size for real simulations (time step of $1$ second), the simulator can take around \textbf{10 seconds} to compute 0 to 5 seconds of the physical system with a testbench using a 6-th generation quad-core (\texttt{i5}) Intel processor and 16GB of RAM. Increasing this interval shows an exponential growth in execution time, as depicted by Table \ref{tab:execTimes} and by Figure \ref{fig:graph1} (values obtained with the interpolation tweak). Although the memory use is also problematic, it is hard to reason about those number due to Haskell's \textbf{garbage collector}~\footnote{Garbage Collector \href{https://wiki.haskell.org/GHC/Memory\_Management}{\textcolor{blue}{wiki page}}.}, a memory manager that deals with Haskell's \textbf{immutability}. Thus, the memory values serve just to solidify the notion that \texttt{Rivika} is inneficient, showing an exponentinal growth in resource use, which makes it impractical to execute longer simulations and diminishes the usability of the proposed software.
 
 \begin{table}[H]
 \centering
 \begin{tabular}{ccc}
 \hline
 Total of Iterations & Execution Time (seconds) & Consumed Memory (Mb) \\ \hline
-1                   & 0.00                     &  0.5      \\ \hline
-2                   & 0.01                     &  1.6      \\ \hline
-3                   & 0.06                     &  16.5     \\ \hline
-4                   & 0.74                     &  211.3    \\ \hline
-5                   & 8.84                     &  2761.2   \\ \hline
-6                   & 120.94                   &  36140.1  \\ \hline
-7                   & 1544.66                  &  473074.8 \\ \hline
-8                   & 19970.17                 &       \\ \hline
+1                   & 0.01                     &  0.5       \\ \hline
+2                   & 0.01                     &  1.8       \\ \hline
+3                   & 0.08                     &  19.1      \\ \hline
+4                   & 0.79                     &  244.7     \\ \hline
+5                   & 10.06                    &  3198.7    \\ \hline
+6                   & 140.95                   &  41867.3   \\ \hline
+7                   & 1544.66                  &  473074.8  \\ \hline
+8                   & 17812.14                 &  6192624.5 \\ \hline
 \end{tabular}
 \caption{\label{tab:execTimes}Small increases in the number of the iterations within the simulation provoke exponential penalties in performance.}
 \end{table}
+
+\figuraBib{Graph1}{With just a few iterations, the exponential behaviour of the implementation is already noticeable}{}{fig:graph1}{width=.85\textwidth}%
 
 \section{The Saving Strategy}
 
@@ -151,7 +153,7 @@ exampleModel =
      return $ sequence [x, y]
 \end{spec}
 
-Due to the new type signature, this change implies changing the driver, i.e., modify the function \textit{runDynamics} (the changes are analogus to the \textit{runDynamicsFinal} function variant).
+Due to the new type signature, this change implies changing the driver, i.e., modify the function \textit{runDynamics} (the changes are analogus to the \textit{runDynamicsFinal} function variant). Further, a new auxiliary function was created, \textit{subRunDynamics}, to separate the environment call from the interpolate and map functionality. The \textit{runDynamics} will do the former, while the latter will be addressed by the auxiliary function.
 
 \begin{code}
 runDynamics :: Model a -> Interval -> Solver -> IO [a]
