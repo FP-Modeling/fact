@@ -10,7 +10,7 @@ import Prelude hiding (Real)
 import Types
 
 lorenzInterv = Interval { startTime = 0,
-                          stopTime = 40 }
+                          stopTime = 10 }
 
 
 lorenzSolver = Solver { dt = 0.01,
@@ -118,4 +118,68 @@ lorenz7 =
 
 lorenz8 =
   do ans <- runDynamics lorenzModel lorenzInterv8 lorenzSolverTest
+     print "Done"
+
+
+lorenzSolver100 = Solver { dt = 1,
+                           method = RungeKutta2,
+                           stage = 0
+                         }
+
+lorenzSolver1k = Solver { dt = 0.1,
+                          method = RungeKutta2,
+                          stage = 0
+                        }
+
+lorenzSolver10k = Solver { dt = 0.01,
+                           method = RungeKutta2,
+                           stage = 0
+                         }
+
+lorenzSolver100k = Solver { dt = 0.001,
+                            method = RungeKutta2,
+                            stage = 0
+                          }
+
+lorenzSolver1M = Solver { dt = 0.0001,
+                          method = RungeKutta2,
+                          stage = 0
+                        }
+
+lorenzSolver10M = Solver { dt = 0.00001,
+                           method = RungeKutta2,
+                           stage = 0
+                         }
+
+lorenzSolver100M = Solver { dt = 0.000001,
+                            method = RungeKutta2,
+                            stage = 0
+                          }
+
+lorenz100 =
+  do ans <- runDynamics lorenzModel lorenzInterv lorenzSolver100
+     print "Done"
+
+lorenz1k =
+  do ans <- runDynamics lorenzModel lorenzInterv lorenzSolver1k
+     print "Done"
+
+lorenz10k =
+  do ans <- runDynamics lorenzModel lorenzInterv lorenzSolver10k
+     print "Done"
+
+lorenz100k =
+  do ans <- runDynamics lorenzModel lorenzInterv lorenzSolver100k
+     print "Done"
+
+lorenz1M =
+  do ans <- runDynamics lorenzModel lorenzInterv lorenzSolver1M
+     print "Done"
+
+lorenz10M =
+  do ans <- runDynamics lorenzModel lorenzInterv lorenzSolver10M
+     print "Done"
+
+lorenz100M =
+  do ans <- runDynamics lorenzModel lorenzInterv lorenzSolver100M
      print "Done"

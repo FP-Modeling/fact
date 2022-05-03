@@ -31,14 +31,3 @@ executables:
     - -O2
     dependencies:
     - rivika
-
-tests:
-  rivika-test:
-    main:                Spec.hs
-    source-dirs:         test
-    ghc-options:
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
-    dependencies:
-    - rivika

@@ -1,4 +1,4 @@
-module Utils where
+module Interpolation where
 
 import Prelude hiding (Real)
 import Types

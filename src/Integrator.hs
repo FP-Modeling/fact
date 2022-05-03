@@ -9,7 +9,7 @@ import Prelude hiding (Real)
 import Types
 import Dynamics
 import Solver
-import Utils
+import Interpolation
 import Memo
            
 -- | The Integrator type represents an integral with caching.
@@ -53,13 +53,13 @@ readInteg integ =
 diffInteg :: Integrator -> Dynamics Real -> Dynamics ()
 diffInteg integ diff =
   do let z = Dynamics $ \ps ->
-           do y <- readIORef (cache integ) -- Give me past values
-              let i = initial integ -- Give me initial value
-              case method (solver ps) of -- Check the solver method
+           do y <- readIORef (cache integ)
+              let i = initial integ
+              case method (solver ps) of
                 Euler -> integEuler diff i y ps
                 RungeKutta2 -> integRK2 diff i y ps
                 RungeKutta4 -> integRK4 diff i y ps
-     liftIO $ writeIORef (computation integ) z -- This is the new computation now!
+     liftIO $ writeIORef (computation integ) z
 
 integEuler :: Dynamics Real
              -> Dynamics Real 

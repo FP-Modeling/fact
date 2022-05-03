@@ -10,19 +10,6 @@ import Data.IORef
 import Data.Array
 import Data.Array.IO
 
--- --
--- -- Memoization
--- --
--- -- The memoization creates such processes, which values are 
--- -- defined and then stored in the cache for the points of
--- -- integration. You should use some kind of interpolation 
--- -- like the interpolate function to process all other time 
--- -- points that don't coincide with the integration points:
--- --
--- --   x = memo interpolate y    -- a linear interpolation
--- --   x = memo discrete y       -- a discrete process
--- --
-
 -- -- | The 'Memo' class specifies a type for which an array can be created.
 class (MArray IOArray e IO) => Memo e where
   newMemoArray_ :: Ix i => (i, i) -> IO (IOArray i e)

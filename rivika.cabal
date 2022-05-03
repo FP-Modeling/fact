@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: ccb733729b3e514a49908ddeae3d2840289834a76aee4d9f21d0cc92477f263c
+-- hash: b53d1a3266b2839fbbbbfc9c14e9affea2db02519273bfa84fe2690bef6218f3
 
 name:           rivika
 version:        0.1.0.0
@@ -33,12 +33,12 @@ library
       Examples.ChemicalReaction
       Examples.ImprovedLorenz
       Integrator
+      Interpolation
       IO
       Memo
       Simulation
       Solver
       Types
-      Utils
   other-modules:
       Paths_rivika
   hs-source-dirs:
@@ -56,21 +56,6 @@ executable rivika-exe
   hs-source-dirs:
       app
   ghc-options: -O2
-  build-depends:
-      array >=0.3.0.0
-    , base >=4.7 && <5
-    , mtl >=1.1.0.2
-    , rivika
-  default-language: Haskell2010
-
-test-suite rivika-test
-  type: exitcode-stdio-1.0
-  main-is: Spec.hs
-  other-modules:
-      Paths_rivika
-  hs-source-dirs:
-      test
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       array >=0.3.0.0
     , base >=4.7 && <5

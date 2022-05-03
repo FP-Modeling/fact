@@ -4,6 +4,7 @@ import Driver
 import Solver
 import Simulation
 import Integrator
+import Types
 
 interv = Interval { startTime = 0, 
                     stopTime = 10 }
@@ -12,7 +13,7 @@ solv = Solver { dt = 1,
                 method = RungeKutta4,
                 stage = 0 }
 
-model :: Model [Double]
+model :: Model Vector
 model =
   do integA <- newInteg 100
      integB <- newInteg 0
