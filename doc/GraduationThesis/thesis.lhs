@@ -31,12 +31,12 @@
 \newminted[code]{haskell}{breaklines,autogobble,linenos=true, numberblanklines=false, fontsize=\footnotesize}
 \newminted[spec]{haskell}{breaklines,autogobble,linenos=true, numberblanklines=false, fontsize=\footnotesize}
 
-\orientador{\prof José Edil Guimarães}{ENE/Unb}%
-\coordenador{\prof João José Costa Gondim}{CIC/Unb}%
-\diamesano{11}{may}{2022}%
+\orientador{\prof José Edil Guimarães}{ENE/UnB}%
+\coordenador{\prof João José Costa Gondim}{CIC/UnB}%
+\diamesano{11}{May}{2022}%
 
-\membrobanca{\prof Vander Ramos Alves}{CIC/Unb}%
-\membrobanca{\dr George Ungureanu}{KTH Royal Institute of Technology}%
+\membrobanca{\prof Vander Ramos Alves}{CIC/UnB}%
+\membrobanca{\dr George Ungureanu}{Ericsson Sweden}%
 
 \autor{Eduardo L.}{Rocha}%
 
