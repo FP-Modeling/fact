@@ -11,31 +11,32 @@
 \contentsline {section}{\numberline {2.2}The Shape of Information}{8}{section.2.2}%
 \contentsline {section}{\numberline {2.3}Modeling Reality}{12}{section.2.3}%
 \contentsline {section}{\numberline {2.4}Making Mathematics Cyber}{14}{section.2.4}%
-\contentsline {chapter}{\numberline {3}Effectful Integrals}{17}{chapter.3}%
-\contentsline {section}{\numberline {3.1}Uplifting the Dynamics Type}{17}{section.3.1}%
-\contentsline {section}{\numberline {3.2}GPAC Bind I: Dynamics}{20}{section.3.2}%
-\contentsline {section}{\numberline {3.3}Exploiting Impurity}{21}{section.3.3}%
-\contentsline {section}{\numberline {3.4}GPAC Bind II: Integrator}{25}{section.3.4}%
-\contentsline {section}{\numberline {3.5}Using Recursion to solve Math}{27}{section.3.5}%
-\contentsline {chapter}{\numberline {4}Execution Walkthrough}{30}{chapter.4}%
-\contentsline {section}{\numberline {4.1}From Models to Models}{30}{section.4.1}%
-\contentsline {section}{\numberline {4.2}Driving the Model}{33}{section.4.2}%
-\contentsline {section}{\numberline {4.3}An attractive example}{34}{section.4.3}%
-\contentsline {section}{\numberline {4.4}Lorenz's Butterfly}{40}{section.4.4}%
-\contentsline {chapter}{\numberline {5}Travelling across Domains}{41}{chapter.5}%
-\contentsline {section}{\numberline {5.1}Time Domains}{41}{section.5.1}%
-\contentsline {section}{\numberline {5.2}Tweak I: Interpolation}{43}{section.5.2}%
-\contentsline {chapter}{\numberline {6}Caching the Speed Pill}{47}{chapter.6}%
-\contentsline {section}{\numberline {6.1}Performance}{47}{section.6.1}%
-\contentsline {section}{\numberline {6.2}The Saving Strategy}{48}{section.6.2}%
-\contentsline {section}{\numberline {6.3}Tweak II: Memoization}{50}{section.6.3}%
-\contentsline {section}{\numberline {6.4}A change in Perspective}{56}{section.6.4}%
-\contentsline {section}{\numberline {6.5}Tweak III: Model and Driver}{57}{section.6.5}%
-\contentsline {section}{\numberline {6.6}Results with Caching}{59}{section.6.6}%
-\contentsline {chapter}{\numberline {7}Conclusion}{61}{chapter.7}%
-\contentsline {section}{\numberline {7.1}Future Improvements}{61}{section.7.1}%
-\contentsline {section}{\numberline {7.2}Final Thoughts}{63}{section.7.2}%
-\contentsline {chapter}{References}{64}{section*.52}%
+\contentsline {chapter}{\numberline {3}Effectful Integrals}{16}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Uplifting the Dynamics Type}{16}{section.3.1}%
+\contentsline {section}{\numberline {3.2}GPAC Bind I: Dynamics}{19}{section.3.2}%
+\contentsline {section}{\numberline {3.3}Exploiting Impurity}{20}{section.3.3}%
+\contentsline {section}{\numberline {3.4}GPAC Bind II: Integrator}{24}{section.3.4}%
+\contentsline {section}{\numberline {3.5}Using Recursion to solve Math}{26}{section.3.5}%
+\contentsline {chapter}{\numberline {4}Execution Walkthrough}{29}{chapter.4}%
+\contentsline {section}{\numberline {4.1}From Models to Models}{29}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Driving the Model}{32}{section.4.2}%
+\contentsline {section}{\numberline {4.3}An attractive example}{33}{section.4.3}%
+\contentsline {section}{\numberline {4.4}Lorenz's Butterfly}{39}{section.4.4}%
+\contentsline {chapter}{\numberline {5}Travelling across Domains}{40}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Time Domains}{40}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Tweak I: Interpolation}{42}{section.5.2}%
+\contentsline {chapter}{\numberline {6}Caching the Speed Pill}{46}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Performance}{46}{section.6.1}%
+\contentsline {section}{\numberline {6.2}The Saving Strategy}{47}{section.6.2}%
+\contentsline {section}{\numberline {6.3}Tweak II: Memoization}{49}{section.6.3}%
+\contentsline {section}{\numberline {6.4}A change in Perspective}{55}{section.6.4}%
+\contentsline {section}{\numberline {6.5}Tweak III: Model and Driver}{56}{section.6.5}%
+\contentsline {section}{\numberline {6.6}Results with Caching}{58}{section.6.6}%
+\contentsline {chapter}{\numberline {7}Conclusion}{60}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Limitations}{60}{section.7.1}%
+\contentsline {section}{\numberline {7.2}Future Improvements}{61}{section.7.2}%
+\contentsline {section}{\numberline {7.3}Final Thoughts}{64}{section.7.3}%
+\contentsline {chapter}{References}{65}{section*.52}%
 \babel@toc {american}{}
 \babel@toc {american}{}
 \babel@toc {american}{}
