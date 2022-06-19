@@ -15,7 +15,7 @@ lorenzInterv = Interval { startTime = 0,
 
 lorenzSolver = Solver { dt = 0.01,
                         method = RungeKutta2,
-                        stage = 0
+                        stage = SolverStage 0
                       }
 
 sigma = 10.0
@@ -85,7 +85,7 @@ lorenzInterv8 = Interval { startTime = 0,
 
 lorenzSolverTest = Solver { dt = 1,
                              method = RungeKutta2,
-                             stage = 0
+                             stage = SolverStage 0
                            }
 
 lorenz1 =
@@ -123,37 +123,37 @@ lorenz8 =
 
 lorenzSolver100 = Solver { dt = 1,
                            method = RungeKutta2,
-                           stage = 0
+                           stage = SolverStage 0
                          }
 
 lorenzSolver1k = Solver { dt = 0.1,
                           method = RungeKutta2,
-                          stage = 0
+                          stage = SolverStage 0
                         }
 
 lorenzSolver10k = Solver { dt = 0.01,
                            method = RungeKutta2,
-                           stage = 0
+                           stage = SolverStage 0
                          }
 
 lorenzSolver100k = Solver { dt = 0.001,
                             method = RungeKutta2,
-                            stage = 0
+                            stage = SolverStage 0
                           }
 
 lorenzSolver1M = Solver { dt = 0.0001,
                           method = RungeKutta2,
-                          stage = 0
+                          stage = SolverStage 0
                         }
 
 lorenzSolver10M = Solver { dt = 0.00001,
                            method = RungeKutta2,
-                           stage = 0
+                           stage = SolverStage 0
                          }
 
 lorenzSolver100M = Solver { dt = 0.000001,
                             method = RungeKutta2,
-                            stage = 0
+                            stage = SolverStage 0
                           }
 
 lorenz100 =

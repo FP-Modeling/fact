@@ -10,6 +10,14 @@ data Solver = Solver { dt        :: Real,      -- ^ the integration time step
                        stage     :: Stage      -- ^ the current stage
                      } deriving (Eq, Ord, Show)
 
+data Stage = SolverStage Int
+           | Interpolate
+           deriving (Eq, Ord, Show)
+
+getSolverStage :: Stage -> Int
+getSolverStage (SolverStage st) = st
+getSolverStage Interpolate = 0
+
 -- | It defines the integration method.
 data Method = Euler          -- ^ Euler's method
             | RungeKutta2    -- ^ the 2nd order Runge-Kutta method
@@ -20,17 +28,19 @@ data Method = Euler          -- ^ Euler's method
 stages :: Solver -> [Stage]
 stages sl = 
   case method sl of
-    Euler -> [0]
-    RungeKutta2 -> [0, 1]
-    RungeKutta4 -> [0, 1, 2, 3]
+    Euler -> solverStage [0]
+    RungeKutta2 -> solverStage [0, 1]
+    RungeKutta4 -> solverStage [0, 1, 2, 3]
+  where solverStage list = map SolverStage list
 
 -- | Make a tuple with minimum and maximum boundaries, based on the solver method
 stageBnds :: Solver -> (Stage, Stage)
 stageBnds sl = 
   case method sl of
-    Euler -> (0, 0)
-    RungeKutta2 -> (0, 1)
-    RungeKutta4 -> (0, 3)
+    Euler -> solverStage (0, 0)
+    RungeKutta2 -> solverStage (0, 1)
+    RungeKutta4 -> solverStage (0, 3)
+  where solverStage (init, end) = (SolverStage init, SolverStage end)
 
 -- | Auxiliary functions for boundaries of stages
 stageLoBnd :: Solver -> Stage
@@ -41,9 +51,10 @@ stageHiBnd sc = snd $ stageBnds sc
 
 -- | Transforms iteration to time
 iterToTime :: Interval -> Solver -> Iteration -> Stage -> Real
-iterToTime interv solver n st =
+iterToTime _ _ _ Interpolate = error "Incorrect stage: Interpolate"
+iterToTime interv solver n (SolverStage st) =
   if st < 0 then 
-    error "Incorrect stage: iterToTime"
+    error "Incorrect solver stage in iterToTime"
   else
     (startTime interv) + n' * (dt solver) + delta (method solver) st
       where n' = fromInteger (toInteger n)

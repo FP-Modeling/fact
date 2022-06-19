@@ -44,7 +44,7 @@ lorenzInterv8 = Interval { startTime = 0,
 
 basicLorenzSolver = Solver { dt = 1,
                              method = RungeKutta2,
-                             stage = 0
+                             stage = SolverStage 0
                            }
 
 sigma = 10.0

@@ -11,7 +11,7 @@ interv = Interval { startTime = 0,
 
 solv = Solver { dt = 1,
                 method = RungeKutta4,
-                stage = 0 }
+                stage = SolverStage 0 }
 
 model :: Model Vector
 model =

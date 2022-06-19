@@ -21,14 +21,14 @@ data Integrator = Integrator { initial :: Dynamics Real,   -- ^ The initial valu
 initialize :: Dynamics a -> Dynamics a
 initialize (Dynamics m) =
   Dynamics $ \ps ->
-  if iteration ps == 0 && stage (solver ps) == 0 then
+  if iteration ps == 0 && getSolverStage (stage $ solver ps) == 0 then
     m ps
   else
     let iv = interval ps
         sl = solver ps
-    in m $ ps { time = iterToTime iv sl 0 0,
+    in m $ ps { time = iterToTime iv sl 0 (SolverStage 0),
                 iteration = 0,
-                solver = sl { stage = 0 }}
+                solver = sl { stage = SolverStage 0 }}
 
 newInteg :: Dynamics Real -> Dynamics Integrator
 newInteg i = 
@@ -72,8 +72,8 @@ integEuler (Dynamics diff) (Dynamics i) (Dynamics y) ps =
     n -> do 
       let iv  = interval ps
           sl  = solver ps
-          ty  = iterToTime iv sl (n - 1) 0
-          psy = ps { time = ty, iteration = n - 1, solver = sl { stage = 0} }
+          ty  = iterToTime iv sl (n - 1) (SolverStage 0)
+          psy = ps { time = ty, iteration = n - 1, solver = sl { stage = SolverStage 0} }
       a <- y psy
       b <- diff psy
       let !v = a + dt (solver ps) * b
@@ -85,35 +85,35 @@ integRK2 :: Dynamics Real
            -> Parameters -> IO Real
 integRK2 (Dynamics f) (Dynamics i) (Dynamics y) ps =
   case stage (solver ps) of
-    0 -> case iteration ps of
-      0 ->
-        i ps
-      n -> do
-        let iv = interval ps
-            sl = solver ps
-            ty = iterToTime iv sl (n - 1) 0
-            t1 = ty
-            t2 = iterToTime iv sl (n - 1) 1
-            psy = ps { time = ty, iteration = n - 1, solver = sl { stage = 0 }}
-            ps1 = psy
-            ps2 = ps { time = t2, iteration = n - 1, solver = sl { stage = 1 }}
-        vy <- y psy
-        k1 <- f ps1
-        k2 <- f ps2
-        let !v = vy + dt sl / 2.0 * (k1 + k2)
-        return v
-    1 -> do
-      let iv = interval ps
-          sl = solver ps
-          n  = iteration ps
-          ty = iterToTime iv sl n 0
-          t1 = ty
-          psy = ps { time = ty, iteration = n, solver = sl { stage = 0 }}
-          ps1 = psy
-      vy <- y psy
-      k1 <- f ps1
-      let !v = vy + dt sl * k1
-      return v
+    SolverStage 0 -> case iteration ps of
+                       0 ->
+                         i ps
+                       n -> do
+                         let iv = interval ps
+                             sl = solver ps
+                             ty = iterToTime iv sl (n - 1) (SolverStage 0)
+                             t1 = ty
+                             t2 = iterToTime iv sl (n - 1) (SolverStage 1)
+                             psy = ps { time = ty, iteration = n - 1, solver = sl { stage = SolverStage 0 }}
+                             ps1 = psy
+                             ps2 = ps { time = t2, iteration = n - 1, solver = sl { stage = SolverStage 1 }}
+                         vy <- y psy
+                         k1 <- f ps1
+                         k2 <- f ps2
+                         let !v = vy + dt sl / 2.0 * (k1 + k2)
+                         return v
+    SolverStage 1 -> do
+                  let iv = interval ps
+                      sl = solver ps
+                      n  = iteration ps
+                      ty = iterToTime iv sl n (SolverStage 0)
+                      t1 = ty
+                      psy = ps { time = ty, iteration = n, solver = sl { stage = SolverStage 0 }}
+                      ps1 = psy
+                  vy <- y psy
+                  k1 <- f ps1
+                  let !v = vy + dt sl * k1
+                  return v
     _ -> 
       error "Incorrect stage: integRK2"
 
@@ -123,65 +123,65 @@ integRK4 :: Dynamics Real
            -> Parameters -> IO Real
 integRK4 (Dynamics f) (Dynamics i) (Dynamics y) ps =
   case stage (solver ps) of
-    0 -> case iteration ps of
-      0 -> 
-        i ps
-      n -> do
-        let iv = interval ps
-            sl = solver ps
-            ty = iterToTime iv sl (n - 1) 0
-            t1 = ty
-            t2 = iterToTime iv sl  (n - 1) 1
-            t3 = iterToTime iv sl  (n - 1) 2
-            t4 = iterToTime iv sl  (n - 1) 3
-            psy = ps { time = ty, iteration = n - 1, solver = sl { stage = 0 }}
-            ps1 = psy
-            ps2 = ps { time = t2, iteration = n - 1, solver = sl { stage = 1 }}
-            ps3 = ps { time = t3, iteration = n - 1, solver = sl { stage = 2 }}
-            ps4 = ps { time = t4, iteration = n - 1, solver = sl { stage = 3 }}
-        vy <- y psy
-        k1 <- f ps1
-        k2 <- f ps2
-        k3 <- f ps3
-        k4 <- f ps4
-        let !v = vy + dt sl / 6.0 * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
-        return v
-    1 -> do
-      let iv = interval ps
-          sl = solver ps
-          n  = iteration ps
-          ty = iterToTime iv sl n 0
-          t1 = ty
-          psy = ps { time = ty, iteration = n, solver = sl { stage = 0 }}
-          ps1 = psy
-      vy <- y psy
-      k1 <- f ps1
-      let !v = vy + dt sl / 2.0 * k1
-      return v
-    2 -> do
-      let iv = interval ps
-          sl = solver ps
-          n  = iteration ps
-          ty = iterToTime iv sl n 0
-          t2 = iterToTime iv sl n 1
-          psy = ps { time = ty, iteration = n, solver = sl { stage = 0 }}
-          ps2 = ps { time = t2, iteration = n, solver = sl { stage = 1 }}
-      vy <- y psy
-      k2 <- f ps2
-      let !v = vy + dt sl / 2.0 * k2
-      return v
-    3 -> do
-      let iv = interval ps
-          sl = solver ps
-          n  = iteration ps
-          ty = iterToTime iv sl n 0
-          t3 = iterToTime iv sl n 2
-          psy = ps { time = ty, iteration = n, solver = sl { stage = 0 }}
-          ps3 = ps { time = t3, iteration = n, solver = sl { stage = 2 }}
-      vy <- y psy
-      k3 <- f ps3
-      let !v = vy + dt sl * k3
-      return v
+    SolverStage 0 -> case iteration ps of
+                       0 -> 
+                         i ps
+                       n -> do
+                         let iv = interval ps
+                             sl = solver ps
+                             ty = iterToTime iv sl (n - 1) (SolverStage 0)
+                             t1 = ty
+                             t2 = iterToTime iv sl  (n - 1) (SolverStage 1)
+                             t3 = iterToTime iv sl  (n - 1) (SolverStage 2)
+                             t4 = iterToTime iv sl  (n - 1) (SolverStage 3)
+                             psy = ps { time = ty, iteration = n - 1, solver = sl { stage = SolverStage 0 }}
+                             ps1 = psy
+                             ps2 = ps { time = t2, iteration = n - 1, solver = sl { stage = SolverStage 1 }}
+                             ps3 = ps { time = t3, iteration = n - 1, solver = sl { stage = SolverStage 2 }}
+                             ps4 = ps { time = t4, iteration = n - 1, solver = sl { stage = SolverStage 3 }}
+                         vy <- y psy
+                         k1 <- f ps1
+                         k2 <- f ps2
+                         k3 <- f ps3
+                         k4 <- f ps4
+                         let !v = vy + dt sl / 6.0 * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
+                         return v
+    SolverStage 1 -> do
+                  let iv = interval ps
+                      sl = solver ps
+                      n  = iteration ps
+                      ty = iterToTime iv sl n (SolverStage 0)
+                      t1 = ty
+                      psy = ps { time = ty, iteration = n, solver = sl { stage = SolverStage 0 }}
+                      ps1 = psy
+                  vy <- y psy
+                  k1 <- f ps1
+                  let !v = vy + dt sl / 2.0 * k1
+                  return v
+    SolverStage 2 -> do
+                  let iv = interval ps
+                      sl = solver ps
+                      n  = iteration ps
+                      ty = iterToTime iv sl n (SolverStage 0)
+                      t2 = iterToTime iv sl n (SolverStage 1)
+                      psy = ps { time = ty, iteration = n, solver = sl { stage = SolverStage 0 }}
+                      ps2 = ps { time = t2, iteration = n, solver = sl { stage = SolverStage 1 }}
+                  vy <- y psy
+                  k2 <- f ps2
+                  let !v = vy + dt sl / 2.0 * k2
+                  return v
+    SolverStage 3 -> do
+                  let iv = interval ps
+                      sl = solver ps
+                      n  = iteration ps
+                      ty = iterToTime iv sl n (SolverStage 0)
+                      t3 = iterToTime iv sl n (SolverStage 2)
+                      psy = ps { time = ty, iteration = n, solver = sl { stage = SolverStage 0 }}
+                      ps3 = ps { time = t3, iteration = n, solver = sl { stage = SolverStage 2 }}
+                  vy <- y psy
+                  k3 <- f ps3
+                  let !v = vy + dt sl * k3
+                  return v
     _ -> 
       error "Incorrect stase: integRK4"
 

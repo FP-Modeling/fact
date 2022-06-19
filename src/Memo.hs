@@ -32,7 +32,7 @@ memo tr (Dynamics m) =
   Dynamics $ \ps ->
   do let sl = solver ps
          iv = interval ps
-         (stl, stu) = stageBnds sl
+         (SolverStage stl, SolverStage stu) = stageBnds sl
          (nl, nu)   = iterationBnds iv (dt sl)
      arr   <- newMemoUArray_ ((stl, nl), (stu, nu))
      nref  <- newIORef 0
@@ -41,16 +41,16 @@ memo tr (Dynamics m) =
            do let sl  = solver ps
                   iv  = interval ps
                   n   = iteration ps
-                  st  = stage sl
-                  stu = stageHiBnd sl 
+                  st  = getSolverStage $ stage sl
+                  stu = getSolverStage $ stageHiBnd sl 
                   loop n' st' = 
                     if (n' > n) || ((n' == n) && (st' > st)) 
                     then 
                       readArray arr (st, n)
                     else 
-                      let ps' = ps { time = iterToTime iv sl n' st',
+                      let ps' = ps { time = iterToTime iv sl n' (SolverStage st'),
                                      iteration = n',
-                                     solver = sl { stage = st' }}
+                                     solver = sl { stage = SolverStage st' }}
                       in do a <- m ps'
                             a `seq` writeArray arr (st', n') a
                             if st' >= stu 
@@ -83,9 +83,9 @@ memo0 tr (Dynamics m) =
                     then 
                       readArray arr n
                     else 
-                      let ps' = ps { time = iterToTime iv sl n' 0,
+                      let ps' = ps { time = iterToTime iv sl n' (SolverStage 0),
                                      iteration = n',
-                                     solver = sl { stage = 0} }
+                                     solver = sl { stage = SolverStage 0} }
                       in do a <- m ps'
                             a `seq` writeArray arr n' a
                             writeIORef nref (n' + 1)
