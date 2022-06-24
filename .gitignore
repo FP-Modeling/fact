@@ -25,6 +25,7 @@ thesis.tex
 *.ist
 *.lot
 *.txt
+*.png
 *.texlhs2TeX
 .stack-work/
 *~

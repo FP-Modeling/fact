@@ -126,6 +126,3 @@ instance (Floating a) => Floating (Dynamics a) where
   asinh = unaryOP asinh
   acosh = unaryOP acosh
   atanh = unaryOP atanh
-
-instance MonadIO Dynamics where
-  liftIO m = Dynamics $ const m     

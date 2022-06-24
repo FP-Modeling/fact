@@ -4,7 +4,6 @@ module Integrator where
 import Data.IORef
 import Control.Monad.Trans
 
-
 import Prelude hiding (Real)
 import Types
 import Dynamics
@@ -31,35 +30,33 @@ initialize (Dynamics m) =
                 solver = sl { stage = SolverStage 0 }}
 
 newInteg :: Dynamics Real -> Dynamics Integrator
-newInteg i = 
-  do r1 <- liftIO $ newIORef $ initialize i 
-     r2 <- liftIO $ newIORef $ initialize i 
+newInteg i =
+  Dynamics $ \ps ->
+  do r1 <- newIORef $ initialize i 
+     r2 <- newIORef $ initialize i 
      let integ = Integrator { initial = i, 
                               cache   = r1,
                               computation  = r2 }
-         z = Dynamics $ \ps -> 
-           do (Dynamics m) <- readIORef (computation integ)
-              m ps
-     y <- memo interpolate z
-     liftIO $ writeIORef (cache integ) y
+         z = Dynamics $ \ps ->  (`apply` ps) =<< readIORef (computation integ)
+     y <- memo interpolate z `apply` ps
+     writeIORef (cache integ) y
      return integ
 
 readInteg :: Integrator -> Dynamics Real
 readInteg integ = 
-  Dynamics $ \ps ->
-  do (Dynamics m) <- readIORef (cache integ)
-     m ps
-     
+  Dynamics $ \ps -> (`apply` ps) =<< readIORef (cache integ)
+
 diffInteg :: Integrator -> Dynamics Real -> Dynamics ()
-diffInteg integ diff =
-  do let z = Dynamics $ \ps ->
-           do y <- readIORef (cache integ)
-              let i = initial integ
-              case method (solver ps) of
-                Euler -> integEuler diff i y ps
-                RungeKutta2 -> integRK2 diff i y ps
-                RungeKutta4 -> integRK4 diff i y ps
-     liftIO $ writeIORef (computation integ) z
+diffInteg integ diff = Dynamics $ const $ writeIORef (computation integ) z
+  where i = initial integ
+        z = Dynamics $ \ps ->
+          let f = solverToFunction (method $ solver ps)
+          in
+          (\y -> f diff i y ps) =<< readIORef (cache integ)
+     
+solverToFunction Euler = integEuler
+solverToFunction RungeKutta2 = integRK2
+solverToFunction RungeKutta4 = integRK4
 
 integEuler :: Dynamics Real
              -> Dynamics Real 
@@ -186,31 +183,31 @@ integRK4 (Dynamics f) (Dynamics i) (Dynamics y) ps =
       error "Incorrect stase: integRK4"
 
 
--- | The Integrator' type represents an integral without caching.
-data Integrator' = Integrator' { initial'     :: Dynamics Real,
-                                 computation' :: IORef (Dynamics Real)
-                               }
+-- -- | The Integrator' type represents an integral without caching.
+-- data Integrator' = Integrator' { initial'     :: Dynamics Real,
+--                                  computation' :: IORef (Dynamics Real)
+--                                }
 
-newInteg' :: Dynamics Double -> Dynamics Integrator'
-newInteg' i = 
-  do comp <- liftIO $ newIORef $ initialize i 
-     let integ = Integrator'{ initial'     = i, 
-                              computation' = comp }
-     return integ
+-- newInteg' :: Dynamics Double -> Dynamics Integrator'
+-- newInteg' i = 
+--   do comp <- liftIO $ newIORef $ initialize i 
+--      let integ = Integrator'{ initial'     = i, 
+--                               computation' = comp }
+--      return integ
 
-readInteg' :: Integrator' -> Dynamics Real
-readInteg' integ = 
-  Dynamics $ \ps ->
-  do (Dynamics m) <- readIORef (computation' integ)
-     m ps
+-- readInteg' :: Integrator' -> Dynamics Real
+-- readInteg' integ = 
+--   Dynamics $ \ps ->
+--   do (Dynamics m) <- readIORef (computation' integ)
+--      m ps
      
-diffInteg' :: Integrator' -> Dynamics Real -> Dynamics ()
-diffInteg' integ diff =
-  do let z = Dynamics $ \ps ->
-           do y <- readIORef (computation' integ)
-              let i = initial' integ
-              case method (solver ps) of
-                Euler -> integEuler diff i y ps
-                RungeKutta2 -> integRK2 diff i y ps
-                RungeKutta4 -> integRK4 diff i y ps
-     liftIO $ writeIORef (computation' integ) (interpolate z)
+-- diffInteg' :: Integrator' -> Dynamics Real -> Dynamics ()
+-- diffInteg' integ diff =
+--   do let z = Dynamics $ \ps ->
+--            do y <- readIORef (computation' integ)
+--               let i = initial' integ
+--               case method (solver ps) of
+--                 Euler -> integEuler diff i y ps
+--                 RungeKutta2 -> integRK2 diff i y ps
+--                 RungeKutta4 -> integRK4 diff i y ps
+--      liftIO $ writeIORef (computation' integ) (interpolate z)

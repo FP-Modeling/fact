@@ -10,8 +10,12 @@ import Prelude hiding (Real)
 import Types
 
 lorenzInterv = Interval { startTime = 0,
-                          stopTime = 10 }
+                          stopTime = 40 }
 
+testLorenzSolver = Solver { dt = 0.001,
+                            method = Euler,
+                            stage = SolverStage 0
+                          }
 
 lorenzSolver = Solver { dt = 0.01,
                         method = RungeKutta2,
@@ -35,6 +39,10 @@ lorenzModel =
      diffInteg integZ (x * y - beta * z)
      return $ sequence [x, y, z]
 
+monadLorenzTest =
+  do ans <- runDynamicsFinal lorenzModel lorenzInterv testLorenzSolver
+     print ans
+
 mainLorenzFinal =
   do ans <- runDynamicsFinal lorenzModel lorenzInterv lorenzSolver
      print ans
@@ -43,9 +51,9 @@ mainLorenz =
   do ans <- runDynamics lorenzModel lorenzInterv lorenzSolver
      print "Done"
 
-allResultsLorenz = runDynamics lorenzModel lorenzInterv lorenzSolver
+allResultsLorenz = runDynamics lorenzModel lorenzInterv testLorenzSolver
 
-lorenzInputOutput = addTime allResultsLorenz lorenzInterv lorenzSolver
+lorenzInputOutput = addTime allResultsLorenz lorenzInterv testLorenzSolver
 
 writeLorenz = do wData <- lorenzInputOutput
                  exportData wData "scripts/LorenzData.txt"
