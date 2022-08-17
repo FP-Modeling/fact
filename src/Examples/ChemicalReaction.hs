@@ -15,15 +15,15 @@ solv = Solver { dt = 1,
 
 model :: Model Vector
 model =
-  do integA <- newInteg 100
-     integB <- newInteg 0
-     integC <- newInteg 0
+  do integA <- createInteg 100
+     integB <- createInteg 0
+     integC <- createInteg 0
      let a = readInteg integA
          b = readInteg integB
          c = readInteg integC
      let ka = 1
          kb = 1
-     diffInteg integA (- ka * a )
-     diffInteg integB (ka * a - kb * b)
-     diffInteg integC (kb * b)
+     updateInteg integA (- ka * a )
+     updateInteg integB (ka * a - kb * b)
+     updateInteg integC (kb * b)
      return $ sequence [a, b, c]

@@ -5,7 +5,7 @@ import Solver
 import Simulation
 import Integrator
 import IO
-import Dynamics
+import CT
 import Prelude hiding (Real)
 import Types
 
@@ -28,30 +28,30 @@ beta = 8.0 / 3.0
 
 lorenzModel :: Model Vector
 lorenzModel =
-  do integX <- newInteg 1.0
-     integY <- newInteg 1.0
-     integZ <- newInteg 1.0
+  do integX <- createInteg 1.0
+     integY <- createInteg 1.0
+     integZ <- createInteg 1.0
      let x = readInteg integX
          y = readInteg integY
          z = readInteg integZ
-     diffInteg integX (sigma * (y - x))
-     diffInteg integY (x * (rho - z) - y)
-     diffInteg integZ (x * y - beta * z)
+     updateInteg integX (sigma * (y - x))
+     updateInteg integY (x * (rho - z) - y)
+     updateInteg integZ (x * y - beta * z)
      return $ sequence [x, y, z]
 
 monadLorenzTest =
-  do ans <- runDynamicsFinal lorenzModel lorenzInterv testLorenzSolver
+  do ans <- runCTFinal lorenzModel lorenzInterv testLorenzSolver
      print ans
 
 mainLorenzFinal =
-  do ans <- runDynamicsFinal lorenzModel lorenzInterv lorenzSolver
+  do ans <- runCTFinal lorenzModel lorenzInterv lorenzSolver
      print ans
 
 mainLorenz =
-  do ans <- runDynamics lorenzModel lorenzInterv lorenzSolver
+  do ans <- runCT lorenzModel lorenzInterv lorenzSolver
      print "Done"
 
-allResultsLorenz = runDynamics lorenzModel lorenzInterv testLorenzSolver
+allResultsLorenz = runCT lorenzModel lorenzInterv testLorenzSolver
 
 lorenzInputOutput = addTime allResultsLorenz lorenzInterv testLorenzSolver
 
@@ -97,35 +97,35 @@ lorenzSolverTest = Solver { dt = 1,
                            }
 
 lorenz1 =
-  do ans <- runDynamics lorenzModel lorenzInterv1 lorenzSolverTest
+  do ans <- runCT lorenzModel lorenzInterv1 lorenzSolverTest
      print "Done"
 
 lorenz2 =
-  do ans <- runDynamics lorenzModel lorenzInterv2 lorenzSolverTest
+  do ans <- runCT lorenzModel lorenzInterv2 lorenzSolverTest
      print "Done"
 
 lorenz3 =
-  do ans <- runDynamics lorenzModel lorenzInterv3 lorenzSolverTest
+  do ans <- runCT lorenzModel lorenzInterv3 lorenzSolverTest
      print "Done"
 
 lorenz4 =
-  do ans <- runDynamics lorenzModel lorenzInterv4 lorenzSolverTest
+  do ans <- runCT lorenzModel lorenzInterv4 lorenzSolverTest
      print "Done"
 
 lorenz5 =
-  do ans <- runDynamics lorenzModel lorenzInterv5 lorenzSolverTest
+  do ans <- runCT lorenzModel lorenzInterv5 lorenzSolverTest
      print "Done"
 
 lorenz6 =
-  do ans <- runDynamics lorenzModel lorenzInterv6 lorenzSolverTest
+  do ans <- runCT lorenzModel lorenzInterv6 lorenzSolverTest
      print "Done"
 
 lorenz7 =
-  do ans <- runDynamics lorenzModel lorenzInterv7 lorenzSolverTest
+  do ans <- runCT lorenzModel lorenzInterv7 lorenzSolverTest
      print "Done"
 
 lorenz8 =
-  do ans <- runDynamics lorenzModel lorenzInterv8 lorenzSolverTest
+  do ans <- runCT lorenzModel lorenzInterv8 lorenzSolverTest
      print "Done"
 
 
@@ -165,29 +165,29 @@ lorenzSolver100M = Solver { dt = 0.000001,
                           }
 
 lorenz100 =
-  do ans <- runDynamics lorenzModel lorenzInterv lorenzSolver100
+  do ans <- runCT lorenzModel lorenzInterv lorenzSolver100
      print "Done"
 
 lorenz1k =
-  do ans <- runDynamics lorenzModel lorenzInterv lorenzSolver1k
+  do ans <- runCT lorenzModel lorenzInterv lorenzSolver1k
      print "Done"
 
 lorenz10k =
-  do ans <- runDynamics lorenzModel lorenzInterv lorenzSolver10k
+  do ans <- runCT lorenzModel lorenzInterv lorenzSolver10k
      print "Done"
 
 lorenz100k =
-  do ans <- runDynamics lorenzModel lorenzInterv lorenzSolver100k
+  do ans <- runCT lorenzModel lorenzInterv lorenzSolver100k
      print "Done"
 
 lorenz1M =
-  do ans <- runDynamics lorenzModel lorenzInterv lorenzSolver1M
+  do ans <- runCT lorenzModel lorenzInterv lorenzSolver1M
      print "Done"
 
 lorenz10M =
-  do ans <- runDynamics lorenzModel lorenzInterv lorenzSolver10M
+  do ans <- runCT lorenzModel lorenzInterv lorenzSolver10M
      print "Done"
 
 lorenz100M =
-  do ans <- runDynamics lorenzModel lorenzInterv lorenzSolver100M
+  do ans <- runCT lorenzModel lorenzInterv lorenzSolver100M
      print "Done"

@@ -1,26 +1,26 @@
 module Driver where
 
-import Dynamics
+import CT
 import Solver
 import Simulation
 
-type Model a = Dynamics (Dynamics a)
+type Model a = CT (CT a)
 
 epslon = 0.00001
 
 -- | Run the simulation and return the result in the last 
 -- time point using the specified simulation specs.
-runDynamicsFinal :: Model a -> Interval -> Solver -> IO a
-runDynamicsFinal (Dynamics m) iv sl = 
+runCTFinal :: Model a -> Interval -> Solver -> IO a
+runCTFinal (CT m) iv sl = 
   do d <- m Parameters { interval = iv,
                          time = startTime iv,
                          iteration = 0,
                          solver = sl { stage = SolverStage 0 }}
-     subRunDynamicsFinal d iv sl
+     subRunCTFinal d iv sl
 
 -- | Auxiliary functions to runDyanamics (individual computation and list of computations)
-subRunDynamicsFinal :: Dynamics a -> Interval -> Solver -> IO a
-subRunDynamicsFinal (Dynamics m) iv sl =
+subRunCTFinal :: CT a -> Interval -> Solver -> IO a
+subRunCTFinal (CT m) iv sl =
   do let n = iterationHiBnd iv (dt sl)
          t = iterToTime iv sl n (SolverStage 0)
          x = m Parameters { interval = iv,
@@ -36,16 +36,16 @@ subRunDynamicsFinal (Dynamics m) iv sl =
 
 -- | Run the simulation and return the results in all 
 -- integration time points using the specified simulation specs.
-runDynamics :: Model a -> Interval -> Solver -> IO [a]
-runDynamics (Dynamics m) iv sl = 
+runCT :: Model a -> Interval -> Solver -> IO [a]
+runCT (CT m) iv sl = 
   do d <- m Parameters { interval = iv,
                          time = startTime iv,
                          iteration = 0,
                          solver = sl { stage = SolverStage 0 }}
-     sequence $ subRunDynamics d iv sl
+     sequence $ subRunCT d iv sl
 
-subRunDynamics :: Dynamics a -> Interval -> Solver -> [IO a]
-subRunDynamics (Dynamics m) iv sl =
+subRunCT :: CT a -> Interval -> Solver -> [IO a]
+subRunCT (CT m) iv sl =
   do let (nl, nu) = iterationBnds iv (dt sl)
          parameterise n = Parameters { interval = iv,
                                        time = iterToTime iv sl n (SolverStage 0),
@@ -59,10 +59,10 @@ subRunDynamics (Dynamics m) iv sl =
      then map (m . parameterise) [nl .. nu]
      else init $ map (m . parameterise) [nl .. nu] ++ [m ps]     
 
-type BasicModel a = Dynamics a
+type BasicModel a = CT a
 
-basicRunDynamics :: BasicModel a -> Interval -> Solver -> IO [a]
-basicRunDynamics (Dynamics m) iv sl =
+basicRunCT :: BasicModel a -> Interval -> Solver -> IO [a]
+basicRunCT (CT m) iv sl =
   do let (nl, nu) = basicIterationBnds iv (dt sl)
          parameterise n = Parameters { interval = iv,
                                        time = iterToTime iv sl n (SolverStage 0),

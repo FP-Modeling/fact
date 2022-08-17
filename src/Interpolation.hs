@@ -2,7 +2,7 @@ module Interpolation where
 
 import Prelude hiding (Real)
 import Types
-import Dynamics
+import CT
 import Simulation
 import Solver
 
@@ -12,9 +12,9 @@ neighborhood sl t t' =
   abs (t - t') <= dt sl / 1.0e6
 
 -- | Discretize the computation in the integration time points.
-discrete :: Dynamics a -> Dynamics a
-discrete (Dynamics m) =
-  Dynamics $ \ps ->
+discrete :: CT a -> CT a
+discrete (CT m) =
+  CT $ \ps ->
   let st = getSolverStage $ stage (solver ps)
       r | st == 0    = m ps
         | st > 0    = let iv = interval ps
@@ -34,9 +34,9 @@ discrete (Dynamics m) =
   in r
 
 -- | Interpolate the computation based on the integration time points only.
-interpolate :: Dynamics Real -> Dynamics Real
-interpolate (Dynamics m) = 
-  Dynamics $ \ps ->
+interpolate :: CT Real -> CT Real
+interpolate (CT m) = 
+  CT $ \ps ->
   case stage $ solver ps of
     SolverStage _ ->  m ps
     Interpolate   -> let iv = interval ps

@@ -30,7 +30,7 @@
 -- SUCH DAMAGE.
 
 -- |
--- Module     : Dynamics
+-- Module     : CT
 -- Copyright  : Copyright (c) 2009-2011, David Sorokin <david.sorokin@gmail.com>
 -- License    : BSD3
 -- Maintainer : Eduardo Lemos Rocha <dudulr10@gmail.com>
@@ -38,8 +38,8 @@
 -- Tested with: GHC 8.10.7
 -- |
 
-module Dynamics 
-       (Dynamics(..),
+module CT 
+       (CT(..),
         Parameters(..)) where
 
 import Control.Monad
@@ -58,43 +58,43 @@ data Parameters = Parameters { interval  :: Interval, -- ^ the simulation interv
                                iteration :: Iteration -- ^ the current iteration
                              } deriving (Eq, Show)
 
-newtype Dynamics a = Dynamics {apply :: Parameters -> IO a}
+newtype CT a = CT {apply :: Parameters -> IO a}
 
-instance Functor Dynamics where
-  fmap f (Dynamics da) = Dynamics $ \ps -> fmap f (da ps)
+instance Functor CT where
+  fmap f (CT da) = CT $ \ps -> fmap f (da ps)
 
-instance Applicative Dynamics where
-  pure a = Dynamics $ const (return a)
+instance Applicative CT where
+  pure a = CT $ const (return a)
   (<*>) = appComposition
 
-appComposition :: Dynamics (a -> b) -> Dynamics a -> Dynamics b
-appComposition (Dynamics df) (Dynamics da)
-  = Dynamics $ \ps -> df ps >>= \f -> fmap f (da ps)
+appComposition :: CT (a -> b) -> CT a -> CT b
+appComposition (CT df) (CT da)
+  = CT $ \ps -> df ps >>= \f -> fmap f (da ps)
   
-instance Monad Dynamics where
+instance Monad CT where
   return  = returnD
   m >>= k = bindD k m
 
-returnD :: a -> Dynamics a
-returnD a = Dynamics $ const (return a)
+returnD :: a -> CT a
+returnD a = CT $ const (return a)
 
-bindD :: (a -> Dynamics b ) -> Dynamics a -> Dynamics b
-bindD k (Dynamics m) = 
-  Dynamics $ \ps -> m ps >>= \a -> (\(Dynamics m') -> m' ps) $ k a
+bindD :: (a -> CT b ) -> CT a -> CT b
+bindD k (CT m) = 
+  CT $ \ps -> m ps >>= \a -> (\(CT m') -> m' ps) $ k a
 
-instance Eq (Dynamics a) where
+instance Eq (CT a) where
   x == y = error "<< Can't compare dynamics >>" 
 
-instance Show (Dynamics a) where
-  showsPrec _ x = showString "<< Dynamics >>"
+instance Show (CT a) where
+  showsPrec _ x = showString "<< CT >>"
 
-unaryOP :: (a -> b) -> Dynamics a -> Dynamics b
+unaryOP :: (a -> b) -> CT a -> CT b
 unaryOP = fmap
 
-binaryOP :: (a -> b -> c) -> Dynamics a -> Dynamics b -> Dynamics c
+binaryOP :: (a -> b -> c) -> CT a -> CT b -> CT c
 binaryOP func da db = fmap func da <*> db
   
-instance (Num a) => Num (Dynamics a) where
+instance (Num a) => Num (CT a) where
   x + y = binaryOP (+) x y
   x - y = binaryOP (-) x y
   x * y = binaryOP (*) x y
@@ -103,12 +103,12 @@ instance (Num a) => Num (Dynamics a) where
   signum = unaryOP signum
   fromInteger i = return $ fromInteger i
 
-instance (Fractional a) => Fractional (Dynamics a) where
+instance (Fractional a) => Fractional (CT a) where
   x / y = binaryOP (/) x y
   recip = unaryOP recip
   fromRational t = return $ fromRational t
 
-instance (Floating a) => Floating (Dynamics a) where
+instance (Floating a) => Floating (CT a) where
   pi = return pi
   exp = unaryOP exp
   log = unaryOP log

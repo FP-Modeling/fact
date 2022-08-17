@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: b53d1a3266b2839fbbbbfc9c14e9affea2db02519273bfa84fe2690bef6218f3
+-- hash: 92778eeae1c252a56c8c454b226ee1fd5cec7e70911646a46a76e65dc8e61a5e
 
 name:           rivika
 version:        0.1.0.0
@@ -27,8 +27,8 @@ source-repository head
 
 library
   exposed-modules:
+      CT
       Driver
-      Dynamics
       Examples.BasicLorenz
       Examples.ChemicalReaction
       Examples.ImprovedLorenz

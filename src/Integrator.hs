@@ -6,20 +6,20 @@ import Control.Monad.Trans
 
 import Prelude hiding (Real)
 import Types
-import Dynamics
+import CT
 import Solver
 import Interpolation
 import Memo
            
 -- | The Integrator type represents an integral with caching.
-data Integrator = Integrator { initial :: Dynamics Real,   -- ^ The initial value.
-                               cache   :: IORef (Dynamics Real),
-                               computation  :: IORef (Dynamics Real)
+data Integrator = Integrator { initial :: CT Real,   -- ^ The initial value.
+                               cache   :: IORef (CT Real),
+                               computation  :: IORef (CT Real)
                              }
 
-initialize :: Dynamics a -> Dynamics a
-initialize (Dynamics m) =
-  Dynamics $ \ps ->
+initialize :: CT a -> CT a
+initialize (CT m) =
+  CT $ \ps ->
   if iteration ps == 0 && getSolverStage (stage $ solver ps) == 0 then
     m ps
   else
@@ -29,27 +29,27 @@ initialize (Dynamics m) =
                 iteration = 0,
                 solver = sl { stage = SolverStage 0 }}
 
-newInteg :: Dynamics Real -> Dynamics Integrator
-newInteg i =
-  Dynamics $ \ps ->
+createInteg :: CT Real -> CT Integrator
+createInteg i =
+  CT $ \ps ->
   do r1 <- newIORef $ initialize i 
      r2 <- newIORef $ initialize i 
      let integ = Integrator { initial = i, 
                               cache   = r1,
                               computation  = r2 }
-         z = Dynamics $ \ps ->  (`apply` ps) =<< readIORef (computation integ)
+         z = CT $ \ps ->  (`apply` ps) =<< readIORef (computation integ)
      y <- memo interpolate z `apply` ps
      writeIORef (cache integ) y
      return integ
 
-readInteg :: Integrator -> Dynamics Real
+readInteg :: Integrator -> CT Real
 readInteg integ = 
-  Dynamics $ \ps -> (`apply` ps) =<< readIORef (cache integ)
+  CT $ \ps -> (`apply` ps) =<< readIORef (cache integ)
 
-diffInteg :: Integrator -> Dynamics Real -> Dynamics ()
-diffInteg integ diff = Dynamics $ const $ writeIORef (computation integ) z
+updateInteg :: Integrator -> CT Real -> CT ()
+updateInteg integ diff = CT $ const $ writeIORef (computation integ) z
   where i = initial integ
-        z = Dynamics $ \ps ->
+        z = CT $ \ps ->
           let f = solverToFunction (method $ solver ps)
           in
           (\y -> f diff i y ps) =<< readIORef (cache integ)
@@ -58,11 +58,11 @@ solverToFunction Euler = integEuler
 solverToFunction RungeKutta2 = integRK2
 solverToFunction RungeKutta4 = integRK4
 
-integEuler :: Dynamics Real
-             -> Dynamics Real 
-             -> Dynamics Real 
+integEuler :: CT Real
+             -> CT Real 
+             -> CT Real 
              -> Parameters -> IO Real
-integEuler (Dynamics diff) (Dynamics i) (Dynamics y) ps =
+integEuler (CT diff) (CT i) (CT y) ps =
   case iteration ps of
     0 -> 
       i ps
@@ -76,11 +76,11 @@ integEuler (Dynamics diff) (Dynamics i) (Dynamics y) ps =
       let !v = a + dt (solver ps) * b
       return v
 
-integRK2 :: Dynamics Real
-           -> Dynamics Real
-           -> Dynamics Real
+integRK2 :: CT Real
+           -> CT Real
+           -> CT Real
            -> Parameters -> IO Real
-integRK2 (Dynamics f) (Dynamics i) (Dynamics y) ps =
+integRK2 (CT f) (CT i) (CT y) ps =
   case stage (solver ps) of
     SolverStage 0 -> case iteration ps of
                        0 ->
@@ -114,11 +114,11 @@ integRK2 (Dynamics f) (Dynamics i) (Dynamics y) ps =
     _ -> 
       error "Incorrect stage: integRK2"
 
-integRK4 :: Dynamics Real
-           -> Dynamics Real
-           -> Dynamics Real
+integRK4 :: CT Real
+           -> CT Real
+           -> CT Real
            -> Parameters -> IO Real
-integRK4 (Dynamics f) (Dynamics i) (Dynamics y) ps =
+integRK4 (CT f) (CT i) (CT y) ps =
   case stage (solver ps) of
     SolverStage 0 -> case iteration ps of
                        0 -> 
@@ -184,26 +184,26 @@ integRK4 (Dynamics f) (Dynamics i) (Dynamics y) ps =
 
 
 -- -- | The Integrator' type represents an integral without caching.
--- data Integrator' = Integrator' { initial'     :: Dynamics Real,
---                                  computation' :: IORef (Dynamics Real)
+-- data Integrator' = Integrator' { initial'     :: CT Real,
+--                                  computation' :: IORef (CT Real)
 --                                }
 
--- newInteg' :: Dynamics Double -> Dynamics Integrator'
--- newInteg' i = 
+-- createInteg' :: CT Double -> CT Integrator'
+-- createInteg' i = 
 --   do comp <- liftIO $ newIORef $ initialize i 
 --      let integ = Integrator'{ initial'     = i, 
 --                               computation' = comp }
 --      return integ
 
--- readInteg' :: Integrator' -> Dynamics Real
+-- readInteg' :: Integrator' -> CT Real
 -- readInteg' integ = 
---   Dynamics $ \ps ->
---   do (Dynamics m) <- readIORef (computation' integ)
+--   CT $ \ps ->
+--   do (CT m) <- readIORef (computation' integ)
 --      m ps
      
--- diffInteg' :: Integrator' -> Dynamics Real -> Dynamics ()
+-- diffInteg' :: Integrator' -> CT Real -> CT ()
 -- diffInteg' integ diff =
---   do let z = Dynamics $ \ps ->
+--   do let z = CT $ \ps ->
 --            do y <- readIORef (computation' integ)
 --               let i = initial' integ
 --               case method (solver ps) of

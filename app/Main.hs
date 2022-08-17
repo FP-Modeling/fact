@@ -2,7 +2,7 @@ module Main where
 
 import Examples.ChemicalReaction
 import Driver
-import Dynamics
+import CT
 import IO
 import Integrator
 import Interpolation
@@ -12,5 +12,5 @@ import Solver
 import Types
 
 main = 
-  do a <- runDynamicsFinal model interv solv
+  do a <- runCTFinal model interv solv
      print a

@@ -2,7 +2,7 @@
 
 module Memo where
 
-import Dynamics
+import CT
 import Solver
 import Simulation
 
@@ -26,10 +26,10 @@ instance (MArray IOUArray e IO) => UMemo e where
 
 -- | Memoize and order the computation in the integration time points using 
 -- the specified interpolation and being aware of the Runge-Kutta method.
-memo :: UMemo e => (Dynamics e -> Dynamics e) -> Dynamics e 
-        -> Dynamics (Dynamics e)
-memo tr (Dynamics m) = 
-  Dynamics $ \ps ->
+memo :: UMemo e => (CT e -> CT e) -> CT e 
+        -> CT (CT e)
+memo tr (CT m) = 
+  CT $ \ps ->
   do let sl = solver ps
          iv = interval ps
          (SolverStage stl, SolverStage stu) = stageBnds sl
@@ -62,14 +62,14 @@ memo tr (Dynamics m) =
               n'  <- readIORef nref
               st' <- readIORef stref
               loop n' st'
-     return $ tr $ Dynamics r
+     return $ tr $ CT r
 
 -- | Memoize and order the computation in the integration time points using 
 -- the specified interpolation and without knowledge of the Runge-Kutta method.
-memo0 :: Memo e => (Dynamics e -> Dynamics e) -> Dynamics e 
-        -> Dynamics (Dynamics e)
-memo0 tr (Dynamics m) = 
-  Dynamics $ \ps ->
+memo0 :: Memo e => (CT e -> CT e) -> CT e 
+        -> CT (CT e)
+memo0 tr (CT m) = 
+  CT $ \ps ->
   do let iv   = interval ps
          bnds = iterationBnds iv (dt (solver ps))
      arr   <- newMemoArray_ bnds
@@ -92,4 +92,4 @@ memo0 tr (Dynamics m) =
                             loop (n' + 1)
               n' <- readIORef nref
               loop n'
-     return $ tr $ Dynamics r
+     return $ tr $ CT r

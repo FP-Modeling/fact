@@ -5,7 +5,7 @@ import Solver
 import Simulation
 import Integrator
 import IO
-import Dynamics
+import CT
 import Prelude hiding (Real)
 import Types
 
@@ -53,45 +53,45 @@ import Types
 
 -- basicLorenzModel :: BasicModel Vector
 -- basicLorenzModel =
---   do integX <- newInteg' 1.0
---      integY <- newInteg' 1.0
---      integZ <- newInteg' 1.0
+--   do integX <- createInteg' 1.0
+--      integY <- createInteg' 1.0
+--      integZ <- createInteg' 1.0
 --      let x = readInteg' integX
 --          y = readInteg' integY
 --          z = readInteg' integZ
---      diffInteg' integX (sigma * (y - x))
---      diffInteg' integY (x * (rho - z) - y)
---      diffInteg' integZ (x * y - beta * z)
+--      updateInteg' integX (sigma * (y - x))
+--      updateInteg' integY (x * (rho - z) - y)
+--      updateInteg' integZ (x * y - beta * z)
 --      sequence [x, y, z]
 
 -- basicLorenz1 =
---   do ans <- basicRunDynamics basicLorenzModel lorenzInterv1 basicLorenzSolver
+--   do ans <- basicRunCT basicLorenzModel lorenzInterv1 basicLorenzSolver
 --      print "Done"
 
 -- basicLorenz2 =
---   do ans <- basicRunDynamics basicLorenzModel lorenzInterv2 basicLorenzSolver
+--   do ans <- basicRunCT basicLorenzModel lorenzInterv2 basicLorenzSolver
 --      print "Done"
 
 -- basicLorenz3 =
---   do ans <- basicRunDynamics basicLorenzModel lorenzInterv3 basicLorenzSolver
+--   do ans <- basicRunCT basicLorenzModel lorenzInterv3 basicLorenzSolver
 --      print "Done"
 
 -- basicLorenz4 =
---   do ans <- basicRunDynamics basicLorenzModel lorenzInterv4 basicLorenzSolver
+--   do ans <- basicRunCT basicLorenzModel lorenzInterv4 basicLorenzSolver
 --      print "Done"
 
 -- basicLorenz5 =
---   do ans <- basicRunDynamics basicLorenzModel lorenzInterv5 basicLorenzSolver
+--   do ans <- basicRunCT basicLorenzModel lorenzInterv5 basicLorenzSolver
 --      print "Done"
 
 -- basicLorenz6 =
---   do ans <- basicRunDynamics basicLorenzModel lorenzInterv6 basicLorenzSolver
+--   do ans <- basicRunCT basicLorenzModel lorenzInterv6 basicLorenzSolver
 --      print "Done"
 
 -- basicLorenz7 =
---   do ans <- basicRunDynamics basicLorenzModel lorenzInterv7 basicLorenzSolver
+--   do ans <- basicRunCT basicLorenzModel lorenzInterv7 basicLorenzSolver
 --      print "Done"
 
 -- basicLorenz8 =
---   do ans <- basicRunDynamics basicLorenzModel lorenzInterv8 basicLorenzSolver
+--   do ans <- basicRunCT basicLorenzModel lorenzInterv8 basicLorenzSolver
 --      print "Done"
