@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 92778eeae1c252a56c8c454b226ee1fd5cec7e70911646a46a76e65dc8e61a5e
+-- hash: b8d6f706b83c2c9c05b2160eedfcd79e6c3eb99d0b1c84842a104270050c46a5
 
 name:           rivika
 version:        0.1.0.0
@@ -32,6 +32,7 @@ library
       Examples.BasicLorenz
       Examples.ChemicalReaction
       Examples.ImprovedLorenz
+      Examples.Sine
       Integrator
       Interpolation
       IO
