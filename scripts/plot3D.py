@@ -23,4 +23,4 @@ plt.show()
 
 plt.plot(xs, zs)
 plt.axis('off')
-plt.savefig('output.png')
+plt.savefig('output3D.png')

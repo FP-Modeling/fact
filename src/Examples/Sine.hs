@@ -5,6 +5,7 @@ import Solver
 import Simulation
 import Integrator
 import Types
+import IO
 
 interv = Interval { startTime = 0, 
                     stopTime = 15 }
@@ -23,3 +24,12 @@ model =
      updateInteg integY z
      updateInteg integZ (kz * y)
      return $ sequence [y, z]
+
+allResultsSine = runCT model interv solv
+
+sineInputOutput = addTime allResultsSine interv solv
+
+writeSine = do wData <- sineInputOutput
+               exportData wData "scripts/SineData.txt"
+
+
