@@ -1,6 +1,7 @@
 module Main where
 
 import Examples.ChemicalReaction
+import Examples.ImprovedLorenz
 import Driver
 import CT
 import IO
@@ -10,7 +11,17 @@ import Memo
 import Simulation
 import Solver
 import Types
+import Criterion
+import Criterion.Measurement
+import qualified Criterion.Types as Criterion
+import qualified Criterion.Measurement.Types as Criterion.Measurement
+import qualified Criterion.Measurement.Types as Criterion.Measurement.Measured
 
-main = 
-  do a <- runCTFinal model interv solv
-     print a
+perform test = do
+  (performance, result) <- measure (nfIO test) 1
+  return (Criterion.Measurement.Measured.measTime performance, result)
+
+main :: IO ()
+main = do
+  results <- sequence $ perform <$> [lorenz100, lorenz1k, lorenz10k, lorenz100k, lorenz1M, lorenz10M, lorenz100M]
+  print results
