@@ -82,6 +82,11 @@ bindD :: (a -> CT b ) -> CT a -> CT b
 bindD k (CT m) = 
   CT $ \ps -> m ps >>= \a -> (\(CT m') -> m' ps) $ k a
 
+bindD' :: (a -> CT b ) -> CT a -> CT b
+bindD' k (CT m) = CT $ \ps -> do
+  a <- m ps
+  k a `apply` ps
+
 instance Eq (CT a) where
   x == y = error "<< Can't compare dynamics >>" 
 
