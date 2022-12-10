@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveFunctor #-}
 -- Copyright (c) 2009, 2010, 2011 David Sorokin <david.sorokin@gmail.com>
 -- 
 -- All rights reserved.
@@ -40,6 +41,7 @@
 
 module CT 
        (CT(..),
+        CT'(..),
         Parameters(..)) where
 
 import Control.Monad
@@ -59,6 +61,16 @@ data Parameters = Parameters { interval  :: Interval, -- ^ the simulation interv
                              } deriving (Eq, Show)
 
 newtype CT a = CT {apply :: Parameters -> IO a}
+
+newtype CT' a = CT' {apply' :: Parameters -> a} deriving Functor
+
+instance Applicative CT' where
+  pure a = CT' $ const a
+  (CT' df) <*> (CT' da) = CT' $ \ps -> df ps (da ps)
+
+instance Monad CT' where
+  return = pure
+  (CT' da) >>= k = CT' $ \ps -> k (da ps) `apply'` ps
 
 instance Functor CT where
   fmap f (CT da) = CT $ \ps -> fmap f (da ps)
@@ -131,3 +143,48 @@ instance (Floating a) => Floating (CT a) where
   asinh = unaryOP asinh
   acosh = unaryOP acosh
   atanh = unaryOP atanh
+
+instance Eq (CT' a) where
+  x == y = error "<< Can't compare dynamics >>" 
+
+instance Show (CT' a) where
+  showsPrec _ x = showString "<< CT' >>"
+
+unaryOP' :: (a -> b) -> CT' a -> CT' b
+unaryOP' = fmap
+
+binaryOP' :: (a -> b -> c) -> CT' a -> CT' b -> CT' c
+binaryOP' func da db = fmap func da <*> db
+  
+instance (Num a) => Num (CT' a) where
+  x + y = binaryOP' (+) x y
+  x - y = binaryOP' (-) x y
+  x * y = binaryOP' (*) x y
+  negate = unaryOP' negate
+  abs = unaryOP' abs
+  signum = unaryOP' signum
+  fromInteger i = return $ fromInteger i
+
+instance (Fractional a) => Fractional (CT' a) where
+  x / y = binaryOP' (/) x y
+  recip = unaryOP' recip
+  fromRational t = return $ fromRational t
+
+instance (Floating a) => Floating (CT' a) where
+  pi = return pi
+  exp = unaryOP' exp
+  log = unaryOP' log
+  sqrt = unaryOP' sqrt
+  x ** y = binaryOP' (**) x y
+  sin = unaryOP' sin
+  cos = unaryOP' cos
+  tan = unaryOP' tan
+  asin = unaryOP' asin
+  acos = unaryOP' acos
+  atan = unaryOP' atan
+  sinh = unaryOP' sinh
+  cosh = unaryOP' cosh
+  tanh = unaryOP' tanh
+  asinh = unaryOP' asinh
+  acosh = unaryOP' acosh
+  atanh = unaryOP' atanh

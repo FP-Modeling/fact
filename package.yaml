@@ -25,6 +25,12 @@ dependencies:
 library:
   source-dirs: src
 
+default-extensions:
+  - OverloadedStrings
+  - BangPatterns
+  - ExplicitForAll
+  - NamedFieldPuns
+
 executables:
   rivika-exe:
     main:                Main.hs

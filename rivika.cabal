@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 9cc5044d5cd668322f49ad6390d68b70bcd36f3bccdf7c949a28c043bdb69ce5
+-- hash: 24dcb3d215ff634dfcd0322c3813963ef5127c874c180aeeb715c0a90a4a18df
 
 name:           rivika
 version:        0.1.0.0
@@ -44,6 +44,11 @@ library
       Paths_rivika
   hs-source-dirs:
       src
+  default-extensions:
+      OverloadedStrings
+      BangPatterns
+      ExplicitForAll
+      NamedFieldPuns
   build-depends:
       array >=0.3.0.0
     , base >=4.7 && <5
@@ -58,6 +63,11 @@ executable rivika-exe
       Paths_rivika
   hs-source-dirs:
       app
+  default-extensions:
+      OverloadedStrings
+      BangPatterns
+      ExplicitForAll
+      NamedFieldPuns
   ghc-options: -O2
   build-depends:
       array >=0.3.0.0
