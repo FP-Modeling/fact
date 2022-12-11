@@ -24,6 +24,31 @@ data Integrator = Integrator { initial :: CT Real,   -- ^ The initial value.
                                computation  :: IORef (CT Real)
                              }
 
+type StateIntegrator s = ST s (Integrator' s)
+
+createInteg' :: CT' Real -> StateIntegrator s
+createInteg' i =
+  do r1 <- newSTRef $ initialize' i 
+     r2 <- newSTRef $ initialize' i
+     let integ = Integrator' i r1 r2
+         z = CT' $ \ps -> fmap (`apply'` ps) (readSTRef (computation' integ))
+     y <- memo' interpolate' z
+     writeSTRef (cache' integ) y
+     return integ
+
+createInteg :: CT Real -> CT Integrator
+createInteg i =
+  CT $ \ps ->
+  do r1 <- newIORef $ initialize i 
+     r2 <- newIORef $ initialize i 
+     let integ = Integrator { initial = i, 
+                              cache   = r1,
+                              computation  = r2 }
+         z = CT $ \ps ->  (`apply` ps) =<< readIORef (computation integ)
+     y <- memo interpolate z `apply` ps
+     writeIORef (cache integ) y
+     return integ
+
 -- | The Integrator type represents an integral with caching.
 data Integrator' s = Integrator' { initial' :: CT' Real,   -- ^ The initial value.
                                    cache'   :: STRef s (CT' Real),
@@ -66,30 +91,6 @@ initialize' (CT' m) =
     in m $ ps { time = iterToTime iv sl 0 (SolverStage 0),
                 iteration = 0,
                 solver = sl { stage = SolverStage 0 }}
-
-createInteg :: CT Real -> CT Integrator
-createInteg i =
-  CT $ \ps ->
-  do r1 <- newIORef $ initialize i 
-     r2 <- newIORef $ initialize i 
-     let integ = Integrator { initial = i, 
-                              cache   = r1,
-                              computation  = r2 }
-         z = CT $ \ps ->  (`apply` ps) =<< readIORef (computation integ)
-     y <- memo interpolate z `apply` ps
-     writeIORef (cache integ) y
-     return integ
-
-createInteg' :: forall s. CT' Real -> CT' (ST s (Integrator' s))
-createInteg' i =
-  CT' $ \ps ->
-  do r1 <- newSTRef $ initialize' i 
-     r2 <- newSTRef $ initialize' i
-     integ <- return $ Integrator' i r1 r2
-     z <- return $  CT' $ \ps -> fmap (`apply'` ps) (readSTRef (computation' integ))
-     y <- memo' interpolate' z `apply'` ps
-     writeSTRef (cache' integ) y
-     return integ
 
 readInteg' :: Integrator' s -> CT' (ST s Real)
 readInteg' integ = 
