@@ -1,3 +1,6 @@
+{-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 module Driver where
 
 import CT
@@ -5,6 +8,8 @@ import Solver
 import Simulation
 import Prelude hiding (Real)
 import Types
+import Control.Monad.ST
+import Integrator
 
 type Model a = CT (CT a)
 
@@ -19,6 +24,27 @@ runCTFinal (CT m) t sl =
                          iteration = 0,
                          solver = sl { stage = SolverStage 0 }}
      subRunCTFinal d t sl
+
+-- | Run the simulation and return the result in the last 
+-- time point using the specified simulation specs.
+--runCTFinal' :: Real -> Solver -> IO [Real]
+runCTFinal' :: (forall s. CT' (CT' (ST s a))) -> Real -> Solver -> a
+runCTFinal' m t sl = runST $ subRunCTFinal' m t sl
+
+subRunCTFinal' :: CT' (CT' (ST s a)) -> Real -> Solver -> ST s a
+subRunCTFinal' (CT' m) t sl = do
+       k <- pure $  m Parameters { interval = Interval 0 t,
+                                                time = 0,
+                                                iteration = 0,
+                                                solver = sl { stage = SolverStage 0 }}
+       let iv = Interval 0 t
+           n = iterationHiBnd iv (dt sl)
+           disct = iterToTime iv sl n (SolverStage 0)
+           mode = if disct - t < epslon then SolverStage 0 else Interpolate
+       k `apply'` Parameters { interval = iv,
+                                 time = disct,
+                                 iteration = n,
+                                 solver = sl { stage = mode }}
 
 -- | Auxiliary functions to runDyanamics (individual computation and list of computations)
 subRunCTFinal :: CT a -> Real -> Solver -> IO a
@@ -36,6 +62,7 @@ subRunCTFinal (CT m) t sl =
                          time = t,
                          iteration = n,
                          solver = sl { stage = Interpolate }}
+
 
 -- | Run the simulation and return the results in all 
 -- integration time points using the specified simulation specs.

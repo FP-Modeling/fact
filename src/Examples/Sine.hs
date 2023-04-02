@@ -1,5 +1,6 @@
 {-# LANGUAGE RecordWildCards #-}
-{-# RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE RankNTypes #-}
 module Examples.Sine where
 
 import Driver
@@ -12,6 +13,7 @@ import CT
 import Prelude hiding (Real)
 import Data.List
 import Simulation
+import Control.Monad.ST
 
 interv = Interval { startTime = 0, 
                     stopTime = 15 }
@@ -30,6 +32,18 @@ model =
      updateInteg integY z
      updateInteg integZ (kz * y)
      return $ sequence [y, z]
+
+
+model2 :: forall s. CT' (CT' (ST s Vector))
+model2 =
+  do integY <- createInteg2 0
+     integZ <- createInteg2 1
+     y <- pure $ readInteg2 integY
+     z <- pure $ readInteg2 integZ
+     kz :: CT' (ST s Real) <- pure . pure $ pure (-1)
+     updateInteg2 integY z
+     updateInteg2 integZ ((\n1 n2 -> (*) <$> n1 <*> n2) <$> kz <*> y)
+     return $ sequence <$> sequence [y, z]
 
 -- distort :: Num a => (a -> a) -> CT Real -> CT Real
 -- distort distortion (CT machine)

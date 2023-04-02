@@ -8,6 +8,7 @@ import IO
 import CT
 import Prelude hiding (Real)
 import Types
+import Control.Monad.ST
 
 lorenzInterv = Interval { startTime = 0,
                           stopTime = 40 }
@@ -25,6 +26,31 @@ lorenzSolver = Solver { dt = 0.01,
 sigma = 10.0
 rho = 28.0
 beta = 8.0 / 3.0
+
+--lorenzModel' :: Model Vector
+-- lorenzModel' =
+--   do integX <- createInteg' 1.0
+--      integY <- createInteg' 1.0
+--      integZ <- createInteg' 1.0
+--      let x = readInteg' integX
+--          y = readInteg' integY
+--          z = readInteg' integZ
+--      updateInteg' integX (()sigma * (y - x))
+--      updateInteg' integY (x * (rho - z) - y)
+--      updateInteg' integZ (x * y - beta * z)
+--      return $ sequence [x, y, z]
+
+model :: Model Vector
+model =
+  do integY <- createInteg 0
+     integZ <- createInteg 1
+     let y = readInteg integY
+         z = readInteg integZ
+         kz = -1
+     updateInteg integY z
+     updateInteg integZ (kz * y)
+     return $ sequence [y, z]
+
 
 lorenzModel :: Model Vector
 lorenzModel =
@@ -44,8 +70,10 @@ lorenzModel =
 --      print ans
 
 -- mainLorenzFinal =
---   do ans <- runCTFinal lorenzModel lorenzInterv lorenzSolver
---      print ans
+--   do ans1 <- runCTFinal model 40 lorenzSolver
+--      ans2 <- runCTFinal' 40 lorenzSolver
+--      print ans1
+--      print ans2
 
 -- mainLorenz =
 --   do ans <- runCT lorenzModel lorenzInterv lorenzSolver
