@@ -20,7 +20,7 @@ runCTFinal (CT m) t sl =
                          solver = sl { stage = SolverStage 0 }}
      subRunCTFinal d t sl
 
--- | Auxiliary functions to runDyanamics (individual computation and list of computations)
+-- | Auxiliary functions to runCTFinal
 subRunCTFinal :: CT a -> Real -> Solver -> IO a
 subRunCTFinal (CT m) t sl =
   do let iv = Interval 0 t
@@ -47,6 +47,7 @@ runCT (CT m) t sl =
                          solver = sl { stage = SolverStage 0 }}
      sequence $ subRunCT d t sl
 
+-- | Auxiliary functions to runCT
 subRunCT :: CT a -> Real -> Solver -> [IO a]
 subRunCT (CT m) t sl =
   do let iv = Interval 0 t
@@ -62,21 +63,3 @@ subRunCT (CT m) t sl =
      if iterToTime iv sl nu (SolverStage 0) - t < epslon
      then map (m . parameterise) [nl .. nu]
      else init $ map (m . parameterise) [nl .. nu] ++ [m ps]     
-
-type BasicModel a = CT a
-
-basicRunCT :: BasicModel a -> Interval -> Solver -> IO [a]
-basicRunCT (CT m) iv sl =
-  do let (nl, nu) = basicIterationBnds iv (dt sl)
-         parameterise n = Parameters { interval = iv,
-                                       time = iterToTime iv sl n (SolverStage 0),
-                                       iteration = n,
-                                       solver = sl { stage = SolverStage 0 }}
-         ps = Parameters { interval = iv,
-                           time = stopTime iv,
-                           iteration = nu,
-                           solver = sl { stage = Interpolate }}
-     if iterToTime iv sl nu (SolverStage 0) - stopTime iv < epslon
-     then sequence $ map (m . parameterise) [nl .. nu]
-     else sequence (init $ map (m . parameterise) [nl .. nu] ++ [m ps])
-

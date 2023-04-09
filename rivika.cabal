@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.34.7.
+-- This file has been generated from package.yaml by hpack version 0.35.2.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 9cc5044d5cd668322f49ad6390d68b70bcd36f3bccdf7c949a28c043bdb69ce5
+-- hash: c8fbb03b04897b9ebf5856ec7e506e01dcfb7b7d819b95b276fd05bcadb9c862
 
 name:           rivika
 version:        0.1.0.0
@@ -27,11 +27,12 @@ source-repository head
 
 library
   exposed-modules:
+      Benchmarks
       CT
       Driver
-      Examples.BasicLorenz
       Examples.ChemicalReaction
-      Examples.ImprovedLorenz
+      Examples.HierarchicalLorenz
+      Examples.Lorenz
       Examples.Sine
       Integrator
       Interpolation

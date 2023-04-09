@@ -181,33 +181,3 @@ integRK4 (CT f) (CT i) (CT y) ps =
                   return v
     _ -> 
       error "Incorrect stase: integRK4"
-
-
--- -- | The Integrator' type represents an integral without caching.
--- data Integrator' = Integrator' { initial'     :: CT Real,
---                                  computation' :: IORef (CT Real)
---                                }
-
--- createInteg' :: CT Double -> CT Integrator'
--- createInteg' i = 
---   do comp <- liftIO $ newIORef $ initialize i 
---      let integ = Integrator'{ initial'     = i, 
---                               computation' = comp }
---      return integ
-
--- readInteg' :: Integrator' -> CT Real
--- readInteg' integ = 
---   CT $ \ps ->
---   do (CT m) <- readIORef (computation' integ)
---      m ps
-     
--- diffInteg' :: Integrator' -> CT Real -> CT ()
--- diffInteg' integ diff =
---   do let z = CT $ \ps ->
---            do y <- readIORef (computation' integ)
---               let i = initial' integ
---               case method (solver ps) of
---                 Euler -> integEuler diff i y ps
---                 RungeKutta2 -> integRK2 diff i y ps
---                 RungeKutta4 -> integRK4 diff i y ps
---      liftIO $ writeIORef (computation' integ) (interpolate z)
