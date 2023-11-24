@@ -43,7 +43,7 @@ module CT
         Parameters(..)) where
 
 import Control.Monad
-import Control.Monad.Trans
+import Control.Monad.Fix
 
 import Prelude hiding (Real)
 import Types
@@ -74,6 +74,11 @@ appComposition (CT df) (CT da)
 instance Monad CT where
   return  = returnD
   m >>= k = bindD k m
+
+instance MonadFix CT where
+  -- mfix :: (a -> m a) -> m a
+  mfix f = 
+    CT $ \ps -> mfix ((`apply` ps) . f)
 
 returnD :: a -> CT a
 returnD a = CT $ const (return a)

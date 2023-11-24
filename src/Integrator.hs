@@ -1,4 +1,5 @@
 {-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE RecursiveDo #-}
 module Integrator where
 
 import Data.IORef
@@ -10,7 +11,17 @@ import CT
 import Solver
 import Interpolation
 import Memo
-           
+
+integ :: CT Double                  -- ^ the derivative
+         -> CT Double               -- ^ the initial value
+         -> CT (CT Double)          -- ^ the integral
+integ diff i =
+  mdo y <- memo interpolate z
+      z <-  CT $ \ps ->
+          let f = solverToFunction (method $ solver ps)
+          in return . CT $ f diff i y
+      return y
+       
 -- | The Integrator type represents an integral with caching.
 data Integrator = Integrator { initial :: CT Real,   -- ^ The initial value.
                                cache   :: IORef (CT Real),

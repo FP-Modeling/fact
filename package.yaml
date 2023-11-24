@@ -21,6 +21,7 @@ dependencies:
 - array >= 0.3.0.0
 - criterion
 - criterion-measurement
+- monadlist
 
 library:
   source-dirs: src
