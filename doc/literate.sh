@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Fixing a WSL problem with aliases. Just skip this, linux user
 shopt -s expand_aliases
