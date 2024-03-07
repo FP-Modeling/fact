@@ -1,8 +1,9 @@
 # FACT
 
-## Credits
+FACT is a domain specific language to model continuous-time systems. 
+For motivation and in-depth presentation of the main ideas, please refer to 
 
-FACT (Functional Algebra for Continuous Time) is a **reduced** and updated version of [aivika](https://github.com/dsorokin/aivika). This project has the main goal of incresing the understanding of aivika incrementally, using the earlier versions of the code (the earliest version is only available in [hackage](https://hackage.haskell.org/package/aivika-0.1)). Hence, it is necessary to update the code, since the `ghc` compiler changed a lot since back these versions where developed.
+- Edil Medeiros, Eduardo Peixoto, Eduardo Lemos, [*FACT: A Domain-Specific Language Based on a Functional Algebra for Continuous Time Modeling*](https://doi.org/10.1109/WSC60868.2023.10408703), 2023 Winter Simulation Conference.
 
 ## How to use
 
@@ -46,3 +47,6 @@ cd doc
 ./literate.sh thesis colorful
 ```
 
+## Credits
+
+FACT (Functional Algebra for Continuous Time) is a **reduced** and updated version of [aivika](https://github.com/dsorokin/aivika). This project has the main goal of incresing the understanding of aivika incrementally, using the earlier versions of the code (the earliest version is only available in [hackage](https://hackage.haskell.org/package/aivika-0.1)). Hence, it is necessary to update the code, since the `ghc` compiler changed a lot since back these versions where developed.
