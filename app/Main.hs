@@ -1,6 +1,6 @@
 module Main where
 
-import Examples.ChemicalReaction
+import Benchmarks
 
 main :: IO ()
-main = chemical >>= print
+main = benchmarks

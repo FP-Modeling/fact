@@ -9,7 +9,6 @@ import Integrator
 import Types
 import IO
 import CT
-import Prelude hiding (Real)
 import Data.List
 import Simulation
 import Control.Monad.ListM
@@ -22,7 +21,7 @@ sineSolv2 = Solver { dt = 1,
 
 type Result = (Double, String)
 
-sineModel2 :: CT Real -> Model Vector
+sineModel2 :: CT Double -> Model Vector
 sineModel2 ic =
   do integY <- createInteg 0
      integZ <- createInteg ic
@@ -33,14 +32,14 @@ sineModel2 ic =
      updateInteg integZ (kz * y)
      return $ sequence [y]
 
-example1 :: CT Real -> Model [Result]
+example1 :: CT Double -> Model [Result]
 example1 ic =
   do integY <- createInteg ic
      let y = readInteg integY
      updateInteg integY 1
      return $ map (, "line")<$> sequence [y]
 
-example2 :: CT Real -> Model [Result]
+example2 :: CT Double -> Model [Result]
 example2 ic =
   do integY <- createInteg ic
      let y = readInteg integY
@@ -55,9 +54,9 @@ line = runCT (example1 1) 40 sineSolv2
 
 type HybridModel a = a -> Parameters -> IO a
 
-type Predicate a b = a -> (CT Real -> Model [b])
+type Predicate a b = a -> (CT Double -> Model [b])
 
-predicate :: (Ord a, Num a) => a -> (CT Real -> Model [Result])
+predicate :: (Ord a, Num a) => a -> (CT Double -> Model [Result])
 predicate initialCondition =
   if initialCondition >= 20
   then example2 else example1
@@ -68,7 +67,7 @@ demux predicate (initialCondition, _) p = do
   model <- m (pure initialCondition) `apply` p
   head <$> model `apply` p
   
-hybrid :: (MonadPlus p, Monad m) => (a -> Parameters -> m a) -> a -> Real -> Solver -> m (p a)
+hybrid :: (MonadPlus p, Monad m) => (a -> Parameters -> m a) -> a -> Double -> Solver -> m (p a)
 hybrid f z t sl =
   do let iv = Interval 0 t
          (nl, nu) = iterationBnds iv (dt sl)

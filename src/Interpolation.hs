@@ -1,13 +1,12 @@
 module Interpolation where
 
-import Prelude hiding (Real)
 import Types
 import CT
 import Simulation
 import Solver
 
 -- | Function to solve floating point approximations
-neighborhood :: Solver -> Real -> Real -> Bool
+neighborhood :: Solver -> Double -> Double -> Bool
 neighborhood sl t t' = 
   abs (t - t') <= dt sl / 1.0e6
 
@@ -34,27 +33,29 @@ discrete (CT m) =
   in r
 
 -- | Interpolate the computation based on the integration time points only.
-interpolate :: CT Real -> CT Real
+interpolate :: CT Double -> CT Double
 interpolate (CT m) = 
   CT $ \ps ->
   case stage $ solver ps of
-    SolverStage _ ->  m ps
-    Interpolate   -> let iv = interval ps
-                         sl = solver ps
-                         t  = time ps
-                         st = dt sl
-                         x  = (t - startTime iv) / st
-                         n1 = max (floor x) (iterationLoBnd iv st)
-                         n2 = min (ceiling x) (iterationHiBnd iv st)
-                         t1 = iterToTime iv sl n1 (SolverStage 0)
-                         t2 = iterToTime iv sl n2 (SolverStage 0)
-                         z1 = m $ ps { time = t1,
-                                       iteration = n1,
-                                       solver = sl { stage = SolverStage 0 } }
-                         z2 = m $ ps { time = t2,
-                                       iteration = n2,
-                                       solver = sl { stage = SolverStage 0 } }
-        
-                     in do y1 <- z1
-                           y2 <- z2
-                           return $ y1 + (y2 - y1) * (t - t1) / (t2 - t1)
+    SolverStage _ -> m ps
+    Interpolate   ->
+      let iv = interval ps
+          sl = solver ps
+          t  = time ps
+          st = dt sl
+          x  = (t - startTime iv) / st
+          n1 = max (floor x) (iterationLoBnd iv st)
+          n2 = min (ceiling x) (iterationHiBnd iv st)
+          t1 = iterToTime iv sl n1 (SolverStage 0)
+          t2 = iterToTime iv sl n2 (SolverStage 0)
+          z1 =
+            m $ ps { time = t1,
+                     iteration = n1,
+                     solver = sl { stage = SolverStage 0 }}
+          z2 =
+            m $ ps { time = t2,
+                     iteration = n2,
+                     solver = sl { stage = SolverStage 0 }}         
+      in do y1 <- z1
+            y2 <- z2
+            return $ y1 + (y2 - y1) * (t - t1) / (t2 - t1)

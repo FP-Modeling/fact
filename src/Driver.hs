@@ -3,7 +3,6 @@ module Driver where
 import CT
 import Solver
 import Simulation
-import Prelude hiding (Real)
 import Types
 
 type Model a = CT (CT a)
@@ -12,7 +11,7 @@ epslon = 0.00001
 
 -- | Run the simulation and return the result in the last 
 -- time point using the specified simulation specs.
-runCTFinal :: Model a -> Real -> Solver -> IO a
+runCTFinal :: Model a -> Double -> Solver -> IO a
 runCTFinal (CT m) t sl = 
   do d <- m Parameters { interval = Interval 0 t,
                          time = 0,
@@ -21,7 +20,7 @@ runCTFinal (CT m) t sl =
      subRunCTFinal d t sl
 
 -- | Auxiliary functions to runCTFinal
-subRunCTFinal :: CT a -> Real -> Solver -> IO a
+subRunCTFinal :: CT a -> Double -> Solver -> IO a
 subRunCTFinal (CT m) t sl =
   do let iv = Interval 0 t
          n = iterationHiBnd iv (dt sl)
@@ -39,27 +38,35 @@ subRunCTFinal (CT m) t sl =
 
 -- | Run the simulation and return the results in all 
 -- integration time points using the specified simulation specs.
-runCT :: Model a -> Real -> Solver -> IO [a]
-runCT (CT m) t sl = 
-  do d <- m Parameters { interval = Interval 0 t,
-                         time = 0,
-                         iteration = 0,
-                         solver = sl { stage = SolverStage 0 }}
-     sequence $ subRunCT d t sl
+runCT :: Model a -> Double -> Solver -> IO [a]
+runCT (CT m) t sl = do
+  d <- m Parameters { interval = Interval 0 t,
+                      time = 0,
+                      iteration = 0,
+                      solver = sl { stage = SolverStage 0}}
+  sequence $ subRunCT d t sl
 
 -- | Auxiliary functions to runCT
-subRunCT :: CT a -> Real -> Solver -> [IO a]
-subRunCT (CT m) t sl =
-  do let iv = Interval 0 t
-         (nl, nu) = iterationBnds iv (dt sl)
-         parameterise n = Parameters { interval = iv,
-                                       time = iterToTime iv sl n (SolverStage 0),
-                                       iteration = n,
-                                       solver = sl { stage = SolverStage 0 }}
-         ps = Parameters { interval = iv,
-                           time = t,
-                           iteration = nu,
-                           solver = sl { stage = Interpolate }}
-     if iterToTime iv sl nu (SolverStage 0) - t < epslon
-     then map (m . parameterise) [nl .. nu]
-     else init $ map (m . parameterise) [nl .. nu] ++ [m ps]     
+subRunCT :: CT a -> Double -> Solver -> [IO a]
+subRunCT (CT m) t sl = do
+  let iv = Interval 0 t
+      (nl, nu) = iterationBnds iv (dt sl)
+      parameterise n =
+        let time = iterToTime iv sl n (SolverStage 0)
+            solver = sl { stage = SolverStage 0}
+        in
+        Parameters { interval = iv,
+                     time = time,
+                     iteration = n,
+                     solver = solver}
+      ps =
+       Parameters {interval = iv,
+                   time = t,
+                   iteration = nu,
+                   solver = sl { stage = Interpolate }}
+      endTime = iterToTime iv sl nu (SolverStage 0)
+      values = map (m . parameterise) [nl .. nu]
+  if endTime - t < epslon
+  then values
+  else init values ++ [m ps]     
+

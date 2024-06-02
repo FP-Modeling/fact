@@ -1,3 +1,4 @@
+{-# LANGUAGE RecursiveDo #-}
 module Examples.Lorenz where
 
 import Driver
@@ -6,7 +7,6 @@ import Simulation
 import Integrator
 import IO
 import CT
-import Prelude hiding (Real)
 import Types
 
 sigma = 10.0
@@ -67,17 +67,14 @@ lorenzSolver100B = Solver { dt = 0.000000001,
                           }
 
 lorenzModel :: Model Vector
-lorenzModel =
-  do integX <- createInteg 1.0
-     integY <- createInteg 1.0
-     integZ <- createInteg 1.0
-     let x = readInteg integX
-         y = readInteg integY
-         z = readInteg integZ
-     updateInteg integX (sigma * (y - x))
-     updateInteg integY (x * (rho - z) - y)
-     updateInteg integZ (x * y - beta * z)
-     return $ sequence [x, y, z]
+lorenzModel = mdo
+   x <- integ (sigma * (y - x)) 1.0
+   y <- integ (x * (rho - z) - y) 1.0
+   z <- integ (x * y - beta * z) 1.0
+   let sigma = 10.0
+       rho = 28.0
+       beta = 8.0 / 3.0
+   return $ sequence [x, y, z]
 
 lorenz100 = runCTFinal lorenzModel 100 lorenzSolver100
 

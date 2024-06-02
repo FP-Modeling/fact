@@ -5,27 +5,24 @@ module Integrator where
 import Data.IORef
 import Control.Monad.Trans
 
-import Prelude hiding (Real)
 import Types
 import CT
 import Solver
 import Interpolation
 import Memo
 
-integ :: CT Double                  -- ^ the derivative
-         -> CT Double               -- ^ the initial value
-         -> CT (CT Double)          -- ^ the integral
+integ :: CT Double -> CT Double -> CT (CT Double)
 integ diff i =
   mdo y <- memo interpolate z
-      z <-  CT $ \ps ->
-          let f = solverToFunction (method $ solver ps)
-          in return . CT $ f diff i y
+      z <- CT $ \ps ->
+            let f = solverToFunction (method $ solver ps)
+            in return . CT $ f diff i y
       return y
-       
+      
 -- | The Integrator type represents an integral with caching.
-data Integrator = Integrator { initial :: CT Real,   -- ^ The initial value.
-                               cache   :: IORef (CT Real),
-                               computation  :: IORef (CT Real)
+data Integrator = Integrator { initial :: CT Double,   -- ^ The initial value.
+                               cache   :: IORef (CT Double),
+                               computation  :: IORef (CT Double)
                              }
 
 initialize :: CT a -> CT a
@@ -40,39 +37,42 @@ initialize (CT m) =
                 iteration = 0,
                 solver = sl { stage = SolverStage 0 }}
 
-createInteg :: CT Real -> CT Integrator
+createInteg :: CT Double -> CT Integrator
 createInteg i =
   CT $ \ps ->
-  do r1 <- newIORef $ initialize i 
-     r2 <- newIORef $ initialize i 
-     let integ = Integrator { initial = i, 
-                              cache   = r1,
-                              computation  = r2 }
-         z = CT $ \ps ->  (`apply` ps) =<< readIORef (computation integ)
-     y <- memo interpolate z `apply` ps
-     writeIORef (cache integ) y
-     return integ
+    do r1 <- newIORef $ initialize i 
+       r2 <- newIORef $ initialize i 
+       let integ = Integrator { initial = i, 
+                                cache = r1,
+                                computation  = r2 }
+           z = CT $ \ps ->
+             do v <- readIORef (computation integ)
+                v `apply` ps
+       y <- memo interpolate z `apply` ps
+       writeIORef (cache integ) y
+       return integ
 
-readInteg :: Integrator -> CT Real
+readInteg :: Integrator -> CT Double
 readInteg integ = 
   CT $ \ps -> (`apply` ps) =<< readIORef (cache integ)
 
-updateInteg :: Integrator -> CT Real -> CT ()
-updateInteg integ diff = CT $ const $ writeIORef (computation integ) z
-  where i = initial integ
-        z = CT $ \ps ->
-          let f = solverToFunction (method $ solver ps)
-          in
-          (\y -> f diff i y ps) =<< readIORef (cache integ)
+updateInteg :: Integrator -> CT Double -> CT ()
+updateInteg integ diff =
+  CT . const $ writeIORef (computation integ) z
+    where i = initial integ
+          z = CT $ \ps ->
+                let f = solverToFunction (method $ solver ps)
+                in
+                (\y -> f diff i y ps) =<< readIORef (cache integ)
      
 solverToFunction Euler = integEuler
 solverToFunction RungeKutta2 = integRK2
 solverToFunction RungeKutta4 = integRK4
 
-integEuler :: CT Real
-             -> CT Real 
-             -> CT Real 
-             -> Parameters -> IO Real
+integEuler :: CT Double
+             -> CT Double 
+             -> CT Double 
+             -> Parameters -> IO Double
 integEuler (CT diff) (CT i) (CT y) ps =
   case iteration ps of
     0 -> 
@@ -87,10 +87,10 @@ integEuler (CT diff) (CT i) (CT y) ps =
       let !v = a + dt (solver ps) * b
       return v
 
-integRK2 :: CT Real
-           -> CT Real
-           -> CT Real
-           -> Parameters -> IO Real
+integRK2 :: CT Double
+           -> CT Double
+           -> CT Double
+           -> Parameters -> IO Double
 integRK2 (CT f) (CT i) (CT y) ps =
   case stage (solver ps) of
     SolverStage 0 -> case iteration ps of
@@ -125,10 +125,10 @@ integRK2 (CT f) (CT i) (CT y) ps =
     _ -> 
       error "Incorrect stage: integRK2"
 
-integRK4 :: CT Real
-           -> CT Real
-           -> CT Real
-           -> Parameters -> IO Real
+integRK4 :: CT Double
+           -> CT Double
+           -> CT Double
+           -> Parameters -> IO Double
 integRK4 (CT f) (CT i) (CT y) ps =
   case stage (solver ps) of
     SolverStage 0 -> case iteration ps of

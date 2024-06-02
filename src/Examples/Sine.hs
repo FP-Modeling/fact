@@ -7,7 +7,6 @@ import Integrator
 import Types
 import IO
 import CT
-import Prelude hiding (Real)
 import Data.List
 import Simulation
 

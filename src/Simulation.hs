@@ -1,6 +1,5 @@
 module Simulation where
 
-import Prelude hiding (Real)
 import Types
 
 -- | It defines a time interval

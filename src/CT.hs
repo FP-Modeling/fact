@@ -45,7 +45,6 @@ module CT
 import Control.Monad
 import Control.Monad.Fix
 
-import Prelude hiding (Real)
 import Types
 
 import Solver
@@ -54,7 +53,7 @@ import Simulation
 -- | It defines the simulation time appended with additional information.
 data Parameters = Parameters { interval  :: Interval, -- ^ the simulation interval
                                solver    :: Solver,   -- ^ the solver configuration
-                               time      :: Real,     -- ^ the current time
+                               time      :: Double,     -- ^ the current time
                                iteration :: Iteration -- ^ the current iteration
                              } deriving (Eq, Show)
 
@@ -62,18 +61,20 @@ newtype CT a = CT {apply :: Parameters -> IO a}
 
 instance Functor CT where
   fmap f (CT da) = CT $ \ps -> fmap f (da ps)
-
+  
 instance Applicative CT where
-  pure a = CT $ const (return a)
-  (<*>) = appComposition
+  pure a = CT $ const (pure a)
+  (CT df) <*> (CT da) = CT $ \ps -> do f <- df ps
+                                       fmap f (da ps)
 
 appComposition :: CT (a -> b) -> CT a -> CT b
 appComposition (CT df) (CT da)
   = CT $ \ps -> df ps >>= \f -> fmap f (da ps)
   
 instance Monad CT where
-  return  = returnD
-  m >>= k = bindD k m
+  return = pure
+  (CT m) >>= k = CT $ \ps -> do a <- m ps
+                                k a `apply` ps
 
 instance MonadFix CT where
   -- mfix :: (a -> m a) -> m a

@@ -1,11 +1,10 @@
 module Solver where
 
-import Prelude hiding (Real)
 import Types
 import Simulation
 
 -- | It defines configurations to use within the solver
-data Solver = Solver { dt        :: Real,      -- ^ the integration time step
+data Solver = Solver { dt        :: Double,      -- ^ the integration time step
                        method    :: Method,    -- ^ the integration method
                        stage     :: Stage      -- ^ the current stage
                      } deriving (Eq, Ord, Show)
@@ -50,7 +49,7 @@ stageHiBnd :: Solver -> Stage
 stageHiBnd sc = snd $ stageBnds sc
 
 -- | Transforms iteration to time
-iterToTime :: Interval -> Solver -> Iteration -> Stage -> Real
+iterToTime :: Interval -> Solver -> Iteration -> Stage -> Double
 iterToTime _ _ _ Interpolate = error "Incorrect stage: Interpolate"
 iterToTime interv solver n (SolverStage st) =
   if st < 0 then 

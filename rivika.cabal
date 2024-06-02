@@ -48,12 +48,12 @@ library
   hs-source-dirs:
       src
   build-depends:
-      array >=0.3.0.0
-    , base >=4.7 && <5
+      array
+    , base
     , criterion
     , criterion-measurement
     , monadlist
-    , mtl >=1.1.0.2
+    , mtl
   default-language: Haskell2010
 
 executable rivika-exe
@@ -64,11 +64,11 @@ executable rivika-exe
       app
   ghc-options: -O2
   build-depends:
-      array >=0.3.0.0
-    , base >=4.7 && <5
+      array
+    , base
     , criterion
     , criterion-measurement
     , monadlist
-    , mtl >=1.1.0.2
-    , rivika
+    , mtl
+    , rivika    
   default-language: Haskell2010

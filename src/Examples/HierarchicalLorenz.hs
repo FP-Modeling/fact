@@ -6,7 +6,6 @@ import Simulation
 import Integrator
 import IO
 import CT
-import Prelude hiding (Real)
 import Types
 
 hierarchicalLorenzSolver = Solver { dt = 0.01,
@@ -28,7 +27,7 @@ sineModel =
      updateInteg integZ (kz * y)
      return y
 
-hierarchicalLorenzModel :: CT (CT Real) -> Model Vector
+hierarchicalLorenzModel :: CT (CT Double) -> Model Vector
 hierarchicalLorenzModel sine =
   do integX <- createInteg 1.0
      integY <- createInteg 1.0
