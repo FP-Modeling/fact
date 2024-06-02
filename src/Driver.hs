@@ -51,22 +51,22 @@ subRunCT :: CT a -> Double -> Solver -> [IO a]
 subRunCT (CT m) t sl = do
   let iv = Interval 0 t
       (nl, nu) = iterationBnds iv (dt sl)
-      parameterise n =
+      parameterize n =
         let time = iterToTime iv sl n (SolverStage 0)
-            solver = sl { stage = SolverStage 0}
+            solver = sl {stage = SolverStage 0}
         in
-        Parameters { interval = iv,
-                     time = time,
-                     iteration = n,
-                     solver = solver}
+        Parameters {interval = iv,
+                    time = time,
+                    iteration = n,
+                    solver = solver}
       ps =
        Parameters {interval = iv,
                    time = t,
                    iteration = nu,
-                   solver = sl { stage = Interpolate }}
+                   solver = sl {stage = Interpolate}}
       endTime = iterToTime iv sl nu (SolverStage 0)
-      values = map (m . parameterise) [nl .. nu]
+      values = map (m . parameterize) [nl .. nu]
   if endTime - t < epslon
   then values
-  else init values ++ [m ps]     
+  else init values ++ [m ps]
 
