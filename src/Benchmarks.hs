@@ -13,15 +13,14 @@ import Solver
 import Types
 import Criterion
 import Criterion.Measurement
-import qualified Criterion.Types as Criterion
-import qualified Criterion.Measurement.Types as Criterion.Measurement
 import qualified Criterion.Measurement.Types as Criterion.Measurement.Measured
 
+perform :: IO [Double] -> IO Double
 perform test = do
-  (performance, result) <- measure (nfIO test) 1
-  return (Criterion.Measurement.Measured.measTime performance, result)
+  (performance, _) <- measure (nfIO test) 1
+  return $ Criterion.Measurement.Measured.measTime performance
 
 benchmarks :: IO ()
 benchmarks = do
-  results <- sequence $ perform <$> [lorenz100, lorenz1k, lorenz10k, lorenz100k, lorenz1M, lorenz10M, lorenz100M]
+  results <- mapM perform [lorenz100, lorenz1k, lorenz10k, lorenz100k, lorenz1M, lorenz10M, lorenz100M]
   print results
