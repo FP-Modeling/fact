@@ -7,13 +7,13 @@ For motivation and in-depth presentation of the main ideas, please refer to
 
 ## How to use
 
-It mandatory to have [stack](https://docs.haskellstack.org/en/stable/README/) installed. From the root of the project, the following command starts the REPL environment:
+It mandatory to have [cabal](https://cabal.readthedocs.io/en/3.4/getting-started.html) installed. From the root of the project, the following command starts the REPL environment:
 
-`stack repl`
+`cabal repl`
 
-Moreover, the project can be compiled and executed using the following command (the `main` function is redirecting to the Chemical Reaction example):
+Moreover, the project can be compiled and executed using the following command (the `main` function is redirecting to running Lorenz Attractor benchmarks):
 
-`stack run`
+`cabal run`
 
 All the examples in the `Examples` folder are acessible via the REPL environment.
 
