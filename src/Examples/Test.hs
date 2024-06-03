@@ -21,7 +21,7 @@ sineSolv2 = Solver { dt = 1,
 
 type Result = (Double, String)
 
-sineModel2 :: CT Double -> Model Vector
+sineModel2 :: CT Double -> Model [Double]
 sineModel2 ic =
   do integY <- createInteg 0
      integZ <- createInteg ic

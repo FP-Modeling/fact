@@ -27,7 +27,7 @@ sineModel =
      updateInteg integZ (kz * y)
      return y
 
-hierarchicalLorenzModel :: CT (CT Double) -> Model Vector
+hierarchicalLorenzModel :: CT (CT Double) -> Model [Double]
 hierarchicalLorenzModel sine =
   do integX <- createInteg 1.0
      integY <- createInteg 1.0

@@ -66,7 +66,7 @@ lorenzSolver100B = Solver { dt = 0.000000001,
                             stage = SolverStage 0
                           }
 
-lorenzModel :: Model Vector
+lorenzModel :: Model [Double]
 lorenzModel = mdo
    x <- integ (sigma * (y - x)) 1.0
    y <- integ (x * (rho - z) - y) 1.0

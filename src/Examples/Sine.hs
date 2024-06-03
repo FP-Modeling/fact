@@ -14,7 +14,7 @@ sineSolv = Solver { dt = 0.01,
                 method = RungeKutta4,
                 stage = SolverStage 0 }
 
-sineModel :: Model Vector
+sineModel :: Model [Double]
 sineModel =
   do integY <- createInteg 0
      integZ <- createInteg 1

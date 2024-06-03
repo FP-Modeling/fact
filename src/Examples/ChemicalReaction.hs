@@ -10,7 +10,7 @@ chemicalSolv = Solver { dt = 1,
                 method = RungeKutta4,
                 stage = SolverStage 0 }
 
-chemicalModel :: Model Vector
+chemicalModel :: Model [Double]
 chemicalModel =
   do integA <- createInteg 100
      integB <- createInteg 0

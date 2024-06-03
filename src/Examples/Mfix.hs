@@ -16,7 +16,7 @@ mchemicalSolv = Solver { dt = 1,
                 method = RungeKutta4,
                 stage = SolverStage 0 }
 
-mchemicalModel :: Model Vector
+mchemicalModel :: Model [Double]
 mchemicalModel = 
   mdo a <- integ (- ka * a) 100
       b <- integ (ka * a - kb * b) 0
