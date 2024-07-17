@@ -7,7 +7,7 @@ import Data.IORef ( IORef, newIORef, readIORef, writeIORef )
 import CT ( Parameters(solver, interval, time, iteration), CT )
 import Solver
     ( Solver(dt, method, stage),
-      Method(Euler),
+      Method(Euler, RungeKutta2, RungeKutta4),
       Stage(SolverStage),
       getSolverStage,
       iterToTime )
@@ -73,8 +73,8 @@ updateInteg integ diff =
                  liftIO $ f diff i v ps
     
 solverToFunction Euler = integEuler
--- solverToFunction RungeKutta2 = integRK2
--- solverToFunction RungeKutta4 = integRK4
+solverToFunction RungeKutta2 = integRK2
+solverToFunction RungeKutta4 = integRK4
 
 integEuler :: CT Double
              -> CT Double 
@@ -94,108 +94,108 @@ integEuler diff i y ps =
       let !v = a + dt (solver ps) * b
       return v
 
--- integRK2 :: CT Double
---            -> CT Double
---            -> CT Double
---            -> Parameters -> IO Double
--- integRK2 (CT f) (CT i) (CT y) ps =
---   case stage (solver ps) of
---     SolverStage 0 -> case iteration ps of
---                        0 ->
---                          i ps
---                        n -> do
---                          let iv = interval ps
---                              sl = solver ps
---                              ty = iterToTime iv sl (n - 1) (SolverStage 0)
---                              t1 = ty
---                              t2 = iterToTime iv sl (n - 1) (SolverStage 1)
---                              psy = ps { time = ty, iteration = n - 1, solver = sl { stage = SolverStage 0 }}
---                              ps1 = psy
---                              ps2 = ps { time = t2, iteration = n - 1, solver = sl { stage = SolverStage 1 }}
---                          vy <- y psy
---                          k1 <- f ps1
---                          k2 <- f ps2
---                          let !v = vy + dt sl / 2.0 * (k1 + k2)
---                          return v
---     SolverStage 1 -> do
---                   let iv = interval ps
---                       sl = solver ps
---                       n  = iteration ps
---                       ty = iterToTime iv sl n (SolverStage 0)
---                       t1 = ty
---                       psy = ps { time = ty, iteration = n, solver = sl { stage = SolverStage 0 }}
---                       ps1 = psy
---                   vy <- y psy
---                   k1 <- f ps1
---                   let !v = vy + dt sl * k1
---                   return v
---     _ -> 
---       error "Incorrect stage: integRK2"
+integRK2 :: CT Double
+           -> CT Double
+           -> CT Double
+           -> Parameters -> IO Double
+integRK2 f i y ps =
+  case stage (solver ps) of
+    SolverStage 0 -> case iteration ps of
+                       0 ->
+                         runReaderT i ps
+                       n -> do
+                         let iv = interval ps
+                             sl = solver ps
+                             ty = iterToTime iv sl (n - 1) (SolverStage 0)
+                             t1 = ty
+                             t2 = iterToTime iv sl (n - 1) (SolverStage 1)
+                             psy = ps { time = ty, iteration = n - 1, solver = sl { stage = SolverStage 0 }}
+                             ps1 = psy
+                             ps2 = ps { time = t2, iteration = n - 1, solver = sl { stage = SolverStage 1 }}
+                         vy <- liftIO $ runReaderT y psy
+                         k1 <- liftIO $ runReaderT f ps1
+                         k2 <- liftIO $ runReaderT f ps2
+                         let !v = vy + dt sl / 2.0 * (k1 + k2)
+                         return v
+    SolverStage 1 -> do
+                  let iv = interval ps
+                      sl = solver ps
+                      n  = iteration ps
+                      ty = iterToTime iv sl n (SolverStage 0)
+                      t1 = ty
+                      psy = ps { time = ty, iteration = n, solver = sl { stage = SolverStage 0 }}
+                      ps1 = psy
+                  vy <- liftIO $ runReaderT y psy
+                  k1 <- liftIO $ runReaderT f ps1
+                  let !v = vy + dt sl * k1
+                  return v
+    _ -> 
+      error "Incorrect stage: integRK2"
 
--- integRK4 :: CT Double
---            -> CT Double
---            -> CT Double
---            -> Parameters -> IO Double
--- integRK4 (CT f) (CT i) (CT y) ps =
---   case stage (solver ps) of
---     SolverStage 0 -> case iteration ps of
---                        0 -> 
---                          i ps
---                        n -> do
---                          let iv = interval ps
---                              sl = solver ps
---                              ty = iterToTime iv sl (n - 1) (SolverStage 0)
---                              t1 = ty
---                              t2 = iterToTime iv sl  (n - 1) (SolverStage 1)
---                              t3 = iterToTime iv sl  (n - 1) (SolverStage 2)
---                              t4 = iterToTime iv sl  (n - 1) (SolverStage 3)
---                              psy = ps { time = ty, iteration = n - 1, solver = sl { stage = SolverStage 0 }}
---                              ps1 = psy
---                              ps2 = ps { time = t2, iteration = n - 1, solver = sl { stage = SolverStage 1 }}
---                              ps3 = ps { time = t3, iteration = n - 1, solver = sl { stage = SolverStage 2 }}
---                              ps4 = ps { time = t4, iteration = n - 1, solver = sl { stage = SolverStage 3 }}
---                          vy <- y psy
---                          k1 <- f ps1
---                          k2 <- f ps2
---                          k3 <- f ps3
---                          k4 <- f ps4
---                          let !v = vy + dt sl / 6.0 * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
---                          return v
---     SolverStage 1 -> do
---                   let iv = interval ps
---                       sl = solver ps
---                       n  = iteration ps
---                       ty = iterToTime iv sl n (SolverStage 0)
---                       t1 = ty
---                       psy = ps { time = ty, iteration = n, solver = sl { stage = SolverStage 0 }}
---                       ps1 = psy
---                   vy <- y psy
---                   k1 <- f ps1
---                   let !v = vy + dt sl / 2.0 * k1
---                   return v
---     SolverStage 2 -> do
---                   let iv = interval ps
---                       sl = solver ps
---                       n  = iteration ps
---                       ty = iterToTime iv sl n (SolverStage 0)
---                       t2 = iterToTime iv sl n (SolverStage 1)
---                       psy = ps { time = ty, iteration = n, solver = sl { stage = SolverStage 0 }}
---                       ps2 = ps { time = t2, iteration = n, solver = sl { stage = SolverStage 1 }}
---                   vy <- y psy
---                   k2 <- f ps2
---                   let !v = vy + dt sl / 2.0 * k2
---                   return v
---     SolverStage 3 -> do
---                   let iv = interval ps
---                       sl = solver ps
---                       n  = iteration ps
---                       ty = iterToTime iv sl n (SolverStage 0)
---                       t3 = iterToTime iv sl n (SolverStage 2)
---                       psy = ps { time = ty, iteration = n, solver = sl { stage = SolverStage 0 }}
---                       ps3 = ps { time = t3, iteration = n, solver = sl { stage = SolverStage 2 }}
---                   vy <- y psy
---                   k3 <- f ps3
---                   let !v = vy + dt sl * k3
---                   return v
---     _ -> 
---       error "Incorrect stase: integRK4"
+integRK4 :: CT Double
+           -> CT Double
+           -> CT Double
+           -> Parameters -> IO Double
+integRK4 f i y ps =
+  case stage (solver ps) of
+    SolverStage 0 -> case iteration ps of
+                       0 -> 
+                         runReaderT i ps
+                       n -> do
+                         let iv = interval ps
+                             sl = solver ps
+                             ty = iterToTime iv sl (n - 1) (SolverStage 0)
+                             t1 = ty
+                             t2 = iterToTime iv sl  (n - 1) (SolverStage 1)
+                             t3 = iterToTime iv sl  (n - 1) (SolverStage 2)
+                             t4 = iterToTime iv sl  (n - 1) (SolverStage 3)
+                             psy = ps { time = ty, iteration = n - 1, solver = sl { stage = SolverStage 0 }}
+                             ps1 = psy
+                             ps2 = ps { time = t2, iteration = n - 1, solver = sl { stage = SolverStage 1 }}
+                             ps3 = ps { time = t3, iteration = n - 1, solver = sl { stage = SolverStage 2 }}
+                             ps4 = ps { time = t4, iteration = n - 1, solver = sl { stage = SolverStage 3 }}
+                         vy <- liftIO $ runReaderT y psy
+                         k1 <- liftIO $ runReaderT f ps1
+                         k2 <- liftIO $ runReaderT f ps2
+                         k3 <- liftIO $ runReaderT f ps3
+                         k4 <- liftIO $ runReaderT f ps4
+                         let !v = vy + dt sl / 6.0 * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
+                         return v
+    SolverStage 1 -> do
+                  let iv = interval ps
+                      sl = solver ps
+                      n  = iteration ps
+                      ty = iterToTime iv sl n (SolverStage 0)
+                      t1 = ty
+                      psy = ps { time = ty, iteration = n, solver = sl { stage = SolverStage 0 }}
+                      ps1 = psy
+                  vy <- liftIO $ runReaderT y psy
+                  k1 <- liftIO $ runReaderT f ps1
+                  let !v = vy + dt sl / 2.0 * k1
+                  return v
+    SolverStage 2 -> do
+                  let iv = interval ps
+                      sl = solver ps
+                      n  = iteration ps
+                      ty = iterToTime iv sl n (SolverStage 0)
+                      t2 = iterToTime iv sl n (SolverStage 1)
+                      psy = ps { time = ty, iteration = n, solver = sl { stage = SolverStage 0 }}
+                      ps2 = ps { time = t2, iteration = n, solver = sl { stage = SolverStage 1 }}
+                  vy <- liftIO $ runReaderT y psy
+                  k2 <- liftIO $ runReaderT f ps2
+                  let !v = vy + dt sl / 2.0 * k2
+                  return v
+    SolverStage 3 -> do
+                  let iv = interval ps
+                      sl = solver ps
+                      n  = iteration ps
+                      ty = iterToTime iv sl n (SolverStage 0)
+                      t3 = iterToTime iv sl n (SolverStage 2)
+                      psy = ps { time = ty, iteration = n, solver = sl { stage = SolverStage 0 }}
+                      ps3 = ps { time = t3, iteration = n, solver = sl { stage = SolverStage 2 }}
+                  vy <- liftIO $ runReaderT y psy
+                  k3 <- liftIO $ runReaderT f ps3
+                  let !v = vy + dt sl * k3
+                  return v
+    _ -> 
+      error "Incorrect stase: integRK4"

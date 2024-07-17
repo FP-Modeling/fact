@@ -10,7 +10,7 @@ import Data.List
 import Simulation
 
 sineSolv = Solver { dt = 0.01,
-                    method = Euler,
+                    method = RungeKutta4,
                     stage = SolverStage 0 }
 
 sineModel :: Model [Double]
