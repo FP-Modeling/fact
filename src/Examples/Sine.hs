@@ -1,4 +1,3 @@
-{-# LANGUAGE RecordWildCards #-}
 module Examples.Sine where
 
 import Driver
@@ -11,8 +10,8 @@ import Data.List
 import Simulation
 
 sineSolv = Solver { dt = 0.01,
-                method = RungeKutta4,
-                stage = SolverStage 0 }
+                    method = Euler,
+                    stage = SolverStage 0 }
 
 sineModel :: Model [Double]
 sineModel =

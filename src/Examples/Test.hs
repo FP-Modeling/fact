@@ -61,25 +61,25 @@ predicate initialCondition =
   if initialCondition >= 20
   then example2 else example1
 
-demux :: Predicate Double Result -> HybridModel Result
-demux predicate (initialCondition, _) p = do
-  let m = predicate initialCondition
-  model <- m (pure initialCondition) `apply` p
-  head <$> model `apply` p
+-- demux :: Predicate Double Result -> HybridModel Result
+-- demux predicate (initialCondition, _) p = do
+--   let m = predicate initialCondition
+--   model <- m (pure initialCondition) `apply` p
+--   head <$> model `apply` p
   
-hybrid :: (MonadPlus p, Monad m) => (a -> Parameters -> m a) -> a -> Double -> Solver -> m (p a)
-hybrid f z t sl =
-  do let iv = Interval 0 t
-         (nl, nu) = iterationBnds iv (dt sl)
-         parameterise n = Parameters { interval = iv,
-                                       time = iterToTime iv sl n (SolverStage 0),
-                                       iteration = 1,
-                                       solver = sl { stage = SolverStage 0 }}
-         ps = map parameterise [nl..nu]
-     scanM f z ps
+-- hybrid :: (MonadPlus p, Monad m) => (a -> Parameters -> m a) -> a -> Double -> Solver -> m (p a)
+-- hybrid f z t sl =
+--   do let iv = Interval 0 t
+--          (nl, nu) = iterationBnds iv (dt sl)
+--          parameterise n = Parameters { interval = iv,
+--                                        time = iterToTime iv sl n (SolverStage 0),
+--                                        iteration = 1,
+--                                        solver = sl { stage = SolverStage 0 }}
+--          ps = map parameterise [nl..nu]
+--      scanM f z ps
         
-test = do
-  t <- hybrid (demux predicate) (1, "initial") 40 sineSolv2
-  case t of
-    [] -> fail "Something went wrong during hybrid simulation"
-    list -> print list
+-- test = do
+--   t <- hybrid (demux predicate) (1, "initial") 40 sineSolv2
+--   case t of
+--     [] -> fail "Something went wrong during hybrid simulation"
+--     list -> print list

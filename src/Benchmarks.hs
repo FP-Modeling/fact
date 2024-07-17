@@ -2,6 +2,7 @@ module Benchmarks where
 
 import Examples.ChemicalReaction
 import Examples.Lorenz
+import Examples.Sine
 import Driver
 import CT
 import IO
