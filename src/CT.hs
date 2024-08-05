@@ -37,18 +37,17 @@
 -- Stability  : stable
 -- Tested with: GHC 8.10.7
 -- |
-
+{-# LANGUAGE FlexibleInstances #-}
 module CT 
        (CT(..),
         Parameters(..)) where
 
-import Control.Monad
-import Control.Monad.Fix
+import Control.Monad.Trans.Reader ( ReaderT )
 
-import Types
+import Types ( Iteration )
 
-import Solver
-import Simulation
+import Solver ( Solver )
+import Simulation ( Interval )
 
 -- | It defines the simulation time appended with additional information.
 data Parameters = Parameters { interval  :: Interval, -- ^ the simulation interval
@@ -57,83 +56,38 @@ data Parameters = Parameters { interval  :: Interval, -- ^ the simulation interv
                                iteration :: Iteration -- ^ the current iteration
                              } deriving (Eq, Show)
 
-newtype CT a = CT {apply :: Parameters -> IO a}
 
-instance Functor CT where
-  fmap f (CT da) = CT $ \ps -> fmap f (da ps)
-  
-instance Applicative CT where
-  pure a = CT $ const (pure a)
-  (CT df) <*> (CT da) = CT $ \ps -> do f <- df ps
-                                       fmap f (da ps)
-
-appComposition :: CT (a -> b) -> CT a -> CT b
-appComposition (CT df) (CT da)
-  = CT $ \ps -> df ps >>= \f -> fmap f (da ps)
-  
-instance Monad CT where
-  return = pure
-  (CT m) >>= k = CT $ \ps -> do a <- m ps
-                                k a `apply` ps
-
-instance MonadFix CT where
-  -- mfix :: (a -> m a) -> m a
-  mfix f = 
-    CT $ \ps -> mfix ((`apply` ps) . f)
-
-returnD :: a -> CT a
-returnD a = CT $ const (return a)
-
-bindD :: (a -> CT b ) -> CT a -> CT b
-bindD k (CT m) = 
-  CT $ \ps -> m ps >>= \a -> (\(CT m') -> m' ps) $ k a
-
-bindD' :: (a -> CT b ) -> CT a -> CT b
-bindD' k (CT m) = CT $ \ps -> do
-  a <- m ps
-  k a `apply` ps
-
-instance Eq (CT a) where
-  x == y = error "<< Can't compare dynamics >>" 
-
-instance Show (CT a) where
-  showsPrec _ x = showString "<< CT >>"
-
-unaryOP :: (a -> b) -> CT a -> CT b
-unaryOP = fmap
-
-binaryOP :: (a -> b -> c) -> CT a -> CT b -> CT c
-binaryOP func da db = fmap func da <*> db
+type CT a = ReaderT Parameters IO a
   
 instance (Num a) => Num (CT a) where
-  x + y = binaryOP (+) x y
-  x - y = binaryOP (-) x y
-  x * y = binaryOP (*) x y
-  negate = unaryOP negate
-  abs = unaryOP abs
-  signum = unaryOP signum
+  x + y = (+) <$> x <*> y
+  x - y = (-) <$> x <*> y
+  x * y = (*) <$> x <*> y
+  negate = fmap negate
+  abs = fmap abs
+  signum = fmap signum
   fromInteger i = return $ fromInteger i
 
 instance (Fractional a) => Fractional (CT a) where
-  x / y = binaryOP (/) x y
-  recip = unaryOP recip
+  x / y = (/) <$> x <*> y
+  recip = fmap recip
   fromRational t = return $ fromRational t
 
 instance (Floating a) => Floating (CT a) where
   pi = return pi
-  exp = unaryOP exp
-  log = unaryOP log
-  sqrt = unaryOP sqrt
-  x ** y = binaryOP (**) x y
-  sin = unaryOP sin
-  cos = unaryOP cos
-  tan = unaryOP tan
-  asin = unaryOP asin
-  acos = unaryOP acos
-  atan = unaryOP atan
-  sinh = unaryOP sinh
-  cosh = unaryOP cosh
-  tanh = unaryOP tanh
-  asinh = unaryOP asinh
-  acosh = unaryOP acosh
-  atanh = unaryOP atanh
+  exp = fmap exp
+  log = fmap log
+  sqrt = fmap sqrt
+  x ** y = (**) <$> x <*> y
+  sin = fmap sin
+  cos = fmap cos
+  tan = fmap tan
+  asin = fmap asin
+  acos = fmap acos
+  atan = fmap atan
+  sinh = fmap sinh
+  cosh = fmap cosh
+  tanh = fmap tanh
+  asinh = fmap asinh
+  acosh = fmap acosh
+  atanh = fmap atanh

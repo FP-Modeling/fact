@@ -1,6 +1,6 @@
 module Simulation where
 
-import Types
+import Types ( Iteration, TimeStep )
 
 -- | It defines a time interval
 data Interval = Interval { startTime :: Double, -- ^ the start time
