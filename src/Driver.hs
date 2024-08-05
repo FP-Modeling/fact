@@ -1,11 +1,12 @@
 module Driver where
 
 import CT
+    ( CT, Parameters(Parameters, solver, interval, time, iteration) )
 import Solver
+    ( Solver(stage, dt), Stage(SolverStage, Interpolate), iterToTime )
 import Simulation
-import Types
-import Control.Monad.Trans.Reader (reader, ask, runReaderT)
-import Control.Monad.IO.Class (liftIO)
+    ( Interval(Interval), iterationHiBnd, iterationBnds )
+import Control.Monad.Trans.Reader ( ReaderT(runReaderT) )
 
 type Model a = CT (CT a)
 

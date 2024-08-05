@@ -2,15 +2,21 @@
 
 module Memo where
 
-import CT
+import CT ( CT, Parameters(solver, interval, time, iteration) )
 import Solver
-import Simulation
+    ( getSolverStage,
+      iterToTime,
+      stageBnds,
+      stageHiBnd,
+      Solver(stage, dt),
+      Stage(SolverStage) )
+import Simulation ( iterationBnds )
 
-import Data.IORef
-import Data.Array
+import Data.IORef ( newIORef, readIORef, writeIORef )
+import Data.Array ( Ix )
 import Data.Array.IO
-import Control.Monad.Trans.Reader
-import Control.Monad.IO.Class (liftIO)
+    ( Ix, readArray, writeArray, MArray(newArray_), IOUArray, IOArray )
+import Control.Monad.Trans.Reader ( ReaderT(ReaderT, runReaderT) )
 
 -- -- | The 'Memo' class specifies a type for which an array can be created.
 class (MArray IOArray e IO) => Memo e where
@@ -74,8 +80,8 @@ memo0 tr m =
   ReaderT $ \ps -> do
   let iv   = interval ps
       bnds = iterationBnds iv (dt (solver ps))
-  arr   <- liftIO $ newMemoArray_ bnds
-  nref  <- liftIO $ newIORef 0
+  arr   <- newMemoArray_ bnds
+  nref  <- newIORef 0
   let r ps = do
         let sl = solver ps
             iv = interval ps
@@ -92,6 +98,6 @@ memo0 tr m =
                       a `seq` writeArray arr n' a
                       writeIORef nref (n' + 1)
                       loop (n' + 1)
-        n' <- liftIO $ readIORef nref
-        liftIO $ loop n'
+        n' <- readIORef nref
+        loop n'
   pure . tr . ReaderT $ r

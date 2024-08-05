@@ -1,7 +1,7 @@
 module Solver where
 
-import Types
-import Simulation
+import Types ( Iteration )
+import Simulation ( Interval(startTime) )
 
 -- | It defines configurations to use within the solver
 data Solver = Solver { dt        :: Double,      -- ^ the integration time step

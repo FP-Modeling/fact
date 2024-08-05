@@ -13,8 +13,7 @@ import Solver
       iterToTime )
 import Interpolation ( interpolate )
 import Memo ( memo )
-import Control.Monad.Trans.Reader
-import Control.Monad.IO.Class (liftIO)
+import Control.Monad.Trans.Reader ( ReaderT(ReaderT, runReaderT) )
 
 integ :: CT Double -> CT Double -> CT (CT Double)
 integ diff i =
@@ -69,7 +68,7 @@ updateInteg integ diff =
                 let f = solverToFunction (method $ solver ps)
                 in
                 (\y -> f diff i y ps) =<< readIORef (cache integ)
-                
+
 solverToFunction Euler = integEuler
 solverToFunction RungeKutta2 = integRK2
 solverToFunction RungeKutta4 = integRK4

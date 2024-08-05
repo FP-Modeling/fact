@@ -9,7 +9,6 @@ import Solver
       getSolverStage,
       iterToTime )
 import Control.Monad.Trans.Reader ( ReaderT(ReaderT, runReaderT) )
-import Control.Monad.IO.Class (liftIO)
 
 -- | Function to solve floating point approximations
 neighborhood :: Solver -> Double -> Double -> Bool
@@ -62,6 +61,6 @@ interpolate m =
             runReaderT m $ ps { time = t2,
                                 iteration = n2,
                                 solver = sl { stage = SolverStage 0 }}         
-      in do y1 <- liftIO z1
-            y2 <- liftIO z2
+      in do y1 <- z1
+            y2 <- z2
             return $ y1 + (y2 - y1) * (t - t1) / (t2 - t1)
