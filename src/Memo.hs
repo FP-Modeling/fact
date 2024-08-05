@@ -9,7 +9,7 @@ import Simulation
 import Data.IORef
 import Data.Array
 import Data.Array.IO
-import Control.Monad.Trans.Reader (reader, ask, runReaderT)
+import Control.Monad.Trans.Reader
 import Control.Monad.IO.Class (liftIO)
 
 -- -- | The 'Memo' class specifies a type for which an array can be created.
@@ -30,17 +30,16 @@ instance (MArray IOUArray e IO) => UMemo e where
 -- the specified interpolation and being aware of the Runge-Kutta method.
 memo :: UMemo e => (CT e -> CT e) -> CT e 
         -> CT (CT e)
-memo tr m = do 
-  ps <- ask
+memo tr m =
+  ReaderT $ \ps -> do
   let sl = solver ps
       iv = interval ps
       (SolverStage stl, SolverStage stu) = stageBnds sl
       (nl, nu)   = iterationBnds iv (dt sl)
-  arr   <- liftIO $ newMemoUArray_ ((stl, nl), (stu, nu))
-  nref  <- liftIO $ newIORef 0
-  stref <- liftIO $ newIORef 0
-  let r = do
-        ps <- ask
+  arr   <- newMemoUArray_ ((stl, nl), (stu, nu))
+  nref  <- newIORef 0
+  stref <- newIORef 0
+  let r ps = do
         let sl  = solver ps
             iv  = interval ps
             n   = iteration ps
@@ -62,23 +61,22 @@ memo tr m = do
                                 loop (n' + 1) 0
                         else do writeIORef stref (st' + 1)
                                 loop n' (st' + 1)
-        n'  <- liftIO $ readIORef nref
-        st' <- liftIO $ readIORef stref
-        liftIO $ loop n' st'
-  pure . tr $ r
+        n'  <- readIORef nref
+        st' <- readIORef stref
+        loop n' st'
+  pure . tr . ReaderT $ r
 
 -- | Memoize and order the computation in the integration time points using 
 -- the specified interpolation and without knowledge of the Runge-Kutta method.
 memo0 :: Memo e => (CT e -> CT e) -> CT e 
         -> CT (CT e)
-memo0 tr m = do
-  ps <- ask
+memo0 tr m =
+  ReaderT $ \ps -> do
   let iv   = interval ps
       bnds = iterationBnds iv (dt (solver ps))
   arr   <- liftIO $ newMemoArray_ bnds
   nref  <- liftIO $ newIORef 0
-  let r = do
-        ps <- ask
+  let r ps = do
         let sl = solver ps
             iv = interval ps
             n  = iteration ps
@@ -96,4 +94,4 @@ memo0 tr m = do
                       loop (n' + 1)
         n' <- liftIO $ readIORef nref
         liftIO $ loop n'
-  pure . tr $ r
+  pure . tr . ReaderT $ r

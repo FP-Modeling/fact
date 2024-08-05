@@ -8,7 +8,7 @@ import Solver
       Stage(SolverStage, Interpolate),
       getSolverStage,
       iterToTime )
-import Control.Monad.Trans.Reader (reader, ask, runReaderT)
+import Control.Monad.Trans.Reader ( ReaderT(ReaderT, runReaderT) )
 import Control.Monad.IO.Class (liftIO)
 
 -- | Function to solve floating point approximations
@@ -18,8 +18,8 @@ neighborhood sl t t' =
 
 -- | Discretize the computation in the integration time points.
 discrete :: CT a -> CT a
-discrete m = do
-  ps <- ask
+discrete m = 
+  ReaderT $ \ps ->
   let st = getSolverStage $ stage (solver ps)
       r | st == 0    = runReaderT m ps
         | st > 0    = let iv = interval ps
@@ -36,14 +36,14 @@ discrete m = do
                       in runReaderT m $ ps { time = iterToTime iv sl n' (SolverStage 0),
                                              iteration = n',
                                              solver = sl { stage = SolverStage 0} }
-  liftIO r
+  in r
 
 -- | Interpolate the computation based on the integration time points only.
 interpolate :: CT Double -> CT Double
-interpolate m = do
-  ps <- ask
+interpolate m =
+  ReaderT $ \ps ->
   case stage $ solver ps of
-    SolverStage _ -> liftIO $ runReaderT m ps
+    SolverStage _ -> runReaderT m ps
     Interpolate   ->
       let iv = interval ps
           sl = solver ps
