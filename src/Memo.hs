@@ -71,33 +71,3 @@ memo tr m =
         st' <- readIORef stref
         loop n' st'
   pure . tr . ReaderT $ r
-
--- | Memoize and order the computation in the integration time points using 
--- the specified interpolation and without knowledge of the Runge-Kutta method.
-memo0 :: Memo e => (CT e -> CT e) -> CT e 
-        -> CT (CT e)
-memo0 tr m =
-  ReaderT $ \ps -> do
-  let iv   = interval ps
-      bnds = iterationBnds iv (dt (solver ps))
-  arr   <- newMemoArray_ bnds
-  nref  <- newIORef 0
-  let r ps = do
-        let sl = solver ps
-            iv = interval ps
-            n  = iteration ps
-            loop n' = 
-              if n' > n
-              then 
-                readArray arr n
-              else 
-                let ps' = ps { time = iterToTime iv sl n' (SolverStage 0),
-                               iteration = n',
-                               solver = sl { stage = SolverStage 0} }
-                in do a <- runReaderT m ps'
-                      a `seq` writeArray arr n' a
-                      writeIORef nref (n' + 1)
-                      loop (n' + 1)
-        n' <- readIORef nref
-        loop n'
-  pure . tr . ReaderT $ r

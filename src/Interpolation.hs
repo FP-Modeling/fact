@@ -15,28 +15,6 @@ neighborhood :: Solver -> Double -> Double -> Bool
 neighborhood sl t t' = 
   abs (t - t') <= dt sl / 1.0e6
 
--- | Discretize the computation in the integration time points.
-discrete :: CT a -> CT a
-discrete m = 
-  ReaderT $ \ps ->
-  let st = getSolverStage $ stage (solver ps)
-      r | st == 0    = runReaderT m ps
-        | st > 0    = let iv = interval ps
-                          sl = solver ps
-                          n  = iteration ps
-                      in runReaderT m $ ps { time = iterToTime iv sl n (SolverStage 0),
-                                             solver = sl {stage = SolverStage 0} }
-        | otherwise = let iv = interval ps
-                          t  = time ps
-                          sl = solver ps
-                          n  = iteration ps
-                          t' = startTime iv + fromIntegral (n + 1) * dt sl
-                          n' = if neighborhood sl t t' then n + 1 else n
-                      in runReaderT m $ ps { time = iterToTime iv sl n' (SolverStage 0),
-                                             iteration = n',
-                                             solver = sl { stage = SolverStage 0} }
-  in r
-
 -- | Interpolate the computation based on the integration time points only.
 interpolate :: CT Double -> CT Double
 interpolate m = do
