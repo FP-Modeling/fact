@@ -15,6 +15,7 @@ import Interpolation ( interpolate )
 import Memo ( memo )
 import Control.Monad.Trans.Reader
 import Control.Monad.IO.Class
+import Control.Monad
 
 integ :: CT Double -> CT Double -> CT (CT Double)
 integ diff i =
@@ -58,8 +59,7 @@ createInteg i =
        return integ
 
 readInteg :: Integrator -> CT Double
-readInteg integ = 
-  ReaderT $ \ps -> flip runReaderT ps =<< readIORef (cache integ)
+readInteg = join . liftIO . readIORef . cache
 
 updateInteg :: Integrator -> CT Double -> CT ()
 updateInteg integ diff = do
