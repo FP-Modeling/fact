@@ -13,14 +13,15 @@ import Solver
       iterToTime )
 import Interpolation ( interpolate )
 import Memo ( memo )
-import Control.Monad.Trans.Reader ( ReaderT(ReaderT, runReaderT) )
+import Control.Monad.Trans.Reader
+import Control.Monad.IO.Class
 
 integ :: CT Double -> CT Double -> CT (CT Double)
 integ diff i =
   mdo y <- memo interpolate z
-      z <- ReaderT $ \ps ->
+      z <- do ps <- ask
               let f = solverToFunction (method $ solver ps)
-              in pure . ReaderT $ f diff i y
+              pure $ f diff i y
       return y
       
 -- | The Integrator type represents an integral with caching.
@@ -61,45 +62,46 @@ readInteg integ =
   ReaderT $ \ps -> flip runReaderT ps =<< readIORef (cache integ)
 
 updateInteg :: Integrator -> CT Double -> CT ()
-updateInteg integ diff =
-  ReaderT . const $ writeIORef (computation integ) z
-    where i = initial integ
-          z = ReaderT $ \ps ->
-                let f = solverToFunction (method $ solver ps)
-                in
-                (\y -> f diff i y ps) =<< readIORef (cache integ)
+updateInteg integ diff = do
+  let i = initial integ
+      z = do
+        ps <- ask
+        let f = solverToFunction (method $ solver ps)
+        y <- liftIO $ readIORef (cache integ)
+        f diff i y
+  liftIO $ writeIORef (computation integ) z
 
 solverToFunction Euler = integEuler
 solverToFunction RungeKutta2 = integRK2
 solverToFunction RungeKutta4 = integRK4
 
 integEuler :: CT Double
-             -> CT Double 
-             -> CT Double 
-             -> Parameters -> IO Double
-integEuler diff i y ps =
+           -> CT Double
+           -> CT Double
+           -> CT Double
+integEuler diff i y = do
+  ps <- ask
   case iteration ps of
-    0 -> 
-      runReaderT i ps
-    n -> do 
+    0 -> i
+    n -> do
       let iv  = interval ps
           sl  = solver ps
           ty  = iterToTime iv sl (n - 1) (SolverStage 0)
           psy = ps { time = ty, iteration = n - 1, solver = sl { stage = SolverStage 0} }
-      a <- runReaderT y psy
-      b <- runReaderT diff psy
+      a <- local (const psy) y
+      b <- local (const psy) diff
       let !v = a + dt (solver ps) * b
       return v
 
 integRK2 :: CT Double
-           -> CT Double
-           -> CT Double
-           -> Parameters -> IO Double
-integRK2 f i y ps =
+         -> CT Double
+         -> CT Double
+         -> CT Double
+integRK2 f i y = do
+  ps <- ask
   case stage (solver ps) of
     SolverStage 0 -> case iteration ps of
-                       0 ->
-                         runReaderT i ps
+                       0 -> i
                        n -> do
                          let iv = interval ps
                              sl = solver ps
@@ -109,9 +111,9 @@ integRK2 f i y ps =
                              psy = ps { time = ty, iteration = n - 1, solver = sl { stage = SolverStage 0 }}
                              ps1 = psy
                              ps2 = ps { time = t2, iteration = n - 1, solver = sl { stage = SolverStage 1 }}
-                         vy <- runReaderT y psy
-                         k1 <- runReaderT f ps1
-                         k2 <- runReaderT f ps2
+                         vy <- local (const psy) y
+                         k1 <- local (const ps1) f
+                         k2 <- local (const ps2) f
                          let !v = vy + dt sl / 2.0 * (k1 + k2)
                          return v
     SolverStage 1 -> do
@@ -122,22 +124,22 @@ integRK2 f i y ps =
                       t1 = ty
                       psy = ps { time = ty, iteration = n, solver = sl { stage = SolverStage 0 }}
                       ps1 = psy
-                  vy <- runReaderT y psy
-                  k1 <- runReaderT f ps1
+                  vy <- local (const psy) y
+                  k1 <- local (const ps1) f
                   let !v = vy + dt sl * k1
                   return v
-    _ -> 
+    _ ->
       error "Incorrect stage: integRK2"
 
 integRK4 :: CT Double
-           -> CT Double
-           -> CT Double
-           -> Parameters -> IO Double
-integRK4 f i y ps =
+         -> CT Double
+         -> CT Double
+         -> CT Double
+integRK4 f i y = do
+  ps <- ask
   case stage (solver ps) of
     SolverStage 0 -> case iteration ps of
-                       0 -> 
-                         runReaderT i ps
+                       0 -> i
                        n -> do
                          let iv = interval ps
                              sl = solver ps
@@ -151,11 +153,11 @@ integRK4 f i y ps =
                              ps2 = ps { time = t2, iteration = n - 1, solver = sl { stage = SolverStage 1 }}
                              ps3 = ps { time = t3, iteration = n - 1, solver = sl { stage = SolverStage 2 }}
                              ps4 = ps { time = t4, iteration = n - 1, solver = sl { stage = SolverStage 3 }}
-                         vy <- runReaderT y psy
-                         k1 <- runReaderT f ps1
-                         k2 <- runReaderT f ps2
-                         k3 <- runReaderT f ps3
-                         k4 <- runReaderT f ps4
+                         vy <- local (const psy) y
+                         k1 <- local (const ps1) f
+                         k2 <- local (const ps2) f
+                         k3 <- local (const ps3) f
+                         k4 <- local (const ps4) f
                          let !v = vy + dt sl / 6.0 * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
                          return v
     SolverStage 1 -> do
@@ -166,8 +168,8 @@ integRK4 f i y ps =
                       t1 = ty
                       psy = ps { time = ty, iteration = n, solver = sl { stage = SolverStage 0 }}
                       ps1 = psy
-                  vy <- runReaderT y psy
-                  k1 <- runReaderT f ps1
+                  vy <- local (const psy) y
+                  k1 <- local (const ps1) f
                   let !v = vy + dt sl / 2.0 * k1
                   return v
     SolverStage 2 -> do
@@ -178,8 +180,8 @@ integRK4 f i y ps =
                       t2 = iterToTime iv sl n (SolverStage 1)
                       psy = ps { time = ty, iteration = n, solver = sl { stage = SolverStage 0 }}
                       ps2 = ps { time = t2, iteration = n, solver = sl { stage = SolverStage 1 }}
-                  vy <- runReaderT y psy
-                  k2 <- runReaderT f ps2
+                  vy <- local (const psy) y
+                  k2 <- local (const ps2) f
                   let !v = vy + dt sl / 2.0 * k2
                   return v
     SolverStage 3 -> do
@@ -190,9 +192,9 @@ integRK4 f i y ps =
                       t3 = iterToTime iv sl n (SolverStage 2)
                       psy = ps { time = ty, iteration = n, solver = sl { stage = SolverStage 0 }}
                       ps3 = ps { time = t3, iteration = n, solver = sl { stage = SolverStage 2 }}
-                  vy <- runReaderT y psy
-                  k3 <- runReaderT f ps3
+                  vy <- local (const psy) y
+                  k3 <- local (const ps3) f
                   let !v = vy + dt sl * k3
                   return v
-    _ -> 
+    _ ->
       error "Incorrect stase: integRK4"
