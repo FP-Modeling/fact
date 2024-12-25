@@ -48,30 +48,30 @@ then
         echo "----------------------------"
         echo "Generating intermediate PDF"
         # Generate .tex file from .lhs file
-        lhs2Tex GraduationThesis/thesis.lhs > GraduationThesis/thesis.tex
+        lhs2Tex MastersThesis/thesis.lhs > MastersThesis/thesis.tex
 
         echo "----------------------------"
         echo "Generating PDF with pdflatex"
-        pdflatex -shell-escape -output-directory='GraduationThesis/' GraduationThesis/thesis.tex
+        pdflatex -shell-escape -output-directory='MastersThesis/' MastersThesis/thesis.tex
 
         # Generate references
         echo "----------------------------"
         echo "Generating references with bibtex"
-        cp GraduationThesis/bibliography.bib .
-        bibtex GraduationThesis/thesis
+        cp MastersThesis/bibliography.bib .
+        bibtex MastersThesis/thesis
         rm bibliography.bib
 
         # Generate black and white pdf from created .tex file
         echo "----------------------------"
         echo "Generating PDF with pdflatex"
-        pdflatex -shell-escape -output-directory='GraduationThesis/' GraduationThesis/thesis.tex
-        pdflatex -shell-escape -output-directory='GraduationThesis/' GraduationThesis/thesis.tex
+        pdflatex -shell-escape -output-directory='MastersThesis/' MastersThesis/thesis.tex
+        pdflatex -shell-escape -output-directory='MastersThesis/' MastersThesis/thesis.tex
 
         echo "----------------------------"
         echo "Moving PDF to the parent folder"
 
         # Renaming and moving
-        mv GraduationThesis/thesis.pdf thesisGray.pdf
+        mv MastersThesis/thesis.pdf thesisGray.pdf
 
         echo "----------------------------"
         echo "END"
@@ -82,16 +82,16 @@ then
         echo "Generating PDF with pdflatex"
 	if [[ $3 == 'doubled' ]]
         then
-	    pdflatex -shell-escape -output-directory='GraduationThesis/' "\def\iscolorful{}\def\doubleSpaced{} \input{GraduationThesis/thesis.lhs}"
+	    pdflatex -shell-escape -output-directory='MastersThesis/' "\def\iscolorful{}\def\doubleSpaced{} \input{MastersThesis/thesis.lhs}"
 	else
-            pdflatex -shell-escape -output-directory='GraduationThesis/' "\def\iscolorful{} \input{GraduationThesis/thesis.lhs}"
+            pdflatex -shell-escape -output-directory='MastersThesis/' "\def\iscolorful{} \input{MastersThesis/thesis.lhs}"
 	fi
 
         # Generate references
         echo "----------------------------"
         echo "Generating references with bibtex"
-        cp GraduationThesis/bibliography.bib .
-        bibtex GraduationThesis/thesis
+        cp MastersThesis/bibliography.bib .
+        bibtex MastersThesis/thesis
         rm bibliography.bib
 
         # Generate colorful pdf from .lhs file
@@ -99,18 +99,18 @@ then
         echo "Generating PDF with pdflatex"
 	if [[ $3 == 'doubled' ]]
 	then
-	    pdflatex -shell-escape -output-directory='GraduationThesis/' "\def\iscolorful{}\def\doubleSpaced{} \input{GraduationThesis/thesis.lhs}"
-	    pdflatex -shell-escape -output-directory='GraduationThesis/' "\def\iscolorful{}\def\doubleSpaced{} \input{GraduationThesis/thesis.lhs}"
+	    pdflatex -shell-escape -output-directory='MastersThesis/' "\def\iscolorful{}\def\doubleSpaced{} \input{MastersThesis/thesis.lhs}"
+	    pdflatex -shell-escape -output-directory='MastersThesis/' "\def\iscolorful{}\def\doubleSpaced{} \input{MastersThesis/thesis.lhs}"
 	else
-            pdflatex -shell-escape -output-directory='GraduationThesis/' "\def\iscolorful{} \input{GraduationThesis/thesis.lhs}"
-            pdflatex -shell-escape -output-directory='GraduationThesis/' "\def\iscolorful{} \input{GraduationThesis/thesis.lhs}"
+            pdflatex -shell-escape -output-directory='MastersThesis/' "\def\iscolorful{} \input{MastersThesis/thesis.lhs}"
+            pdflatex -shell-escape -output-directory='MastersThesis/' "\def\iscolorful{} \input{MastersThesis/thesis.lhs}"
 	fi
 
         echo "----------------------------"
         echo "Moving PDF to the parent folder"
 
         # Renaming and moving
-        mv GraduationThesis/thesis.pdf thesisColorful.pdf
+        mv MastersThesis/thesis.pdf thesisColorful.pdf
 
         echo "----------------------------"
         echo "END"
@@ -118,15 +118,15 @@ then
     elif [[ $2 == 'compile' ]]
     then
         # Compile the thesis with GHC
-        ghc GraduationThesis/thesis.lhs
+        ghc MastersThesis/thesis.lhs
 
 	# Moving to current directory (Unix and Windows)
-	mv GraduationThesis/thesis thesis
-	mv GraduationThesis/thesis.exe thesis.exe
+	mv MastersThesis/thesis thesis
+	mv MastersThesis/thesis.exe thesis.exe
     elif [[ $2 == 'repl' ]]
     then
         # Enter GHCi with the thesis loaded
-        ghci -Wdefault GraduationThesis/thesis.lhs
+        ghci -Wdefault MastersThesis/thesis.lhs
 
     else
         echo "No available option! Use compile, repl, gray or colorful!"
