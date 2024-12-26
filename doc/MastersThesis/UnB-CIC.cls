@@ -170,7 +170,7 @@
 	\def\@textscale#1#2{{\addfontfeatures{Scale=#1}#2}}
 }%
 
-\RequirePackage{graphicx}\graphicspath{{.}{GraduationThesis/img/}}%
+\RequirePackage{graphicx}\graphicspath{{.}{MastersThesis/img/}}%
 \RequirePackage{boites}
 \RequirePackage[a4paper,includefoot]{geometry}
 
@@ -895,7 +895,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand{\titulo}[1]{\title{#1}}%
 
-\def\@texpath{GraduationThesis/tex}%
+\def\@texpath{MastersThesis/tex}%
 \newcommand{\@erroSeNaoExiste}[1]{%
     \IfFileExists{#1}{}%
 	    {\ClassError{UnB-CIC}%
