@@ -2,8 +2,9 @@
 \begin{code}
 module MastersThesis.Lhs.Interpolation where
 import MastersThesis.Lhs.Design
+import Control.Monad.Trans.Reader
 
-type Model a = Dynamics (Dynamics a)
+type Model a = CT (CT a)
 
 \end{code}
 }
@@ -18,10 +19,9 @@ When dealing with continuous time, \texttt{Rivika} changes the domain in which \
 
 The problems starts in the physical domain. The goal is to obtain a value of an unknown function $y(t)$ at time $t_x$. However, because the solution is based on \textbf{numerical methods} a sampling process occurs and the continuous time domain is transformed into a \textbf{discrete} time domain, where the solver methods reside --- those are represented by the functions \textit{integEuler}, \textit{integRK2} and \textit{integRK4}. A solver depends on the chosen time step to execute a numerical algorithm. Thus, time is modeled by the sum of $t_0$ with $n\Delta$, where $n$ is a natural number. Hence, from the solver perspective, time is always dependent on the time step, i.e., only values that can be described as $t_0 + n\Delta$ can be properly visualized by the solver. Finally, there's the \textbf{iteration} domain, used by the driver functions, \textit{runDynamics} and \textit{runDynamicsFinal}. When executing the driver, one of its first steps is to call the function \textit{iterationsBnds}, which converts the simulation time interval to a tuple of numbers that represent the amount of iterations based on the time step of the solver. This functions is presented bellow:
 
-
 \begin{spec}
 iterationBnds :: Interval -> Double -> (Int, Int)
-iterationBnds interv dt = (0, round ((stopTime interv - 
+iterationBnds interv dt = (0, ceiling ((stopTime interv - 
                                startTime interv) / dt))
 \end{spec}
 
@@ -30,10 +30,11 @@ To achieve the total number of iterations, the function \textit{iterationBnds} d
 The function that allows us to go back to the discrete time domain being in the iteration axis is the \textit{iterToTime} function. It uses the solver information, the current iteration and the interval to transition back to time, as depicted by the following code:
 
 \begin{code}
-iterToTime :: Interval -> Solver -> Int -> Int -> Double
-iterToTime interv solver n st =
+iterToTime :: Interval -> Solver -> Int -> Stage -> Double
+iterToTime _ _ _ Interpolate = error "Incorrect stage: Interpolate"
+iterToTime interv solver n (SolverStage st) =
   if st < 0 then 
-    error "Incorrect stage: iterToTime"
+    error "Incorrect solver stage in iterToTime"
   else
     (startTime interv) + n' * (dt solver) + delta (method solver) st
       where n' = fromInteger (toInteger n)
@@ -43,7 +44,7 @@ iterToTime interv solver n st =
             delta RungeKutta4 0 = 0
             delta RungeKutta4 1 = dt solver / 2
             delta RungeKutta4 2 = dt solver / 2
-            delta RungeKutta4 3 = dt solver                          
+            delta RungeKutta4 3 = dt solver                 
 \end{code}
 
 A transformation from iteration to time depends on the chosen solver method due to their next step functions. For instance, the second and forth order Runge-Kutta methods have more stages, and it uses fractions of the time step for more granular use of the derivative function. This is why lines 11 and 12 are using half of the time step. Moreover, all discrete time calculations assume that the value starts from the beginning of the simulation (\textit{startTime}). The result is obtained by the sum of the initial value, the solver-dependent \textit{delta} function and the iteration times the solver time step (line 6).
@@ -64,7 +65,7 @@ iterationLoBnd :: Interval -> Double -> Int
 iterationLoBnd interv dt = fst $ iterationBnds interv dt
 
 iterationHiBnd :: Interval -> Double -> Int
-iterationHiBnd interv dt = snd $ iterationBnds interv dt                   
+iterationHiBnd interv dt = snd $ iterationBnds interv dt   
 
 iterationBnds :: Interval -> Double -> (Int, Int)
 iterationBnds interv dt = (0, ceiling ((stopTime interv - 
@@ -81,20 +82,35 @@ iterationBnds interv dt = (0, ceiling ((stopTime interv -
 
 epslon = 0.00001                          
 
-runDynamics :: Model a -> Interval -> Solver -> IO [a]
-runDynamics (Dynamics m) iv sl =
-  do let (nl, nu) = basicIterationBnds iv (dt sl)
-         parameterise n = Parameters { interval = iv,
-                                       time = iterToTime iv sl n 0,
-                                       iteration = n,
-                                       solver = sl { stage = 0 }}
-         ps = Parameters { interval = iv,
-                           time = stopTime iv,
-                           iteration = nu,
-                           solver = sl { stage = -1}}
-     if (iterToTime iv sl nu 0) - (stopTime iv) < epslon
-     then sequence $ map (m . parameterise) [nl .. nu]
-     else sequence $ ((init $ map (m . parameterise) [nl .. nu]) ++ [m ps])
+runCT :: Model a -> Double -> Solver -> IO [a]
+runCT m t sl = do
+  d <- runReaderT m $ Parameters { interval = Interval 0 t,
+                                   time = 0,
+                                   iteration = 0,
+                                   solver = sl { stage = SolverStage 0}}
+  sequence $ subRunCT d t sl
+
+subRunCT :: CT a -> Double -> Solver -> [IO a]
+subRunCT m t sl = do
+  let iv = Interval 0 t
+      (nl, nu) = iterationBnds iv (dt sl)
+      parameterize n =
+        let time = iterToTime iv sl n (SolverStage 0)
+            solver = sl {stage = SolverStage 0}
+        in Parameters { interval = iv,
+                        time = time,
+                        iteration = n,
+                        solver = solver }
+
+      disct = iterToTime iv sl nu (SolverStage 0)
+      values = map (runReaderT m . parameterize) [nl .. nu]
+  if disct - t < epslon
+  then values
+  else let ps = Parameters { interval = iv,
+                             time = t,
+                             iteration = nu,
+                             solver = sl {stage = Interpolate} }
+       in init values ++ [runReaderT m ps]
 \end{spec}
 
 The new implementation of \textit{iterationBnds} is pretty similar to the previous one, with the difference being the replacement of the \textit{round} function for the \textit{ceiling} function. As explained in the previous section, the rounding is used to go to the iteration domain. However, because the interpolation \textbf{requires} both solver steps --- the one that came before $t_x$ and the one immediately
@@ -107,51 +123,50 @@ This parametric record, however, will only be used if, and \textbf{only} if, we 
 Next, the integrator needs to be modified in order to cope with negative value in solver stages. The following \textit{interpolate} function will be an added to the integrator:
 
 \begin{code}
-interpolate :: Dynamics Double -> Dynamics Double
-interpolate (Dynamics m) = 
-  Dynamics $ \ps -> 
-  if stage (solver ps) >= 0 then 
-    m ps
-  else 
-    let iv = interval ps
-        sl = solver ps
-        t  = time ps
-        st = dt sl
-        x  = (t - startTime iv) / st
-        n1 = max (floor x) (iterationLoBnd iv st)
-        n2 = min (ceiling x) (iterationHiBnd iv st)
-        t1 = iterToTime iv sl n1 0
-        t2 = iterToTime iv sl n2 0
-        z1 = m $ ps { time = t1,
-                      iteration = n1,
-                      solver = sl { stage = 0 } }
-        z2 = m $ ps { time = t2,
-                      iteration = n2,
-                      solver = sl { stage = 0 } }        
-    in do y1 <- z1
-          y2 <- z2
-          return $ y1 + (y2 - y1) * (t - t1) / (t2 - t1)
+interpolate :: CT Double -> CT Double
+interpolate m = do
+  ps <- ask
+  case stage $ solver ps of
+    SolverStage _ -> m
+    Interpolate   ->
+      let iv = interval ps
+          sl = solver ps
+          t  = time ps
+          st = dt sl
+          x  = (t - startTime iv) / st
+          n1 = max (floor x) (iterationLoBnd iv st)
+          n2 = min (ceiling x) (iterationHiBnd iv st)
+          t1 = iterToTime iv sl n1 (SolverStage 0)
+          t2 = iterToTime iv sl n2 (SolverStage 0)
+          ps1 = ps { time = t1,
+                     iteration = n1,
+                     solver = sl { stage = SolverStage 0 }}
+          ps2 = ps { time = t2,
+                     iteration = n2,
+                     solver = sl { stage = SolverStage 0 }}
+          z1 = local (const ps1) m
+          z2 = local (const ps2) m
+      in z1 + (z2 - z1) * pure ((t - t1) / (t2 - t1))
 \end{code}
 
 Lines 4 to 6 are the normal workflow for positive values in the \texttt{stage} field. If a corner case comes in, the reminaing code applies \textbf{linear interpolation} to it. It accomplishes this by first comparing the next and previous discrete times (lines 14 and 15) relative to \texttt{x} (line 11) --- the discrete counterpart of the time of interest \texttt{t} (line 9). These time points are calculated by their correspondent iterations (lines 12 and 13). Then, the integrator calculates the outcomes at these two points, i.e., do applications of the previous and next modeled times points with their respective parametric records (lines 16 to 21). Finally, lines 22 to 24 execute the linear interpolation with the obtained values that surround the non-discrete time point. Figure \ref{fig:interpolate} illustrates the effect of the \textit{interpolate} function when converting domains.
 
 \begin{spec}
-diffInteg :: Integrator -> Dynamics Double -> Dynamics ()
-diffInteg integ diff =
-  do let z = Dynamics $ \ps ->
-           do whatToDo <- readIORef (computation integ)
-              let i = initial integ
-              case method (solver ps) of
-                Euler -> integEuler diff i whatToDo ps
-                RungeKutta2 -> integRK2 diff i whatToDo ps
-                RungeKutta4 -> integRK4 diff i whatToDo ps
-     liftIO $ writeIORef (computation integ) (interpolate z)     
+updateInteg :: Integrator -> CT Double -> CT ()
+updateInteg integ diff = do
+  let i = initial integ
+      z = do
+        ps <- ask
+        let f = solverToFunction (method $ solver ps)
+        y <- liftIO $ readIORef (cache integ)
+        f diff i y
+  liftIO $ writeIORef (computation integ) z
 \end{spec}
 
 \figuraBib{Interpolate}{Linear interpolation is a transformation that transition us back to the continuous domain}{}{fig:interpolate}{width=.7\textwidth}%
 
-The last step in this tweak is to add this function into the integrator function \textit{diffInteg}. The code is almost identical to the one presented in chapter 3, \textit{Effectful Integrals}. The main difference is in line 10, where the interpolation function is being applied to \texttt{z}. Figure \ref{fig:diffInterpolate} shows the same visual representation for the \textit{diffInteg} function used in chapter 4, but with the aforementioned modifications.
+The last step in this tweak is to add this function into the integrator function \textit{updateInteg}. The code is almost identical to the one presented in chapter 3, \textit{Effectful Integrals}. The main difference is in line 10, where the interpolation function is being applied to \texttt{z}. Figure \ref{fig:diffInterpolate} shows the same visual representation for the \textit{updateInteg} function used in chapter 4, but with the aforementioned modifications.
 
-\figuraBib{DiffIntegInterpolate}{The new \textit{diffInteg} function add linear interpolation to the pipeline when receiving a parametric record}{}{fig:diffInterpolate}{width=.9\textwidth}%
+\figuraBib{DiffIntegInterpolate}{The new \textit{updateInteg} function add linear interpolation to the pipeline when receiving a parametric record}{}{fig:diffInterpolate}{width=.9\textwidth}%
 
 This concludes the first tweak in \texttt{Rivika}. Now, the mismatches between the stop time of the simulation and the time step are being treated differently, going back to the continuous domain thanks to the added linear interpolation. The next chapter, \textit{Caching the Speed Pill}, goes deep into the program's performance and how this can be fixed with a caching strategy.

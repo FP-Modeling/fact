@@ -1,10 +1,12 @@
 \ignore{
 \begin{code}
+{-# LANGUAGE FlexibleInstances #-}
 module MastersThesis.Lhs.Design where
+import Control.Monad.Trans.Reader ( ReaderT )
 \end{code}
 }
 
-In the previous chapter, the importance of making a bridge between two different sets of abstractions --- computers and the physical domain --- was established. This chapter will explain the core philosophy behind the implementation of this link, starting with an introduction to GPAC, followed by the type system used in Haskell, as well as understanding how to model the main entities of the problem. At the end, the presented modeling strategy will justify the data types used in the solution, paving the way for the next chapter \textit{Effectful Integrals}.
+In the previous chapter, the importance of making a bridge between two different sets of abstractions --- computers and the physical domain --- was established. This chapter will explain the core philosophy behind the implementation of this link, starting with an introduction to GPAC, followed by the type and typeclass systems used in Haskell, as well as understanding how to model the main entities of the problem. At the end, the presented modeling strategy will justify the data types used in the solution, paving the way for the next chapter \textit{Effectful Integrals}.
 
 \section{Shannon's Foundation: GPAC}
 \label{sec:gpac}
@@ -33,7 +35,7 @@ Composition rules that restrict how these units can be hooked to one another. Sh
   \item Each variable of integration of an integrator is the input \textit{t}.
 \end{itemize}
 
-During the definition of the DSL, parallels will map the aforementioned basic units and composition rules to the implementation. With this strategy, all the mathematical formalism leveraged for analog computers will drive the implementation in the digital computer. Although we do not formally prove a refinment between the GPAC theory, i.e., our especification, and the final implementation, \texttt{Rivika} is an attempt to build a tool with formalism taken into account; one of the most frequent critiques in the CPS domain, as explained in the previous chapter.
+During the definition of the DSL, parallels will map the aforementioned basic units and composition rules to the implementation. With this strategy, all the mathematical formalism leveraged for analog computers will drive the implementation in the digital computer. Although we do not formally prove a refinement between the GPAC theory, i.e., our especification, and the final implementation of \texttt{FACT}, is an attempt to build a tool with formalism taken into account; one of the most frequent critiques in the CPS domain, as explained in the previous chapter.
 
 \section{The Shape of Information}
 \label{sec:types}
@@ -125,7 +127,7 @@ Within algebraic data types, it is possible to abstract the \textbf{structure} o
 \label{fig:parametricPoly}
 \end{figure}
 
-In some situations, changing the type of the structure is not the desired property of interest. There are applications where some sort of \textbf{behaviour} is a necessity, e.g., the ability of comparing two instances of a custom type. This nature of polymorphism is known as \textit{ad hoc polymorphism}, which is implemented in Haskell via what is similar to java-like interfaces, so-called \textbf{typeclasses}. However, establishing a contract with a typeclass differs from an interface in a fundamental aspect: rather than inheritance being given to the type, it has a lawful implementation, meaning that \textbf{mathematical formalism} is assured for it. As an example, the implementation of the typeclass \texttt{Eq} gives to the type all comparable operations ($==$ and $!=$). Figure \ref{fig:adHocPoly} shows the implementation of \texttt{Ord} typeclass for the presented \texttt{ClockTime}, giving it capabilities for sorting instances of such type.
+In some situations, changing the type of the structure is not the desired property of interest. There are applications where some sort of \textbf{behaviour} is a necessity, e.g., the ability of comparing two instances of a custom type. This nature of polymorphism is known as \textit{ad hoc polymorphism}, which is implemented in Haskell via what is similar to java-like interfaces, so-called \textbf{typeclasses}~\cite{Wadler1989}. However, establishing a contract with a typeclass differs from an interface in a fundamental aspect: rather than inheritance being given to the type, it has a lawful implementation, meaning that \textbf{mathematical formalism} is assured for it, although the implementer is not obligated to prove its laws on a language level. As an example, the implementation of the typeclass \texttt{Eq} gives to the type all comparable operations ($==$ and $!=$). Figure \ref{fig:adHocPoly} shows the implementation of \texttt{Ord} typeclass for the presented \texttt{ClockTime}, giving it capabilities for sorting instances of such type.
 
 \begin{figure}[ht!]
 \centering
@@ -166,7 +168,7 @@ These numerical methods are used to solve problems specified by the following ma
 \label{eq:diffEq}
 \end{equation}
 
-As showed, both the derivative and the function --- the mathematical formulation of the system --- varies according to \textbf{time}. Both acts as functions in which for a given time value, it produces a numerical outcome. Moreover, this equality assumes that the next step following the derivative's direction will not be that different from the actual value of the function $y$ if the time step is small enough. Further, it is assumed that in case of a small enough time step, the difference between time samples is $h$, i.e., the time step. In order to model this mathematical relationship between the functions and its respective derivative, these methods use iteration-based approximations. For intance, the following equation represents one step of the first-order Euler method, the simplest numerical method: 
+As showed, both the derivative and the function --- the mathematical formulation of the system --- varies according to \textbf{time}. Both acts as functions in which for a given time value, it produces a numerical outcome. Moreover, this equality assumes that the next step following the derivative's direction will not be that different from the actual value of the function $y$ if the time step is small enough. Further, it is assumed that in case of a small enough time step, the difference between time samples is $h$, i.e., the time step. In order to model this mathematical relationship between the functions and its respective derivative, these methods use iteration-based approximations. For instance, the following equation represents one step of the first-order Euler method, the simplest numerical method: 
 
 \begin{equation}
 y_{n + 1} = y_n + hf(t_n, y_n)
@@ -192,7 +194,7 @@ $$ y_{5} = y_4 + 1 * f(4, y_4) \rightarrow y_{5} = 27 + 1 * (27 + 4) \rightarrow
 
 Our primary goal is to combine the knowledge levered in section \ref{sec:types} --- modeling capabilities of Haskell's algebraic type system --- with the core notion of differential equations presented in section \ref{sec:diff}. The type system will model equation \ref{eq:nextStep}, detailed in the previous section.
 
-Any representation of a physical system that can be modeled by a set of differential equations has an outcome value at any given moment in time. The type \texttt{Dynamics} in Figure \ref{fig:firstDynamics} is a first draft of representing the continuous physical dynamics~\cite{LeeModeling} --- the evolution of a system state in time:
+Any representation of a physical system that can be modeled by a set of differential equations has an outcome value at any given moment in time. The type \texttt{CT} in Figure \ref{fig:firstDynamics} is a first draft of representing the continuous physical dynamics~\cite{LeeModeling} --- the evolution of a system state in time:
 
 \begin{figure}[ht!]
 \centering
@@ -201,19 +203,19 @@ Any representation of a physical system that can be modeled by a set of differen
   \begin{spec}
   type Time = Double
   type Outcome = Double
-  data Dynamics =
-       Dynamics (Time -> Outcome)
+  data CT =
+       CT (Time -> Outcome)
   \end{spec}
 \end{minipage}
 \begin{minipage}{.56\textwidth}
   \centering
   \includegraphics[width=0.95\linewidth]{MastersThesis/img/SimpleDynamics}
 \end{minipage}
-\caption{In Haskell, the \texttt{type} keyword works for alias. The first draft of the \texttt{Dynamics} type is a \textbf{function}, in which providing a floating point value as time returns another value as outcome.}
+\caption{In Haskell, the \texttt{type} keyword works for alias. The first draft of the \texttt{CT} type is a \textbf{function}, in which providing a floating point value as time returns another value as outcome.}
 \label{fig:firstDynamics}
 \end{figure}
 
-This type seems to capture the concept, whilst being compatible with the definition of a tagged system presented by Lee and Sangiovanni~\cite{LeeSangiovanni}. However, because numerical methods assume that the time variable is \textbf{discrete}, i.e., it is in the form of \textbf{iterations} that they solve differential equations. Thus, some tweaks to this type are needed, such as the number of the current iteration, which method is being used, in which stage the method is and when the final time of the simulation will be reached. With this in mind, new types are introduced. Figure \ref{fig:dynamicsAux} shows the auxiliary types to build a new version of the \texttt{Dynamics} type.
+This type seems to capture the concept, whilst being compatible with the definition of a tagged system presented by Lee and Sangiovanni~\cite{LeeSangiovanni}. However, because numerical methods assume that the time variable is \textbf{discrete}, i.e., it is in the form of \textbf{iterations} that they solve differential equations. Thus, some tweaks to this type are needed, such as the number of the current iteration, which method is being used, in which stage the method is and when the final time of the simulation will be reached. With this in mind, new types are introduced. Figure \ref{fig:dynamicsAux} shows the auxiliary types to build a new version of the \texttt{CT} type.
 
 \begin{figure}[ht!]
 \centering
@@ -229,9 +231,13 @@ data Method = Euler
             | RungeKutta4
             deriving (Eq, Ord, Show)
 
+data Stage = SolverStage Int
+           | Interpolate
+           deriving (Eq, Ord, Show)
+
 data Solver = Solver { dt        :: Double,     
                        method    :: Method, 
-                       stage     :: Int
+                       stage     :: Stage
                      } deriving (Eq, Ord, Show)
 
 data Parameters = Parameters { interval  :: Interval,
@@ -250,25 +256,95 @@ data Parameters = Parameters { interval  :: Interval,
 \label{fig:dynamicsAux}
 \end{figure}
 
-The above auxiliary types serve a common purpose: to provide at any given moment in time, all the information to execute a solver method until the end of the simulation. The type \texttt{Interval} determines when the simulation should start and when it should end. The \texttt{Method} sum type is used inside the \texttt{Solver} type to set solver sensible information, such as the size of the time step, which method will be used and in which stage the method is in at the current moment. Finally, the \texttt{Parameters} type combines everything together, alongside with the current time value as well as its discrete counterpart, iteration.
+The above auxiliary types serve a common purpose: to provide at any given moment in time, all the information to execute a solver method until the end of the simulation. The type \texttt{Interval} determines when the simulation should start and when it should end. The \texttt{Method} sum type is used inside the \texttt{Solver} type to set solver sensible information, such as the size of the time step, which method will be used and in which stage the method is in at the current moment (more about the stage field later on). Finally, the \texttt{Parameters} type combines everything together, alongside with the current time value as well as its discrete counterpart, iteration.
 
-Further, the new \texttt{Dynamics} type can also be parametrically polymorphic, removing the limitation of only using \texttt{Double} values as the outcome. Figure \ref{fig:dynamics} depicts the final type for the physical dynamics. The \texttt{IO} wrapper is needed to cope with memory management and side effects, all of which will be explained in the next chapter.
+Further, the new \texttt{CT} type can also be parametrically polymorphic, removing the limitation of only using \texttt{Double} values as the outcome. Figure \ref{fig:dynamics} depicts the final type for the physical dynamics. The \texttt{IO} wrapper is needed to cope with memory management and side effects, all of which will be explained in the next chapter.
 
 \begin{figure}[H]
 \centering
 \begin{minipage}{.44\textwidth}
   \centering
-\begin{code}
-data Dynamics a =
-     Dynamics (Parameters -> IO a)
-\end{code}
+\begin{spec}
+data CT a =
+     CT (Parameters -> IO a)
+\end{spec}
 \end{minipage}
 \begin{minipage}{.55\textwidth}
   \centering
   \includegraphics[width=0.95\linewidth]{MastersThesis/img/Dynamics}
 \end{minipage}
-\caption{The \texttt{Dynamics} type is a function of from time related information to an arbitraty outcome value.}
+\caption{The \texttt{CT} type is a function of from time related information to an arbitrary potentially effectful outcome value.}
 \label{fig:dynamics}
 \end{figure}
 
-This summarizes the main pilars in the design: FF-GPAC, the mathematical definition of the problem and how we are modeling this domain in Haskell. The next chapter, \textit{Effectful Integrals}, will start from this foundation, by adding typeclasses to the \texttt{Dynamics} type, and will later describe the last core type before explaining the solver execution: the \texttt{Integrator} type. These improvements for the \texttt{Dynamics} type and the new \texttt{Integrator} type will later be mapped to their FF-GPAC counterparts, explaining that they resemble the basic units mentioned in section \ref{sec:gpac}.
+In Haskell, however, function types --- types that are carrying a function inside --- are well-known and identified as an instance of a \textit{reader pattern}. The argument
+in the function type, in our case \texttt{Parameters}, is called a shared \textit{environment} for the computation of the \texttt{Reader}~\footnote{\texttt{Reader} \href{Reader}{\textcolor{blue}{Hackage reference}}.}. Moreover, because the output of our function type is wrapped inside \texttt{IO}, we can leverage another common abstraction in Haskell:
+\textit{monad transformers}. More about Monads will be explained in later chapters, but for now, it suffices to show that our type \texttt{CT} is just a type alias
+for a combination of the \textit{reader transformer} -- a combination of the monads \texttt{Reader} with an underlying \texttt{IO} monad within:
+
+\begin{figure}[H]
+\centering
+\begin{code}
+type CT a = ReaderT Parameters IO a
+\end{code}
+\caption{The \texttt{CT} type can leverage monad transformers in Haskell via \texttt{Reader} in combination with \texttt{IO}.}
+\label{fig:dynamics}
+\end{figure}
+
+
+\ignore{
+\begin{code}
+getSolverStage :: Stage -> Int
+getSolverStage (SolverStage st) = st
+getSolverStage Interpolate = 0
+
+stageBnds :: Solver -> (Stage, Stage)
+stageBnds sl = 
+  case method sl of
+    Euler -> solverStage (0, 0)
+    RungeKutta2 -> solverStage (0, 1)
+    RungeKutta4 -> solverStage (0, 3)
+  where solverStage (init, end) = (SolverStage init, SolverStage end)
+
+stageLoBnd :: Solver -> Stage
+stageLoBnd sc = fst $ stageBnds sc
+                  
+stageHiBnd :: Solver -> Stage
+stageHiBnd sc = snd $ stageBnds sc
+
+instance (Num a) => Num (CT a) where
+  x + y = (+) <$> x <*> y
+  x - y = (-) <$> x <*> y
+  x * y = (*) <$> x <*> y
+  negate = fmap negate
+  abs = fmap abs
+  signum = fmap signum
+  fromInteger i = return $ fromInteger i
+
+instance (Fractional a) => Fractional (CT a) where
+  x / y = (/) <$> x <*> y
+  recip = fmap recip
+  fromRational t = return $ fromRational t
+
+instance (Floating a) => Floating (CT a) where
+  pi = return pi
+  exp = fmap exp
+  log = fmap log
+  sqrt = fmap sqrt
+  x ** y = (**) <$> x <*> y
+  sin = fmap sin
+  cos = fmap cos
+  tan = fmap tan
+  asin = fmap asin
+  acos = fmap acos
+  atan = fmap atan
+  sinh = fmap sinh
+  cosh = fmap cosh
+  tanh = fmap tanh
+  asinh = fmap asinh
+  acosh = fmap acosh
+  atanh = fmap atanh
+\end{code}
+}
+
+This summarizes the main pilars in the design: FF-GPAC, the mathematical definition of the problem and how we are modeling this domain in Haskell. The next chapter, \textit{Effectful Integrals}, will start from this foundation, by adding typeclasses to the \texttt{CT} type, and will later describe the last core type before explaining the solver execution: the \texttt{Integrator} type. These improvements for the \texttt{CT} type and the new \texttt{Integrator} type will later be mapped to their FF-GPAC counterparts, explaining that they resemble the basic units mentioned in section \ref{sec:gpac}.

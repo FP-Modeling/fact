@@ -9,18 +9,20 @@ import Control.Monad.Trans
 import Data.Array.IO
 import Data.Array
 import Data.IORef
+import Control.Monad.Trans.Reader
+import Control.Monad
 
-initialize :: Dynamics a -> Dynamics a
-initialize (Dynamics m) =
-  Dynamics $ \ps ->
-  if iteration ps == 0 && stage (solver ps) == 0 then
-    m ps
+initialize :: CT a -> CT a
+initialize m =
+  ReaderT $ \ps ->
+  if iteration ps == 0 && getSolverStage (stage $ solver ps) == 0 then
+    runReaderT m ps
   else
     let iv = interval ps
         sl = solver ps
-    in m $ ps { time = iterToTime iv sl 0 0,
-                iteration = 0,
-                solver = sl { stage = 0 }}
+    in runReaderT m $ ps { time = iterToTime iv sl 0 (SolverStage 0),
+                           iteration = 0,
+                           solver = sl { stage = SolverStage 0 }}
 
 class (MArray IOArray e IO) => Memo e where
   newMemoArray_ :: Ix i => (i, i) -> IO (IOArray i e)
@@ -32,21 +34,31 @@ instance Memo e where
   newMemoArray_ = newArray_
     
 instance (MArray IOUArray e IO) => UMemo e where
-  newMemoUArray_ = newArray_
-  
-stageBnds :: Solver -> (Int, Int)
-stageBnds sl = 
-  case method sl of
-    Euler -> (0, 0)
-    RungeKutta2 -> (0, 1)
-    RungeKutta4 -> (0, 3)
+  newMemoUArray_ = newArray_ 
 
-stageLoBnd :: Solver -> Int
-stageLoBnd sc = fst $ stageBnds sc
-                  
-stageHiBnd :: Solver -> Int
-stageHiBnd sc = snd $ stageBnds sc
- 
+runCTFinal :: Model a -> Double -> Solver -> IO a
+runCTFinal m t sl = do
+  d <- runReaderT m $ Parameters { interval = Interval 0 t,
+                                   time = 0,
+                                   iteration = 0,
+                                   solver = sl { stage = SolverStage 0 }}
+  subRunCTFinal d t sl
+
+subRunCTFinal :: CT a -> Double -> Solver -> IO a
+subRunCTFinal m t sl = do
+  let iv = Interval 0 t
+      n = iterationHiBnd iv (dt sl)
+      disct = iterToTime iv sl n (SolverStage 0)
+      ps = if disct - t < epslon
+           then Parameters { interval = iv,
+                             time = disct,
+                             iteration = n,
+                             solver = sl { stage = SolverStage 0 }}
+           else Parameters { interval = iv,
+                             time = t,
+                             iteration = n,
+                             solver = sl { stage = Interpolate }}
+  runReaderT m ps
 \end{code}
 }
 
@@ -79,23 +91,22 @@ Total of Iterations & Execution Time (seconds) & Consumed Memory (MB) \\ \hline
 
 Before explaining the solution, it is worth describing \textbf{why} and \textbf{where} this problem arises. First, we need to take a look back onto the solvers' functions, such as the \textit{integEuler} function, introduced in chapter 3, \textit{Effectful Integrals}:
 
-
 \begin{spec}
-integEuler :: Dynamics Double
-             -> Dynamics Double 
-             -> Dynamics Double 
-             -> Parameters -> IO Double
-integEuler (Dynamics diff) (Dynamics init) (Dynamics compute) ps =
+integEuler :: CT Double
+           -> CT Double
+           -> CT Double
+           -> CT Double
+integEuler diff i y = do
+  ps <- ask
   case iteration ps of
-    0 -> 
-      init ps
-    n -> do 
+    0 -> i
+    n -> do
       let iv  = interval ps
           sl  = solver ps
-          ty  = iterToTime iv sl (n - 1) 0
-          prevPS = ps { time = ty, iteration = n - 1, solver = sl { stage = 0} }
-      a <- compute prevPS
-      b <- diff prevPS
+          ty  = iterToTime iv sl (n - 1) (SolverStage 0)
+          psy = ps { time = ty, iteration = n - 1, solver = sl { stage = SolverStage 0} }
+      a <- local (const psy) y
+      b <- local (const psy) diff
       let !v = a + dt (solver ps) * b
       return v
 \end{spec}
@@ -128,43 +139,43 @@ The first tweak, \textit{Memoization}, alters the \texttt{Integrator} type. The 
 The \textit{memo} function creates this memory region for storing values, as well as providing read access to it. This is the only function in \texttt{Rivika} that uses a \textit{constraint}, i.e., it restricts the parametric types to the ones that have implemented the requirement. In our case, this function requires that the internal type \texttt{Dynamics} dependency has implemented the \texttt{UMemo} typeclass. Because this typeclass is too complicated to be in the scope of this project, we will settle with the following explanation: it is required that the parametric values are capable of being contained inside an \textbf{mutable} array, which is the case for our \texttt{Double} values. As dependencies, the \textit{memo} function receives the dynamic computation, as well as the interpolation function that is assumed to be used, in order to attenuate the domain problem described in the previous chapter. This means that at the end, the final result will be piped to the interpolation function. 
 
 \begin{code}
-memo :: UMemo e => (Dynamics e -> Dynamics e) -> Dynamics e 
-        -> Dynamics (Dynamics e)
-memo tr (Dynamics m) = 
-  Dynamics $ \ps ->
-  do let sl = solver ps
-         iv = interval ps
-         (stl, stu) = stageBnds sl
-         (nl, nu)   = iterationBnds iv (dt sl)
-     arr   <- newMemoUArray_ ((stl, nl), (stu, nu))
-     nref  <- newIORef 0
-     stref <- newIORef 0
-     let r ps =
-           do let sl  = solver ps
-                  iv  = interval ps
-                  n   = iteration ps
-                  st  = stage sl
-                  stu = stageHiBnd sl 
-                  loop n' st' = 
-                    if (n' > n) || ((n' == n) && (st' > st)) 
-                    then 
-                      readArray arr (st, n)
-                    else 
-                      let ps' = ps { time = iterToTime iv sl n' st',
-                                     iteration = n',
-                                     solver = sl { stage = st' }}
-                      in do a <- m ps'
-                            a `seq` writeArray arr (st', n') a
-                            if st' >= stu 
-                              then do writeIORef stref 0
-                                      writeIORef nref (n' + 1)
-                                      loop (n' + 1) 0
-                              else do writeIORef stref (st' + 1)
-                                      loop n' (st' + 1)
-              n'  <- readIORef nref
-              st' <- readIORef stref
-              loop n' st'
-     return $ tr $ Dynamics r
+memo :: UMemo e => (CT e -> CT e) -> CT e -> CT (CT e)
+memo interpolate m = do
+  ps <- ask
+  let sl = solver ps
+      iv = interval ps
+      (SolverStage stl, SolverStage stu) = stageBnds sl
+      (nl, nu)   = iterationBnds iv (dt sl)
+  arr   <- liftIO $ newMemoUArray_ ((stl, nl), (stu, nu))
+  nref  <- liftIO $ newIORef 0
+  stref <- liftIO $ newIORef 0
+  let r = do
+        ps <- ask
+        let sl  = solver ps
+            iv  = interval ps
+            n   = iteration ps
+            st  = getSolverStage $ stage sl
+            stu = getSolverStage $ stageHiBnd sl 
+            loop n' stage' =
+              if (n' > n) || ((n' == n) && (stage' > st))
+              then 
+                readArray arr (st, n)
+              else 
+                let ps' = ps { time = iterToTime iv sl n' (SolverStage stage'),
+                               iteration = n',
+                               solver = sl { stage = SolverStage stage' }}
+                in do a <- runReaderT m ps'
+                      a `seq` writeArray arr (stage', n') a
+                      if stage' >= stu
+                        then do writeIORef stref 0
+                                writeIORef nref (n' + 1)
+                                loop (n' + 1) 0
+                        else do writeIORef stref (stage' + 1)
+                                loop n' (stage' + 1)
+        n'  <- liftIO $ readIORef nref
+        st' <- liftIO $ readIORef stref
+        liftIO $ loop n' st'
+  pure . interpolate $ r
 \end{code}
 
 The function starts by getting how many iterations will occur in the simulation, as well as how many stages the chosen method uses (lines 5 to 8). This is used to pre-allocate the minimum amount of memory required for the execution (line 9). This mutable array is two-dimensional and can be viewed as a table in which the number of iterations and stages determine the number of rows and columns. Pointers to iterate accross the table are declared as \textit{nref} and \textit{stref} (lines 10 and 11), to read iteration and stage values respectively. The code block from line 12 to line 36 delimit a procedure or computation that will only be used when needed, and it is being called at the end of the \textit{memo} function (line 37).
@@ -180,52 +191,50 @@ With this function on-hand, it remains to couple it to the \texttt{Integrator} t
 \newpage
 
 \begin{code}
-data Integrator = Integrator { initial     :: Dynamics Double,
-                               cache       :: IORef (Dynamics Double),
-                               computation :: IORef (Dynamics Double)
+data Integrator = Integrator { initial :: CT Double,
+                               cache   :: IORef (CT Double),
+                               computation  :: IORef (CT Double)
                              }
 \end{code}
 
-Next, two other functions need to be adapted: \textit{newInteg} and \textit{readInteg}. In the former function, the new pointer will be used, and it points to the region where the mutable array will be allocated. In the latter, instead of reading from the computation itself, the read-only pointer will be looking at the \textbf{cached} version. These differences will be illustrated by using the same integrator and state variables used in the Lorenz's Attractor example, detailed in chapter 4, \textit{Execution Walkthrough}.
+Next, two other functions need to be adapted: \textit{createInteg} and \textit{readInteg}. In the former function, the new pointer will be used, and it points to the region where the mutable array will be allocated. In the latter, instead of reading from the computation itself, the read-only pointer will be looking at the \textbf{cached} version. These differences will be illustrated by using the same integrator and state variables used in the Lorenz's Attractor example, detailed in chapter 4, \textit{Execution Walkthrough}.
 
-The main difference in the updated version of the \textit{newInteg} function is the inclusion of the new pointer that reads the cached memory (lines 4 to 7). The pointer \texttt{computation}, which will be changed by \textit{diffInteg} in a model to the differential equation, is being read in lines 8 to 10 and piped with interpolation and memoization in line 11. This approach maintains the interpolation, justified in the previous chapter, and adds the aforementioned caching strategy. Finally, the final result is written in the memory region pointed by the caching pointer (line 12).
+The main difference in the updated version of the \textit{createInteg} function is the inclusion of the new pointer that reads the cached memory (lines 4 to 7). The pointer \texttt{computation}, which will be changed by \textit{updateInteg} in a model to the differential equation, is being read in lines 8 to 10 and piped with interpolation and memoization in line 11. This approach maintains the interpolation, justified in the previous chapter, and adds the aforementioned caching strategy. Finally, the final result is written in the memory region pointed by the caching pointer (line 12).
 
-Figure \ref{fig:newInteg} shows that the updated version of the \textit{newInteg} function is similar to the previous implementation. The new field, \texttt{cached}, is a pointer that refers to \texttt{readComp} --- the result of memoization (\texttt{memo}), interpolation (\texttt{interpolate}) and the value obtained by the region pointed by the \texttt{computation} pointer. Given a parametric record \texttt{ps}, \texttt{readComp} gives this record to the dynamic value stored in the region pointed by \texttt{computation}. This result is then interpolated via the \texttt{interpolate} block and it is used as a dependency for the \texttt{memo} block.
+Figure \ref{fig:createInteg} shows that the updated version of the \textit{createInteg} function is similar to the previous implementation. The new field, \texttt{cached}, is a pointer that refers to \texttt{readComp} --- the result of memoization (\texttt{memo}), interpolation (\texttt{interpolate}) and the value obtained by the region pointed by the \texttt{computation} pointer. Given a parametric record \texttt{ps}, \texttt{readComp} gives this record to the dynamic value stored in the region pointed by \texttt{computation}. This result is then interpolated via the \texttt{interpolate} block and it is used as a dependency for the \texttt{memo} block.
 
-The modifications in the \textit{readInteg} function are being portrayed in Figure \ref{fig:readInteg}. As described earlier, the change is minor: instead of reading from the region pointed by the \texttt{computation} pointer, this function will read the value contained in the region pointed by the \texttt{cache} pointer (line 4). This means that the same \texttt{readComp}, described in the new \textit{newInteg} function, will receive a given \texttt{ps}. It is worth noticing that, just like with the \textit{newInteg} function, this cache pointer indirectly interacts with the same memory location pointed by the \texttt{computation} pointer in the integrator (Figure \ref{fig:readInteg}).
+The modifications in the \textit{readInteg} function are being portrayed in Figure \ref{fig:readInteg}. As described earlier, the change is minor: instead of reading from the region pointed by the \texttt{computation} pointer, this function will read the value contained in the region pointed by the \texttt{cache} pointer (line 4). This means that the same \texttt{readComp}, described in the new \textit{createInteg} function, will receive a given \texttt{ps}. It is worth noticing that, just like with the \textit{createInteg} function, this cache pointer indirectly interacts with the same memory location pointed by the \texttt{computation} pointer in the integrator (Figure \ref{fig:readInteg}).
 
 \begin{figure}[t!]
 \begin{code}
-newInteg :: Dynamics Double -> Dynamics Integrator
-newInteg i = 
-  do comp <- liftIO $ newIORef $ initialize i 
-     cachedComp <- liftIO $ newIORef $ initialize i 
-     let integ = Integrator { initial      = i, 
-                              cache        = cachedComp,
-                              computation  = comp }
-         readComp = Dynamics $ \ps ->
-                  do (Dynamics m) <- readIORef (computation integ)
-                     m ps
-     interpCached <- memo interpolate readComp
-     liftIO $ writeIORef (cache integ) interpCached
-     return integ
+createInteg :: CT Double -> CT Integrator
+createInteg i = do
+  r1 <- liftIO . newIORef $ initialize i
+  r2 <- liftIO . newIORef $ initialize i
+  let integ = Integrator { initial = i,
+                           cache = r1,
+                           computation  = r2 }
+      z = do
+        ps <- ask
+        v <- liftIO $ readIORef (computation integ)
+        local (const ps) v
+  y <- memo interpolate z
+  liftIO $ writeIORef (cache integ) y
+  return integ
 \end{code}
 \begin{center}
   \includegraphics[width=0.95\linewidth]{MastersThesis/img/NewInteg}
 \end{center}
-\caption{The new \textit{newInteg} function relies on interpolation composed with memoization. Also, this combination \textbf{produces} results from the computation located in a different memory region, the one pointed by the \texttt{computation} pointer in the integrator.}
-\label{fig:newInteg}
+\caption{The new \textit{createInteg} function relies on interpolation composed with memoization. Also, this combination \textbf{produces} results from the computation located in a different memory region, the one pointed by the \texttt{computation} pointer in the integrator.}
+\label{fig:createInteg}
 \end{figure}
 
 \clearpage
 
 \begin{figure}[t!]
 \begin{code}
-readInteg :: Integrator -> Dynamics Double
-readInteg integ = 
-  Dynamics $ \ps ->
-  do (Dynamics m) <- readIORef (cache integ)
-     m ps
+readInteg :: Integrator -> CT Double
+readInteg = join . liftIO . readIORef . cache
 \end{code}
 \begin{center}
   \includegraphics[width=0.95\linewidth]{MastersThesis/img/ReadInteg}
@@ -234,26 +243,29 @@ readInteg integ =
 \label{fig:readInteg}
 \end{figure}
 
-Lastly, Figure \ref{fig:diffInteg} depicts the new version of the \textit{diffInteg} function. Further, the tweaks in this function are minor, just as with the \textit{readInteg} function. Previously, the \texttt{whatToDo} label, used as a dependency in the solver methods, was being made by reading the content in the region pointed by the \texttt{computation} pointer. Now, this dependency reads the region related to the caching methodology via reading the \texttt{cache} pointer.
+Lastly, Figure \ref{fig:updateInteg} depicts the new version of the \textit{updateInteg} function. Further, the tweaks in this function are minor, just as with the \textit{readInteg} function. Previously, the \texttt{whatToDo} label, used as a dependency in the solver methods, was being made by reading the content in the region pointed by the \texttt{computation} pointer. Now, this dependency reads the region related to the caching methodology via reading the \texttt{cache} pointer.
 
 \begin{figure}[t]
 \begin{code}
-diffInteg :: Integrator -> Dynamics Double -> Dynamics ()
-diffInteg integ diff =
-  do let z = Dynamics $ \ps ->
-           do whatToDo <- readIORef (cache integ)
-              let i = initial integ
-              case method (solver ps) of
-                Euler -> integEuler diff i whatToDo ps
-                RungeKutta2 -> integRK2 diff i whatToDo ps
-                RungeKutta4 -> integRK4 diff i whatToDo ps
-     liftIO $ writeIORef (computation integ) z
+updateInteg :: Integrator -> CT Double -> CT ()
+updateInteg integ diff = do
+  let i = initial integ
+      z = do
+        ps <- ask
+        let f =
+              case (method $ solver ps) of
+                Euler -> integEuler
+                RungeKutta2 -> integRK2
+                RungeKutta4 -> integRK4
+        y <- liftIO $ readIORef (cache integ)
+        f diff i y
+  liftIO $ writeIORef (computation integ) z
 \end{code}     
 \begin{center}
   \includegraphics[width=0.95\linewidth]{MastersThesis/img/DiffInteg}
 \end{center}
-\caption{The new \textit{diffInteg} function gives to the solver functions access to the region with the cached data.}
-\label{fig:diffInteg}
+\caption{The new \textit{updateInteg} function gives to the solver functions access to the region with the cached data.}
+\label{fig:updateInteg}
 \end{figure}
 
 \newpage
@@ -277,56 +289,63 @@ The memoization added to \texttt{Rivika} needs a second tweak, related to the ex
 \begin{spec}
 exampleModel :: Model Vector
 exampleModel =
-  do integX <- newInteg 1
-     integY <- newInteg 1
+  do integX <- createInteg 1
+     integY <- createInteg 1
      let x = readInteg integX
          y = readInteg integY
-     diffInteg integX (x * y)
-     diffInteg integY (y + t)
+     updateInteg integX (x * y)
+     updateInteg integY (y + t)
      sequence [x, y]
 \end{spec}
 
-The caching strategy assumes that the created mutable array will be available for the entire simulation. However, the proposed models will \textbf{always} discard the table created by the \textit{newInteg} function due to the garbage collector~\footnote{Garbage Collector \href{https://wiki.haskell.org/GHC/Memory\_Management}{\textcolor{blue}{wiki page}}.}, after the \textit{sequence} function. Even worse, the table will be created again each time the model is being called and a parametric record is being provided, which happens when using the driver. Thus, the proposed solution to address this problem is to update the \texttt{Model} alias to  a \textbf{function} of the model. This can be achieved by \textbf{wrapping} the state vector with a the \texttt{Dynamics} type, i.e., wrapping the model using the function \textit{pure} or \textit{return}. In this manner, the computation will be "placed" as a side effect of the \texttt{IO} monad and Haskell's memory management system will not remove the table used for caching, in the first computation. So, the following code is the new type alias, alongside the previous example model using the \textit{return} function:
+The caching strategy assumes that the created mutable array will be available for the entire simulation. However, the proposed models will \textbf{always} discard the table created by the \textit{createInteg} function due to the garbage collector~\footnote{Garbage Collector \href{https://wiki.haskell.org/GHC/Memory\_Management}{\textcolor{blue}{wiki page}}.}, after the \textit{sequence} function. Even worse, the table will be created again each time the model is being called and a parametric record is being provided, which happens when using the driver. Thus, the proposed solution to address this problem is to update the \texttt{Model} alias to  a \textbf{function} of the model. This can be achieved by \textbf{wrapping} the state vector with a the \texttt{Dynamics} type, i.e., wrapping the model using the function \textit{pure} or \textit{return}. In this manner, the computation will be "placed" as a side effect of the \texttt{IO} monad and Haskell's memory management system will not remove the table used for caching, in the first computation. So, the following code is the new type alias, alongside the previous example model using the \textit{return} function:
 
 \begin{spec}
-type Model a = Dynamics (Dynamics a)
+type Model a = CT (CT a)
 
 exampleModel :: Model Vector
 exampleModel =
-  do integX <- newInteg 1
-     integY <- newInteg 1
+  do integX <- createInteg 1
+     integY <- createInteg 1
      let x = readInteg integX
          y = readInteg integY
-     diffInteg integX (x * y)
-     diffInteg integY (y + t)
+     updateInteg integX (x * y)
+     updateInteg integY (y + t)
      return $ sequence [x, y]
 \end{spec}
 
 Due to the new type signature, this change implies changing the driver, i.e., modify the function \textit{runDynamics} (the changes are analogus to the \textit{runDynamicsFinal} function variant). Further, a new auxiliary function was created, \textit{subRunDynamics}, to separate the environment into two functions. The \textit{runDynamics} will execute the mapping with the function \textit{parameterise} and the auxiliary function will address the need for interpolation.
 
 \begin{code}
-runDynamics :: Model a -> Interval -> Solver -> IO [a]
-runDynamics (Dynamics m) iv sl = 
-  do d <- m Parameters { interval = iv,
-                         time = startTime iv,
-                         iteration = 0,
-                         solver = sl { stage = 0 }}
-     sequence $ subRunDynamics d iv sl
+runCT :: Model a -> Double -> Solver -> IO [a]
+runCT m t sl = do
+  d <- runReaderT m $ Parameters { interval = Interval 0 t,
+                                   time = 0,
+                                   iteration = 0,
+                                   solver = sl { stage = SolverStage 0}}
+  sequence $ subRunCT d t sl
 
-subRunDynamics :: Dynamics a -> Interval -> Solver -> [IO a]
-subRunDynamics (Dynamics m) iv sl =
-  do let (nl, nu) = iterationBnds iv (dt sl)
-         parameterise n = Parameters { interval = iv,
-                                       time = iterToTime iv sl n 0,
-                                       iteration = n,
-                                       solver = sl { stage = 0 }}
-         ps = Parameters { interval = iv,
-                           time = stopTime iv,
-                           iteration = nu,
-                           solver = sl { stage = -1}}
-     if (iterToTime iv sl nu 0) - (stopTime iv) < 0.00001
-     then map (m . parameterise) [nl .. nu]
-     else (init $ map (m . parameterise) [nl .. nu]) ++ [m ps]     
+subRunCT :: CT a -> Double -> Solver -> [IO a]
+subRunCT m t sl = do
+  let iv = Interval 0 t
+      (nl, nu) = iterationBnds iv (dt sl)
+      parameterize n =
+        let time = iterToTime iv sl n (SolverStage 0)
+            solver = sl {stage = SolverStage 0}
+        in Parameters { interval = iv,
+                        time = time,
+                        iteration = n,
+                        solver = solver }
+
+      disct = iterToTime iv sl nu (SolverStage 0)
+      values = map (runReaderT m . parameterize) [nl .. nu]
+  if disct - t < epslon
+  then values
+  else let ps = Parameters { interval = iv,
+                             time = t,
+                             iteration = nu,
+                             solver = sl {stage = Interpolate} }
+       in init values ++ [runReaderT m ps]
 \end{code}
 
 The main change is the division of the driver into two: one dedicated to "initiate" the simulation environment providing an initial record of the type \texttt{Parameters} (lines 3 to 6), and an auxiliary function doing the mapping to the iteration axis (lines 10 to 14, 20 and 21), as well as checking for interpolation (lines 15 to 19). Thus, this is the final implementation of the driver in \texttt{Rivika}.

@@ -36,11 +36,7 @@
 \contentsline {section}{\numberline {7.1}Limitations}{62}{section.7.1}%
 \contentsline {section}{\numberline {7.2}Future Improvements}{63}{section.7.2}%
 \contentsline {section}{\numberline {7.3}Final Thoughts}{66}{section.7.3}%
-\contentsline {chapter}{References}{67}{section*.52}%
-\babel@toc {american}{}\relax 
-\babel@toc {american}{}\relax 
-\babel@toc {american}{}\relax 
-\babel@toc {american}{}\relax 
+\contentsline {chapter}{References}{67}{section*.53}%
 \babel@toc {american}{}\relax 
 \babel@toc {american}{}\relax 
 \babel@toc {american}{}\relax 

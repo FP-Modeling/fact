@@ -8,32 +8,29 @@ import MastersThesis.Lhs.Design
 
 type Vector = [Double]
 
-lorenzInterv = Interval { startTime = 0,
-                          stopTime = 100 }
-
 lorenzSolver = Solver { dt = 0.01,
                         method = RungeKutta2,
-                        stage = 0
+                        stage = SolverStage 0
                       }
 
 sigma = 10.0
 rho = 28.0
 beta = 8.0 / 3.0
 
-lorenzModel :: Model Vector
-lorenzModel =
-  do integX <- newInteg 1.0
-     integY <- newInteg 1.0
-     integZ <- newInteg 1.0
+oldLorenzModel :: Model Vector
+oldLorenzModel =
+  do integX <- createInteg 1.0
+     integY <- createInteg 1.0
+     integZ <- createInteg 1.0
      let x = readInteg integX
          y = readInteg integY
          z = readInteg integZ
-     diffInteg integX (sigma * (y - x))
-     diffInteg integY (x * (rho - z) - y)
-     diffInteg integZ (x * y - beta * z)
+     updateInteg integX (sigma * (y - x))
+     updateInteg integY (x * (rho - z) - y)
+     updateInteg integZ (x * y - beta * z)
      return $ sequence [x, y, z]
-     
-lorenzSystem = runDynamics lorenzModel lorenzInterv lorenzSolver
+
+oldLorenzSystem = runCTFinal oldLorenzModel 100 lorenzSolver
 \end{code}
 }
 
@@ -54,14 +51,14 @@ With that in mind, Figure \ref{fig:exampleSingle} illustrates an example of a mo
 \begin{figure}[ht!]
 \begin{minipage}{.5\textwidth}
 \begin{spec}
-t :: Dynamics Double
-t = Dynamics $ \ps -> return (time ps)
+t :: CT Double
+t = CT $ \ps -> return (time ps)
 
-exampleModel :: Dynamics Double
+exampleModel :: CT Double
 exampleModel =
-  do integ <- newInteg 1
+  do integ <- createInteg 1
      let y = readInteg integ
-     diffInteg integ (y + t)
+     updateInteg integ (y + t)
      y
 \end{spec}
 \end{minipage}
@@ -76,7 +73,7 @@ $\dot{y} = y + t \quad \quad y(0) = 1$
 
 \figuraBib{Rivika2GPAC}{The developed DSL translates a system described by differential equations to an executable model that resembles FF-GPAC's description}{}{fig:rivika2gpac}{width=.8\textwidth}%
 
-In line 5, a record with type \texttt{Integrator} is created, with $1$ being the initial condition of the system. Line 6 creates a \textbf{state variable}, a label that gives us access to the output of an integrator, \texttt{integ} in this case. Afterward, in line 7, the \textit{diffInteg} function connects the inputs to a given integrator by creating a combinational circuit, \texttt{(y + t)}. Polynomial circuits and integrators' outputs can be used as available inputs, as well as the \textit{time} of the simulation. Finally, line 8 returns the state variable as the output for the \textbf{driver}, the main topic of the next section.
+In line 5, a record with type \texttt{Integrator} is created, with $1$ being the initial condition of the system. Line 6 creates a \textbf{state variable}, a label that gives us access to the output of an integrator, \texttt{integ} in this case. Afterward, in line 7, the \textit{updateInteg} function connects the inputs to a given integrator by creating a combinational circuit, \texttt{(y + t)}. Polynomial circuits and integrators' outputs can be used as available inputs, as well as the \textit{time} of the simulation. Finally, line 8 returns the state variable as the output for the \textbf{driver}, the main topic of the next section.
 
 There is, however, an useful improvement to be made into the definition of a model within the DSL. The presented example used only a single state variable, although it is common to have \textbf{multiple} state variables, i.e., multiple integrators interacting with each other, modeling different aspects of a given scenario. Moreover, when dealing with multiple state variables, it is important to maintain \textbf{synchronization} between them, i.e., the same \texttt{Parameters} is being applied to \textbf{all} state variables at the same time.
 
@@ -90,16 +87,16 @@ Similarly to the preceding example, the list structure will be used to involve a
 \begin{minipage}{.5\textwidth}
 \begin{spec}
 type Vector = [Double]
-type Model a = Dynamics a
+type Model a = CT a
 
 exampleModel :: Model Vector
 exampleModel =
-  do integX <- newInteg 1
-     integY <- newInteg 1
+  do integX <- createInteg 1
+     integY <- createInteg 1
      let x = readInteg integX
          y = readInteg integY
-     diffInteg integX (x * y)
-     diffInteg integY (y + t)
+     updateInteg integX (x * y)
+     updateInteg integY (y + t)
      sequence [x, y]
 
 \end{spec}
@@ -129,8 +126,8 @@ Finally, when creating a model, the same steps have to be done in the same order
 Given a physical model translated to an executable one, it remains to understand which functions drive the simulation, i.e., which functions take the simulations details into consideration and generate the output. The function \textit{runDynamics} fulfills this role:
 
 \begin{spec}
-runDynamics :: Model a -> Interval -> Solver -> IO [a]
-runDynamics (Dynamics m) iv sl =
+runCT :: Model a -> Interval -> Solver -> IO [a]
+runCT (CT m) iv sl =
   do let (nl, nu) = iterationBnds iv (dt sl)
          parameterise n = Parameters { interval = iv,
                                        time = iterToTime iv sl n 0,
@@ -162,9 +159,6 @@ $$$$
 It is straight-forward to map it to the described domain-specific language (DSL). The remaining details are simulation-related, e.g., which solver method will be used, the interval of the simulation, as well as the size of the time step. Taking into account that the constants $\sigma$, $\rho$ and $\beta$ need to be set, the code below summarizes it, and Figure \ref{fig:gpacLorenz} shows its FF-GPAC circuit:
 
 \begin{spec}
-lorenzInterv = Interval { startTime = 0,
-                          stopTime = 100 }
-
 lorenzSolver = Solver { dt = 0.01,
                         method = RungeKutta2,
                         stage = 0
@@ -176,18 +170,18 @@ beta = 8.0 / 3.0
 
 lorenzModel :: Model Vector
 lorenzModel =
-  do integX <- newInteg 1.0
-     integY <- newInteg 1.0
-     integZ <- newInteg 1.0
+  do integX <- createInteg 1.0
+     integY <- createInteg 1.0
+     integZ <- createInteg 1.0
      let x = readInteg integX
          y = readInteg integY
          z = readInteg integZ
-     diffInteg integX (sigma * (y - x))
-     diffInteg integY (x * (rho - z) - y)
-     diffInteg integZ (x * y - beta * z)
-     sequence [x, y, z]
+     updateInteg integX (sigma * (y - x))
+     updateInteg integY (x * (rho - z) - y)
+     updateInteg integZ (x * y - beta * z)
+     return $ sequence [x, y, z]
 
-lorenzSystem = runDynamics lorenzModel lorenzInterv lorenzSolver
+lorenzSystem = runCTFinal lorenzModel 100 lorenzSolver
 \end{spec}
 
 \figuraBib{GPACLorenz}{Using only FF-GPAC's basic units and their composition rules, it's possible to model the Lorenz Attractor example}{}{fig:gpacLorenz}{width=.90\textwidth}%
@@ -198,17 +192,17 @@ The first two records, \texttt{Interval} and \texttt{Solver}, sets the environme
 
 After this overview, let's follow the execution path used by the compiler. Haskell's compiler works in a lazily manner, meaning that it calls for execution only the necessary parts. So, the first step calling \textit{lorenzSystem} is to call the \textit{runDynamics} function with a model, interval and solver configurations. Following its path of execution, the \textit{map} function (inside the driver) forces the application of a parametric record generated by the \textit{parameterise} function to the provided model, \textit{lorenzModel} in this case. Thus, it needs to be executed in order to return from the \textit{runDynamics} function.
 
-To understand the model, we need to follow the execution sequence of the output: \texttt{sequence [x, y, z]}, which requires executing all the lines before this line to obtain the all the state variables. For the sake of simplicity, we will follow the execution of the operations related to the $x$ variable, given that the remaining variables have an analogous execution walkthrough. First and foremost, memory is allocated for the integrator to work with (line 12). Figure \ref{fig:allocateExample} depicts this idea, as well as being a reminder of what the \textit{newInteg} and \textit{initialize} functions do, described in the chapter \textit{Effectful Integrals}. In this image, the integrator \texttt{integX} comprises two fields, \texttt{initial} and \texttt{computation}. The former is a simple value of the type \texttt{Dynamics Double} that, regardless of the parameters record it receives, it returns the initial condition of the system. The latter is a pointer or address that references a specific \texttt{Dynamics Double} computation in memory: in the case of receiving a parametric record \texttt{ps}, it fixes potential problems with it via the \texttt{initialize} block, and it applies this fixed value in order to get \texttt{i}, i.e., the initial value $1$, the same being saved in the other field of the record, \texttt{initial}.
+To understand the model, we need to follow the execution sequence of the output: \texttt{sequence [x, y, z]}, which requires executing all the lines before this line to obtain the all the state variables. For the sake of simplicity, we will follow the execution of the operations related to the $x$ variable, given that the remaining variables have an analogous execution walkthrough. First and foremost, memory is allocated for the integrator to work with (line 12). Figure \ref{fig:allocateExample} depicts this idea, as well as being a reminder of what the \textit{createInteg} and \textit{initialize} functions do, described in the chapter \textit{Effectful Integrals}. In this image, the integrator \texttt{integX} comprises two fields, \texttt{initial} and \texttt{computation}. The former is a simple value of the type \texttt{Dynamics Double} that, regardless of the parameters record it receives, it returns the initial condition of the system. The latter is a pointer or address that references a specific \texttt{Dynamics Double} computation in memory: in the case of receiving a parametric record \texttt{ps}, it fixes potential problems with it via the \texttt{initialize} block, and it applies this fixed value in order to get \texttt{i}, i.e., the initial value $1$, the same being saved in the other field of the record, \texttt{initial}.
 
-\figuraBib{ExampleAllocate}{After \textit{newInteg}, this record is the final image of the integrator. The function \textit{initialize} gives us protecting against wrong records of the type \texttt{Parameters}, assuring it begins from the first iteration, i.e., $t_0$}{}{fig:allocateExample}{width=.90\textwidth}%
+\figuraBib{ExampleAllocate}{After \textit{createInteg}, this record is the final image of the integrator. The function \textit{initialize} gives us protecting against wrong records of the type \texttt{Parameters}, assuring it begins from the first iteration, i.e., $t_0$}{}{fig:allocateExample}{width=.90\textwidth}%
 
 The next step is the creation of the independent state variable $x$ via \textit{readInteg} function (line 15). This variable will read the computations that are executing under the hood by the integrator. The core idea is to read from the computation pointer inside the integrator and create a new \texttt{Dynamics Double} value. Figure \ref{fig:readExample} portrays this mental image. When reading a value from an integrator, the computation pointer is being used to access the memory region previously allocated. Also, what's being stored in memory is a \texttt{Dynamics Double} value. The state variable, $x$ in this case, combines its received \texttt{Parameters} value, so-called \texttt{ps}, and \textbf{applies} it to the stored dynamic function. The result \texttt{v} is then returned.
 
 \figuraBib{ExampleRead}{After \textit{readInteg}, the final floating point values is obtained by reading from memory a dynamic computation and passing to it the received parameters record. The result of this application, $v$, is the returned value}{}{fig:readExample}{width=.90\textwidth}%
 
-The final step is to \textbf{change} the computation \textbf{inside} the memory region (line 18). Until this moment, the stored computation is always returning the value of the system at $t_0$, whilst changing the obtained parameters record to be correct via the \textit{initialize} function. Our goal is to modify this behaviour to the actual solution of the differential equations via using numerical methods, i.e., using the solver of the simulation. The function \textit{diffInteg} fulfills this role and its functionality is illustrated in Figure \ref{fig:changeExample}. With the integrator \texttt{integX} and the differential equation $\sigma (y - x)$ on hand, this function picks the provided parametric record \texttt{ps} and it returns the result of a step of the solver \texttt{RK2}, second-order Runge-Kutta method in this case. Additionally, the solver method receives as a dependency what is being pointed by the \texttt{computation} pointer, represented by \texttt{c} in the image, alongside the differential equation and initial value, pictured by \texttt{d} and \texttt{i} respectively.
+The final step is to \textbf{change} the computation \textbf{inside} the memory region (line 18). Until this moment, the stored computation is always returning the value of the system at $t_0$, whilst changing the obtained parameters record to be correct via the \textit{initialize} function. Our goal is to modify this behaviour to the actual solution of the differential equations via using numerical methods, i.e., using the solver of the simulation. The function \textit{updateInteg} fulfills this role and its functionality is illustrated in Figure \ref{fig:changeExample}. With the integrator \texttt{integX} and the differential equation $\sigma (y - x)$ on hand, this function picks the provided parametric record \texttt{ps} and it returns the result of a step of the solver \texttt{RK2}, second-order Runge-Kutta method in this case. Additionally, the solver method receives as a dependency what is being pointed by the \texttt{computation} pointer, represented by \texttt{c} in the image, alongside the differential equation and initial value, pictured by \texttt{d} and \texttt{i} respectively.
 
-\figuraBib{ExampleChange}{The \textit{diffInteg} function only does side effects, meaning that only affects memory. The internal variable \texttt{c} is a pointer to the computation \textit{itself}, i.e., the dynamic computation being created references this exact procedure}{}{fig:changeExample}{width=.90\textwidth}%
+\figuraBib{ExampleChange}{The \textit{updateInteg} function only does side effects, meaning that only affects memory. The internal variable \texttt{c} is a pointer to the computation \textit{itself}, i.e., the dynamic computation being created references this exact procedure}{}{fig:changeExample}{width=.90\textwidth}%
 
 Figure \ref{fig:finalModelExample} shows the final image for state variable $x$ after until this point in the execution.
 
