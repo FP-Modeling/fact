@@ -111,7 +111,7 @@ import MastersThesis.Lhs.Design
 
 main :: IO ()
 main =
-  do ans <- lorenzSystem
+  do ans <- oldLorenzSystem
      print ans
 \end{code}
 }

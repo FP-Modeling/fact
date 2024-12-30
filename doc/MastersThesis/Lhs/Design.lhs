@@ -1,6 +1,8 @@
 \ignore{
 \begin{code}
+{-# LANGUAGE FlexibleInstances #-}
 module MastersThesis.Lhs.Design where
+import Control.Monad.Trans.Reader ( ReaderT )
 \end{code}
 }
 
@@ -235,7 +237,7 @@ data Stage = SolverStage Int
 
 data Solver = Solver { dt        :: Double,     
                        method    :: Method, 
-                       stage     :: Stage,
+                       stage     :: Stage
                      } deriving (Eq, Ord, Show)
 
 data Parameters = Parameters { interval  :: Interval,
@@ -288,5 +290,61 @@ type CT a = ReaderT Parameters IO a
 \caption{The \texttt{CT} type can leverage monad transformers in Haskell via \texttt{Reader} in combination with \texttt{IO}.}
 \label{fig:dynamics}
 \end{figure}
+
+
+\ignore{
+\begin{code}
+getSolverStage :: Stage -> Int
+getSolverStage (SolverStage st) = st
+getSolverStage Interpolate = 0
+
+stageBnds :: Solver -> (Stage, Stage)
+stageBnds sl = 
+  case method sl of
+    Euler -> solverStage (0, 0)
+    RungeKutta2 -> solverStage (0, 1)
+    RungeKutta4 -> solverStage (0, 3)
+  where solverStage (init, end) = (SolverStage init, SolverStage end)
+
+stageLoBnd :: Solver -> Stage
+stageLoBnd sc = fst $ stageBnds sc
+                  
+stageHiBnd :: Solver -> Stage
+stageHiBnd sc = snd $ stageBnds sc
+
+instance (Num a) => Num (CT a) where
+  x + y = (+) <$> x <*> y
+  x - y = (-) <$> x <*> y
+  x * y = (*) <$> x <*> y
+  negate = fmap negate
+  abs = fmap abs
+  signum = fmap signum
+  fromInteger i = return $ fromInteger i
+
+instance (Fractional a) => Fractional (CT a) where
+  x / y = (/) <$> x <*> y
+  recip = fmap recip
+  fromRational t = return $ fromRational t
+
+instance (Floating a) => Floating (CT a) where
+  pi = return pi
+  exp = fmap exp
+  log = fmap log
+  sqrt = fmap sqrt
+  x ** y = (**) <$> x <*> y
+  sin = fmap sin
+  cos = fmap cos
+  tan = fmap tan
+  asin = fmap asin
+  acos = fmap acos
+  atan = fmap atan
+  sinh = fmap sinh
+  cosh = fmap cosh
+  tanh = fmap tanh
+  asinh = fmap asinh
+  acosh = fmap acosh
+  atanh = fmap atanh
+\end{code}
+}
 
 This summarizes the main pilars in the design: FF-GPAC, the mathematical definition of the problem and how we are modeling this domain in Haskell. The next chapter, \textit{Effectful Integrals}, will start from this foundation, by adding typeclasses to the \texttt{CT} type, and will later describe the last core type before explaining the solver execution: the \texttt{Integrator} type. These improvements for the \texttt{CT} type and the new \texttt{Integrator} type will later be mapped to their FF-GPAC counterparts, explaining that they resemble the basic units mentioned in section \ref{sec:gpac}.
