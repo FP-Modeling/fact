@@ -12,9 +12,9 @@
 \contentsline {section}{\numberline {2.3}Modeling Reality}{13}{section.2.3}%
 \contentsline {section}{\numberline {2.4}Making Mathematics Cyber}{15}{section.2.4}%
 \contentsline {chapter}{\numberline {3}Effectful Integrals}{18}{chapter.3}%
-\contentsline {section}{\numberline {3.1}Uplifting the Dynamics Type}{18}{section.3.1}%
-\contentsline {section}{\numberline {3.2}GPAC Bind I: Dynamics}{21}{section.3.2}%
-\contentsline {section}{\numberline {3.3}Exploiting Impurity}{22}{section.3.3}%
+\contentsline {section}{\numberline {3.1}Uplifting the CT Type}{18}{section.3.1}%
+\contentsline {section}{\numberline {3.2}GPAC Bind I: CT}{21}{section.3.2}%
+\contentsline {section}{\numberline {3.3}Exploiting Impurity}{23}{section.3.3}%
 \contentsline {section}{\numberline {3.4}GPAC Bind II: Integrator}{26}{section.3.4}%
 \contentsline {section}{\numberline {3.5}Using Recursion to solve Math}{28}{section.3.5}%
 \contentsline {chapter}{\numberline {4}Execution Walkthrough}{31}{chapter.4}%
@@ -25,18 +25,18 @@
 \contentsline {chapter}{\numberline {5}Travelling across Domains}{42}{chapter.5}%
 \contentsline {section}{\numberline {5.1}Time Domains}{42}{section.5.1}%
 \contentsline {section}{\numberline {5.2}Tweak I: Interpolation}{44}{section.5.2}%
-\contentsline {chapter}{\numberline {6}Caching the Speed Pill}{48}{chapter.6}%
-\contentsline {section}{\numberline {6.1}Performance}{48}{section.6.1}%
-\contentsline {section}{\numberline {6.2}The Saving Strategy}{49}{section.6.2}%
-\contentsline {section}{\numberline {6.3}Tweak II: Memoization}{51}{section.6.3}%
-\contentsline {section}{\numberline {6.4}A change in Perspective}{57}{section.6.4}%
-\contentsline {section}{\numberline {6.5}Tweak III: Model and Driver}{58}{section.6.5}%
-\contentsline {section}{\numberline {6.6}Results with Caching}{60}{section.6.6}%
-\contentsline {chapter}{\numberline {7}Conclusion}{62}{chapter.7}%
-\contentsline {section}{\numberline {7.1}Limitations}{62}{section.7.1}%
-\contentsline {section}{\numberline {7.2}Future Improvements}{63}{section.7.2}%
-\contentsline {section}{\numberline {7.3}Final Thoughts}{66}{section.7.3}%
-\contentsline {chapter}{References}{67}{section*.53}%
+\contentsline {chapter}{\numberline {6}Caching the Speed Pill}{49}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Performance}{49}{section.6.1}%
+\contentsline {section}{\numberline {6.2}The Saving Strategy}{50}{section.6.2}%
+\contentsline {section}{\numberline {6.3}Tweak II: Memoization}{52}{section.6.3}%
+\contentsline {section}{\numberline {6.4}A change in Perspective}{58}{section.6.4}%
+\contentsline {section}{\numberline {6.5}Tweak III: Model and Driver}{59}{section.6.5}%
+\contentsline {section}{\numberline {6.6}Results with Caching}{61}{section.6.6}%
+\contentsline {chapter}{\numberline {7}Conclusion}{64}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Limitations}{64}{section.7.1}%
+\contentsline {section}{\numberline {7.2}Future Improvements}{65}{section.7.2}%
+\contentsline {section}{\numberline {7.3}Final Thoughts}{68}{section.7.3}%
+\contentsline {chapter}{References}{69}{section*.53}%
 \babel@toc {american}{}\relax 
 \babel@toc {american}{}\relax 
 \babel@toc {american}{}\relax 
