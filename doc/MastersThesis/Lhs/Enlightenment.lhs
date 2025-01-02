@@ -34,19 +34,19 @@ oldLorenzSystem = runCTFinal oldLorenzModel 100 lorenzSolver
 \end{code}
 }
 
-Previously, we presented in detail the latter core type of the implementation, the \texttt{Integrator}, as well as why it can model an integral when used with the \texttt{Dynamics} type. This chapter is a follow-up, and its objectives are threefold: describe how to map a set of differential equations to an executable model, reveal which functions execute a given example and present a guided-example as a proof-of-concept.
+Previously, we presented in detail the latter core type of the implementation, the \texttt{Integrator}, as well as why it can model an integral when used with the \texttt{CT} type. This chapter is a follow-up, and its objectives are threefold: describe how to map a set of differential equations to an executable model, reveal which functions execute a given example and present a guided-example as a proof-of-concept.
 
 \section{From Models to Models}
 
-Systems of differential equations reside in the mathematical domain. In order to \textbf{execute} using the \texttt{Rivika} DSL, this model needs to be converted into an executable model following the DSL's guidelines. Further, we saw that these requirements resemble FF-GPAC's description of its basic units and rules of composition. Thus, these mappings between the three worlds need to be established. Chapters 2 and 3 explained the mapping between \texttt{Rivika} and FF-GPAC. It remains to map the \textit{semantics} of the mathematical world to the \textit{operational} world of \texttt{Rivika}. This mapping goes as the following:
+Systems of differential equations reside in the mathematical domain. In order to \textbf{execute} using the \texttt{FACT} DSL, this model needs to be converted into an executable model following the DSL's guidelines. Further, we saw that these requirements resemble FF-GPAC's description of its basic units and rules of composition. Thus, the mappings between these worlds need to be established. Chapters 2 and 3 explained the mapping between \texttt{FACT} and FF-GPAC. It remains to map the \textit{semantics} of the mathematical world to the \textit{operational} world of \texttt{FACT}. This mapping goes as the following:
 
 \begin{itemize}
   \item The relationship between the derivatives and their respective functions will be modeled by \textbf{feedback} loops with \texttt{Integrator} type.
   \item The initial condition will be modeled by the \texttt{initial} pointer within an integrator.
-  \item Combinational aspects, such as addition and multiplication of constants and the time $t$, will be represented by typeclasses and the \texttt{Dynamics} type.
+  \item Combinational aspects, such as addition and multiplication of constants and the time $t$, will be represented by typeclasses and the \texttt{CT} type.
 \end{itemize}
 
-With that in mind, Figure \ref{fig:exampleSingle} illustrates an example of a model in \texttt{Rivika}, alongside its mathematical counterpart. Further, Figure \ref{fig:rivika2gpac} shows which FF-GPAC circuit each line is modeling. This pipeline effectively makes \texttt{Rivika} a bridge between a physical system, modeled by differential equations, and the FF-GPAC model proposed by Graça~\cite{Graca2003}.
+With that in mind, Figure \ref{fig:exampleSingle} illustrates an example of a model in \texttt{FACT}, alongside its mathematical counterpart. Further, Figure \ref{fig:rivika2gpac} shows which FF-GPAC circuit each line is modeling. This pipeline effectively makes \texttt{FACT} a bridge between a physical system, modeled by differential equations, and the FF-GPAC model proposed by Graça~\cite{Graca2003}.
 
 \begin{figure}[ht!]
 \begin{minipage}{.5\textwidth}
@@ -81,7 +81,7 @@ To address both of these requirements, we will use the \textit{sequence} functio
 
 \figuraBib{Sequence}{Because the list implements the \texttt{Traversable} typeclass, it allows this type to use the \textit{traverse} and \textit{sequence} functions, in which both are related to changing the internal behaviour of the nested structures}{}{fig:sequence}{width=.95\textwidth}%
 
-Similarly to the preceding example, the list structure will be used to involve all the state variables with type \texttt{Dynamics Double}. This tweak is effectively creating a \textbf{vector} of state variables whilst sharing the same notion of time across all of them. So, the final type signature of a model is \texttt{Dynamics [Double]} or, by using a type aliases for \texttt{[Double]} as \texttt{Vector}, \texttt{Dynamics Vector}. A second alias can be created to make it more descriptive, as exemplified in Figure \ref{fig:exampleMultiple}:
+Similarly to the preceding example, the list structure will be used to involve all the state variables with type \texttt{CT Double}. This tweak is effectively creating a \textbf{vector} of state variables whilst sharing the same notion of time across all of them. So, the final type signature of a model is \texttt{CT [Double]} or, by using a type aliases for \texttt{[Double]} as \texttt{Vector}, \texttt{CT Vector}. A second alias can be created to make it more descriptive, as exemplified in Figure \ref{fig:exampleMultiple}:
 
 \begin{figure}[ht!]
 \begin{minipage}{.5\textwidth}
@@ -123,24 +123,31 @@ Finally, when creating a model, the same steps have to be done in the same order
 
 \section{Driving the Model}
 
-Given a physical model translated to an executable one, it remains to understand which functions drive the simulation, i.e., which functions take the simulations details into consideration and generate the output. The function \textit{runDynamics} fulfills this role:
+Given a physical model translated to an executable one, it remains to understand which functions drive the simulation, i.e., which functions take the simulations details into consideration and generate the output. The function \textit{runCT} fulfills this role:
 
 \begin{spec}
-runCT :: Model a -> Interval -> Solver -> IO [a]
-runCT (CT m) iv sl =
-  do let (nl, nu) = iterationBnds iv (dt sl)
-         parameterise n = Parameters { interval = iv,
-                                       time = iterToTime iv sl n 0,
-                                       iteration = n,
-                                       solver = sl { stage = 0 }}
-     sequence $ map (m . parameterise) [nl .. nu]
+runCT :: Model a -> Double -> Solver -> IO [a]
+runCT m t sl = 
+  let iv = Interval 0 t
+      (nl, nu) = iterationBnds iv (dt sl)
+      parameterize n =
+          let time = iterToTime iv sl n (SolverStage 0)
+              solver = sl {stage = SolverStage 0}
+          in Parameters { interval = iv,
+                          time = time,
+                          iteration = n,
+                          solver = solver }
+  in sequence $ map (runReaderT m . parameterize) [nl .. nu]
 \end{spec}
 
-On line 3, we convert the \textit{time} interval of the simulation to an \textit{iteration} interval in the format of a tuple, i.e., the continuous interval becomes the tuple $(0, \frac{stopTime - startTime}{timeStep})$, in which the second value of the tuple is \textbf{rounded}. From line 4 to line 7, we are defining an auxiliary function \textit{parameterise}. This function picks a natural number, which represents the iteration index, and creates a new record with the type \texttt{Parameters}. Additionally, it uses the auxiliary function \textit{iterToTime} (line 5), which converts the iteration number from the domain of discrete \textbf{steps} to the domain of \textbf{discrete time}, i.e., the time the solver methods can operate with (chapter 5 will explore more of this concept). This conversion is based on the time step being used, as well as which method and in which stage it is for that specific iteration. Finally, line 8 produces the outcome of the \textit{runDyanmics} function. The final result is the output from a function called \textit{map} piped it as an argument for the \textit{sequence} function.
+On line 3, we convert the final \textit{time value} for the simulation into an interval value for the simulation (\texttt{iv}) --- the simulation always starts at 0 and goes all the
+way up to the requested time. Next up, on line 4, we convert the interval to an \textit{iteration} interval in the format of a tuple, i.e., the continuous interval becomes the tuple $(0, \frac{stopTime - startTime}{timeStep})$, in which the second value of the tuple is \textbf{rounded}. From line 5 to line 11, we are defining an auxiliary function \textit{parameterise}. This function picks a natural number, which represents the iteration
+index, and creates a new record with the type \texttt{Parameters}. Additionally, it uses the auxiliary function \textit{iterToTime} (line 7), which converts the iteration number from
+the domain of discrete \textbf{steps} to the domain of \textbf{discrete time}, i.e., the time the solver methods can operate with (chapter 5 will explore more of this concept). This conversion is based on the time step being used, as well as which method and in which stage it is for that specific iteration. Finally, line 13 produces the outcome of the \textit{runCT} function. The final result is the output from a function called \textit{map} piped it as an argument for the \textit{sequence} function.
 
-The \textit{map} operation is provided by the \texttt{Functor} of the list monad, and it applies an arbitrary function to the internal members of a list in a \textbf{sequential} manner. In this case, the \textit{parameterise} function, composed with the dynamic application \texttt{m}, is the one being mapped. Thus, a custom value of the type \texttt{Parameters} is taking place of each natural natural number in the list, and this is being applied to the received \texttt{Dynamics} value. It produces a list of answers in order, each one wrapped in the \texttt{IO} monad. To abstract out the \texttt{IO}, thus getting \texttt{IO [a]} rather than \texttt{[IO a]}, the \textit{sequence} function finishes the implementation.
+The \textit{map} operation is provided by the \texttt{Functor} of the list monad, and it applies an arbitrary function to the internal members of a list in a \textbf{sequential} manner. In this case, the \textit{parameterise} function, composed with the continuous machine \texttt{m}, is the one being mapped. Thus, a custom value of the type \texttt{Parameters} is taking place of each natural natural number in the list, and this is being applied to the received \texttt{CT} value. It produces a list of answers in order, each one wrapped in the \texttt{IO} monad. To abstract out the \texttt{IO}, thus getting \texttt{IO [a]} rather than \texttt{[IO a]}, the \textit{sequence} function finishes the implementation.
 
-Additionally, there is an analogous implementation of this function, so-called \textit{runDynamicsFinal}, that return only the final result of the simulation, i.e., $y(stopTime)$, instead of the outputs at the time step samples.
+Additionally, there is an analogous implementation of this function, so-called \textit{runCTFinal}, that return only the final result of the simulation instead of the outputs at the time step samples.
 
 \section{An attractive example}
 
@@ -181,22 +188,22 @@ lorenzModel =
      updateInteg integZ (x * y - beta * z)
      return $ sequence [x, y, z]
 
-lorenzSystem = runCTFinal lorenzModel 100 lorenzSolver
+lorenzSystem = runCT lorenzModel 100 lorenzSolver
 \end{spec}
 
 \figuraBib{GPACLorenz}{Using only FF-GPAC's basic units and their composition rules, it's possible to model the Lorenz Attractor example}{}{fig:gpacLorenz}{width=.90\textwidth}%
 
 \newpage
 
-The first two records, \texttt{Interval} and \texttt{Solver}, sets the environment (lines 1 to 6). The former determines the simulation interval (lines 1 and 2), from start to finish, and the latter configures the solver with $0.01$ seconds as the time step, whilst executing the second-order Runge-Kutta method from the initial stage (lines 3 to 6). The \textit{lorenzModel}, presented after setting the constants (lines 7 to 9), executes the aforementioned pipeline to create the model: allocate memory (lines 12 to 14), create read-only pointers (lines 15 to 17), change the computation (lines 18 to 20) and dispatch it (line 21). Finally, the function \textit{lorenzSystem} groups everything together calling the \textit{runDynamics} driver (line 22).
+The first records, \texttt{Solver}, sets the environment (lines 1 to 4). It configures the solver with $0.01$ seconds as the time step, whilst executing the second-order Runge-Kutta method from the initial stage (lines 3 to 6). The \textit{lorenzModel}, presented after setting the constants (lines 6 to 8), executes the aforementioned pipeline to create the model: allocate memory (lines 12 to 14), create read-only pointers (lines 15 to 17), change the computation (lines 18 to 20) and dispatch it (line 21). Finally, the function \textit{lorenzSystem} groups everything together calling the \textit{runCT} driver (line 22).
 
-After this overview, let's follow the execution path used by the compiler. Haskell's compiler works in a lazily manner, meaning that it calls for execution only the necessary parts. So, the first step calling \textit{lorenzSystem} is to call the \textit{runDynamics} function with a model, interval and solver configurations. Following its path of execution, the \textit{map} function (inside the driver) forces the application of a parametric record generated by the \textit{parameterise} function to the provided model, \textit{lorenzModel} in this case. Thus, it needs to be executed in order to return from the \textit{runDynamics} function.
+After this overview, let's follow the execution path used by the compiler. Haskell's compiler works in a lazily manner, meaning that it calls for execution only the necessary parts. So, the first step calling \textit{lorenzSystem} is to call the \textit{runCT} function with a model, final time for the simulation and solver configurations. Following its path of execution, the \textit{map} function (inside the driver) forces the application of a parametric record generated by the \textit{parameterise} function to the provided model, \textit{lorenzModel} in this case. Thus, it needs to be executed in order to return from the \textit{runCT} function.
 
-To understand the model, we need to follow the execution sequence of the output: \texttt{sequence [x, y, z]}, which requires executing all the lines before this line to obtain the all the state variables. For the sake of simplicity, we will follow the execution of the operations related to the $x$ variable, given that the remaining variables have an analogous execution walkthrough. First and foremost, memory is allocated for the integrator to work with (line 12). Figure \ref{fig:allocateExample} depicts this idea, as well as being a reminder of what the \textit{createInteg} and \textit{initialize} functions do, described in the chapter \textit{Effectful Integrals}. In this image, the integrator \texttt{integX} comprises two fields, \texttt{initial} and \texttt{computation}. The former is a simple value of the type \texttt{Dynamics Double} that, regardless of the parameters record it receives, it returns the initial condition of the system. The latter is a pointer or address that references a specific \texttt{Dynamics Double} computation in memory: in the case of receiving a parametric record \texttt{ps}, it fixes potential problems with it via the \texttt{initialize} block, and it applies this fixed value in order to get \texttt{i}, i.e., the initial value $1$, the same being saved in the other field of the record, \texttt{initial}.
+To understand the model, we need to follow the execution sequence of the output: \texttt{sequence [x, y, z]}, which requires executing all the lines before this line to obtain the all the state variables. For the sake of simplicity, we will follow the execution of the operations related to the $x$ variable, given that the remaining variables have an analogous execution walkthrough. First and foremost, memory is allocated for the integrator to work with (line 12). Figure \ref{fig:allocateExample} depicts this idea, as well as being a reminder of what the \textit{createInteg} and \textit{initialize} functions do, described in the chapter \textit{Effectful Integrals}. In this image, the integrator \texttt{integX} comprises two fields, \texttt{initial} and \texttt{computation}. The former is a simple value of the type \texttt{CT Double} that, regardless of the parameters record it receives, it returns the initial condition of the system. The latter is a pointer or address that references a specific \texttt{CT Double} computation in memory: in the case of receiving a parametric record \texttt{ps}, it fixes potential problems with it via the \texttt{initialize} block, and it applies this fixed value in order to get \texttt{i}, i.e., the initial value $1$, the same being saved in the other field of the record, \texttt{initial}.
 
 \figuraBib{ExampleAllocate}{After \textit{createInteg}, this record is the final image of the integrator. The function \textit{initialize} gives us protecting against wrong records of the type \texttt{Parameters}, assuring it begins from the first iteration, i.e., $t_0$}{}{fig:allocateExample}{width=.90\textwidth}%
 
-The next step is the creation of the independent state variable $x$ via \textit{readInteg} function (line 15). This variable will read the computations that are executing under the hood by the integrator. The core idea is to read from the computation pointer inside the integrator and create a new \texttt{Dynamics Double} value. Figure \ref{fig:readExample} portrays this mental image. When reading a value from an integrator, the computation pointer is being used to access the memory region previously allocated. Also, what's being stored in memory is a \texttt{Dynamics Double} value. The state variable, $x$ in this case, combines its received \texttt{Parameters} value, so-called \texttt{ps}, and \textbf{applies} it to the stored dynamic function. The result \texttt{v} is then returned.
+The next step is the creation of the independent state variable $x$ via \textit{readInteg} function (line 15). This variable will read the computations that are executing under the hood by the integrator. The core idea is to read from the computation pointer inside the integrator and create a new \texttt{CT Double} value. Figure \ref{fig:readExample} portrays this mental image. When reading a value from an integrator, the computation pointer is being used to access the memory region previously allocated. Also, what's being stored in memory is a \texttt{CT Double} value. The state variable, $x$ in this case, combines its received \texttt{Parameters} value, so-called \texttt{ps}, and \textbf{applies} it to the stored continuous machine. The result \texttt{v} is then returned.
 
 \figuraBib{ExampleRead}{After \textit{readInteg}, the final floating point values is obtained by reading from memory a dynamic computation and passing to it the received parameters record. The result of this application, $v$, is the returned value}{}{fig:readExample}{width=.90\textwidth}%
 
@@ -208,7 +215,7 @@ Figure \ref{fig:finalModelExample} shows the final image for state variable $x$ 
 
 \figuraBib{ExampleFinalModel}{After setting up the environment, this is the final depiction of an independent variable. The reader $x$ reads the values computed by the procedure stored in memory, a second-order Runge-Kutta method in this case}{}{fig:finalModelExample}{width=.90\textwidth}%
 
-Lastly, the state variable is wrapped inside a list and it is applied to the \textit{sequence} function, as explained in the previous section. This means that the list of variable(s) in the model, with the signature \texttt{[Dynamics Double]}, is transformed into a value with the type \texttt{Dynamics [Double]}. The transformation can be visually understood when looking at Figure \ref{fig:finalModelExample}. Instead of picking one \texttt{ps} of type \texttt{Parameters} and returning a value \textit{v}, the same parametric record returns a \textbf{list} of values, with the \textbf{same} parametric dependency being applied to all state variables inside $[x, y, z]$.
+Lastly, the state variable is wrapped inside a list and it is applied to the \textit{sequence} function, as explained in the previous section. This means that the list of variable(s) in the model, with the signature \texttt{[CT Double]}, is transformed into a value with the type \texttt{CT [Double]}. The transformation can be visually understood when looking at Figure \ref{fig:finalModelExample}. Instead of picking one \texttt{ps} of type \texttt{Parameters} and returning a value \textit{v}, the same parametric record returns a \textbf{list} of values, with the \textbf{same} parametric dependency being applied to all state variables inside $[x, y, z]$.
 
 However, this only addresses \textbf{how} the driver triggers the entire execution, but does \textbf{not} explain how the differential equations are actually being calculated with the \texttt{RK2} numerical method. This is done by the solver functions (\textit{integEuler}, \textit{integRK2} and \textit{integRK4}) and those are all based on equation \ref{eq:solverEquation} regardless of the chosen method. The equation goes as the following:
 
@@ -243,4 +250,4 @@ After all the explained theory behind the project, it remains to be seen if this
 \label{fig:lorenzPlots}
 \end{figure}
 
-Although correct, the presented solution has a few drawbacks. The next two chapters will explain and address the two identified problems with the current implementation.
+Although correct, the presented solution has a few drawbacks. The next three chapters will explain and address the identified problems with the current implementation.

@@ -45,42 +45,43 @@ The main goal of the present work is to build an executable software that can so
 \end{itemize}
 
 The recognition that the functional paradigm (FP) provides better well-defined, mathematical and rigourous abstractions has been by Backus~\cite{Backus1978} in his Turing Award lecture; where he argued that FP is the path to liberate computing from the limitations of the \textit{von Neumann style} when thinking about systems.
-Thus, continuous time being specified in mathematical terms,  we believe that the use of functional programming for modeling continuous time is not a coincidence; properties that are established as fundamental to leverage better abstractions for CPS simulation seem to be within or better described in the functional programming paradigm. Furthermore, this implementation is based on \texttt{Aivika}~\footnote{\texttt{Aivika} \href{https://github.com/dsorokin/aivika}{\textcolor{blue}{source code}}.} --- an open source multi-method library for simulating a variety of paradigms, including partial support for physical dynamics, written in Haskell. Our version is modified for our needs, such as demonstrating similarities between the implementation and GPAC, shrinking some functionality in favor of focusing on continuous time modeling, and re-thinking the overall organization of the project for better understanding, alongside code refactoring using other Haskell's abstractions. So, this reduced and refactored version of \texttt{Aivika}, so-called \texttt{FACT}~\footnote{\texttt{FACT} \href{https://github.com/FP-Modeling/fact/releases/tag/3.0}{\textcolor{blue}{source code}}.}, will be a Haskell Embedded Domain-Specific Language (HEDSL) within the model-based engineering domain. The built DSL will explore Haskell's specific features and details, such as the type system and typeclasses, to solve differential equations. Figure \ref{fig:introExample} shows a side-by-side comparison between a physical system and a valid model created in the final version of \texttt{FACT}.
+Thus, continuous time being specified in mathematical terms,  we believe that the use of functional programming for modeling continuous time is not a coincidence; properties that are established as fundamental to leverage better abstractions for CPS simulation seem to be within or better described in the functional programming paradigm. Furthermore, this implementation is based on \texttt{Aivika}~\footnote{\texttt{Aivika} \href{https://github.com/dsorokin/aivika}{\textcolor{blue}{source code}}.} --- an open source multi-method library for simulating a variety of paradigms, including partial support for physical dynamics, written in Haskell. Our version is modified for our needs, such as demonstrating similarities between the implementation and GPAC, shrinking some functionality in favor of focusing on continuous time modeling, and re-thinking the overall organization of the project for better understanding, alongside code refactoring using other Haskell's abstractions. So, this reduced and refactored version of \texttt{Aivika}, so-called \texttt{FACT}~\footnote{\texttt{FACT} \href{https://github.com/FP-Modeling/fact/releases/tag/3.0}{\textcolor{blue}{source code}}.}, will be a Haskell Embedded Domain-Specific Language (HEDSL) within the model-based engineering domain. The built DSL will explore Haskell's specific features and details, such as the type system and typeclasses, to solve differential equations. Figure \ref{fig:introExample} shows a side-by-side comparison between the original implementation of Lorenz Attractor in FACT, presented in~\cite{Lemos2022}, and its final form for the same physical system.
 
 \begin{figure}[ht!]
-\vspace{0.4cm}
-\begin{minipage}[t]{.65\textwidth}
-\begin{spec}
-sigma = 10.0
-rho = 28.0
-beta = 8.0 / 3.0
-
-lorenzModel = mdo
-  x <- integ (sigma * (y - x)) 1.0
-  y <- integ (x * (rho - z) - y) 1.0
-  z <- integ (x * y - beta * z) 1.0
-  let sigma = 10.0
-      rho = 28.0
-      beta = 8.0 / 3.0
-  return $ sequence [x, y, z]
-\end{spec}
-\end{minipage}
-\begin{minipage}[t]{.3\textwidth}
-\ifdefined\iscolorful
-  \vspace{-1.25cm}
-\fi
-\begin{center}
-$$ \sigma = 10.0 $$
-$$ \rho = 28.0 $$
-$$ \beta = \frac{8.0}{3.0}$$
-$$$$
-$$$$
-$$\frac{dx}{dt} = \sigma(y - x) $$
-$$\frac{dy}{dt} = x(\rho - z) $$
-$$\frac{dz}{dt} = xy - \beta z $$
-\end{center}
-\end{minipage}
-\caption{The translation between the world of software and the mathematical description of differential equations are explicit in \texttt{FACT}.}
+  \begin{minipage}{0.45\linewidth}
+% \vspace{-0.8cm}
+    \begin{purespec}
+        -- Original version of FACT
+        lorenzModel = do
+        integX <- createInteg 1.0
+        integY <- createInteg 1.0
+        integZ <- createInteg 1.0
+        let x = readInteg integX
+            y = readInteg integY
+            z = readInteg integZ
+            sigma = 10.0
+            rho = 28.0
+            beta = 8.0 / 3.0
+        updateInteg integX (sigma * (y - x))
+        updateInteg integY (x * (rho - z) - y)
+        updateInteg integZ (x * y - beta * z)
+        return $ sequence [x, y, z]
+    \end{purespec}
+  \end{minipage} \;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;
+  \begin{minipage}{0.45\linewidth}
+    \begin{purespec}
+        -- Final version of FACT
+        lorenzModel = mdo
+          x <- integ (sigma * (y - x)) 1.0
+          y <- integ (x * (rho - z) - y) 1.0
+          z <- integ (x * y - beta * z) 1.0
+          let sigma = 10.0
+              rho = 28.0
+              beta = 8.0 / 3.0
+          return $ sequence [x, y, z]          
+    \end{purespec}
+  \end{minipage}
+\caption{The translation between the world of software and the mathematical description of differential equations are explicit in the final version of \texttt{FACT}.}
 \label{fig:introExample}
 \end{figure}
 
