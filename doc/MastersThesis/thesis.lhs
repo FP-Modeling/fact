@@ -30,6 +30,7 @@
 \usepackage[outputdir=MastersThesis/]{minted}
 \newminted[code]{haskell}{breaklines,autogobble,linenos=true, numberblanklines=false, fontsize=\footnotesize}
 \newminted[spec]{haskell}{breaklines,autogobble,linenos=true, numberblanklines=false, fontsize=\footnotesize}
+\newminted[purespec]{haskell}{breaklines,autogobble,linenos=false, numberblanklines=false, fontsize=\footnotesize}
 
 \orientador{\prof Eduardo Peixoto}{CIC/UnB}%
 \coorientador{\prof José Edil Guimarães}{ENE/UnB}%

@@ -35,7 +35,7 @@ Composition rules that restrict how these units can be hooked to one another. Sh
   \item Each variable of integration of an integrator is the input \textit{t}.
 \end{itemize}
 
-During the definition of the DSL, parallels will map the aforementioned basic units and composition rules to the implementation. With this strategy, all the mathematical formalism leveraged for analog computers will drive the implementation in the digital computer. Although we do not formally prove a refinement between the GPAC theory, i.e., our especification, and the final implementation of \texttt{FACT}, is an attempt to build a tool with formalism taken into account; one of the most frequent critiques in the CPS domain, as explained in the previous chapter.
+During the definition of the DSL, parallels will map the aforementioned basic units and composition rules to the implementation. With this strategy, all the mathematical formalism leveraged for analog computers will drive the implementation in the digital computer. Although we do not formally prove a refinement between the GPAC theory, i.e., our epurespecification, and the final implementation of \texttt{FACT}, is an attempt to build a tool with formalism taken into account; one of the most frequent critiques in the CPS domain, as explained in the previous chapter.
 
 \section{The Shape of Information}
 \label{sec:types}
@@ -54,7 +54,7 @@ Types in programming languages represent the format of information. Figure \ref{
 \begin{minipage}[t]{.45\textwidth}
   \centering
   \includegraphics[width=0.95\linewidth]{MastersThesis/img/PictorialFunction}
-  \captionof{figure}{Functions' signatures are contracts; they specify which shape the input information has as well as which shape the output information will have.}
+  \captionof{figure}{Functions' signatures are contracts; they purespecify which shape the input information has as well as which shape the output information will have.}
   \label{fig:functions}
 \end{minipage}
 \end{figure}
@@ -67,11 +67,11 @@ The sum type, also known as tagged union in type theory, is an algebraic data ty
 \centering
 \begin{minipage}{.5\textwidth}
   \centering
-  \begin{spec}
+  \begin{purespec}
   data Parity = Even | Odd
 
   data DigitalStates = High | Low | Z
-  \end{spec}
+  \end{purespec}
 \end{minipage}
 \begin{minipage}{.49\textwidth}
   \centering
@@ -87,7 +87,7 @@ The second type composition mechanism available is the product type, which \text
 \centering
 \begin{minipage}{.57\textwidth}
   \centering
-  \begin{spec}
+  \begin{purespec}
   data ClockTime = Time Int Int
 
   data SpacePosition = Point Double Double Double
@@ -95,7 +95,7 @@ The second type composition mechanism available is the product type, which \text
   data SpacePosition = Point { x :: Double,
                                y :: Double,
                                z :: Double }
-  \end{spec}
+  \end{purespec}
 \end{minipage}
 \begin{minipage}{.4\textwidth}
   \centering
@@ -111,13 +111,13 @@ Within algebraic data types, it is possible to abstract the \textbf{structure} o
 \centering
 \begin{minipage}{.5\textwidth}
   \centering
-  \begin{spec}
+  \begin{purespec}
   data SpacePosition a = Point a a a
 
   data SpacePosition a = Point { x :: a,
                                  y :: a,
                                  z :: a }
-  \end{spec}
+  \end{purespec}
 \end{minipage}
 \begin{minipage}{.45\textwidth}
   \centering
@@ -127,20 +127,20 @@ Within algebraic data types, it is possible to abstract the \textbf{structure} o
 \label{fig:parametricPoly}
 \end{figure}
 
-In some situations, changing the type of the structure is not the desired property of interest. There are applications where some sort of \textbf{behaviour} is a necessity, e.g., the ability of comparing two instances of a custom type. This nature of polymorphism is known as \textit{ad hoc polymorphism}, which is implemented in Haskell via what is similar to java-like interfaces, so-called \textbf{typeclasses}~\cite{Wadler1989}. However, establishing a contract with a typeclass differs from an interface in a fundamental aspect: rather than inheritance being given to the type, it has a lawful implementation, meaning that \textbf{mathematical formalism} is assured for it, although the implementer is not obligated to prove its laws on a language level. As an example, the implementation of the typeclass \texttt{Eq} gives to the type all comparable operations ($==$ and $!=$). Figure \ref{fig:adHocPoly} shows the implementation of \texttt{Ord} typeclass for the presented \texttt{ClockTime}, giving it capabilities for sorting instances of such type.
+In some situations, changing the type of the structure is not the desired property of interest. There are applications where some sort of \textbf{behaviour} is a necessity, e.g., the ability of comparing two instances of a custom type. This nature of polymorphism is known as \textit{ad hoc polymorphism}, which is implemented in Haskell via what is similar to java-like interfaces, so-called \textbf{typeclasses}~\cite{Wadler1989}. However, establishing a contract with a typeclass differs from an interface in a fundamental apurespect: rather than inheritance being given to the type, it has a lawful implementation, meaning that \textbf{mathematical formalism} is assured for it, although the implementer is not obligated to prove its laws on a language level. As an example, the implementation of the typeclass \texttt{Eq} gives to the type all comparable operations ($==$ and $!=$). Figure \ref{fig:adHocPoly} shows the implementation of \texttt{Ord} typeclass for the presented \texttt{ClockTime}, giving it capabilities for sorting instances of such type.
 
 \begin{figure}[ht!]
 \centering
 \begin{minipage}{.46\textwidth}
   \centering
-  \begin{spec}
+  \begin{purespec}
   data ClockTime = Time Int Int
 
   instance Ord ClockTime where
     (Time a b) <= (Time c d)
       = (a <= c) && (b <= d)
 
-  \end{spec}
+  \end{purespec}
 \end{minipage}
 \begin{minipage}{.4\textwidth}
   \centering
@@ -157,18 +157,18 @@ Algebraic data types, when combined with polymorphism, are a powerful tool in pr
 \section{Modeling Reality}
 \label{sec:diff}
 
-The continuous time problem explained in the introduction was initially addressed by mathematics, which represents physical quantities by \textbf{differential equations}. This set of equations establishes a relationship between functions and their respective derivatives; the function express the variable of interest and its derivative describe how it changes over time. It is common in the engineering and in the physics domain to know the rate of change of a given variable, but the function itself is still unknown. These variables describe the state of the system, e.g, velocity, water flow, electrical current, etc. When those variables are allowed to vary continuously --- in arbitrarily small increments --- differential equations arise as the standard tool to describe them.
+The continuous time problem explained in the introduction was initially addressed by mathematics, which represents physical quantities by \textbf{differential equations}. This set of equations establishes a relationship between functions and their repurespective derivatives; the function express the variable of interest and its derivative describe how it changes over time. It is common in the engineering and in the physics domain to know the rate of change of a given variable, but the function itself is still unknown. These variables describe the state of the system, e.g, velocity, water flow, electrical current, etc. When those variables are allowed to vary continuously --- in arbitrarily small increments --- differential equations arise as the standard tool to describe them.
 
 While some differential equations have more than one independent variable per function, being classified as a \textbf{partial differential equation}, some phenomena can be modeled with only one independent variable per function in a given set, being described as a set of \textbf{ordinary differential equations}. However, because the majority of such equations does not have an analytical solution, i.e., cannot be described as a combination of other analytical formulas, numerical procedures are used to solve the system. These mechanisms \textbf{quantize} the physical time duration into an interval of numbers, each spaced by a \textbf{time step} from the other, and the sequence starts from an \textbf{initial value}. Afterward, the derivative is used to calculate the slope or the direction in which the tangent of the function is moving in time in order to predict the value of the next step, i.e., determine which point better represents the function in the next time step. The order of the method varies its precision during the prediction of the steps, e.g, the Runge-Kutta method of 4th order is more precise than the Euler method or the Runge-Kutta of 2nd order.
 
-These numerical methods are used to solve problems specified by the following mathematical relations:
+These numerical methods are used to solve problems purespecified by the following mathematical relations:
 
 \begin{equation}
 \dot{y}(t) = f(t, y(t)) \quad y(t_0) = y_0
 \label{eq:diffEq}
 \end{equation}
 
-As showed, both the derivative and the function --- the mathematical formulation of the system --- varies according to \textbf{time}. Both acts as functions in which for a given time value, it produces a numerical outcome. Moreover, this equality assumes that the next step following the derivative's direction will not be that different from the actual value of the function $y$ if the time step is small enough. Further, it is assumed that in case of a small enough time step, the difference between time samples is $h$, i.e., the time step. In order to model this mathematical relationship between the functions and its respective derivative, these methods use iteration-based approximations. For instance, the following equation represents one step of the first-order Euler method, the simplest numerical method: 
+As showed, both the derivative and the function --- the mathematical formulation of the system --- varies according to \textbf{time}. Both acts as functions in which for a given time value, it produces a numerical outcome. Moreover, this equality assumes that the next step following the derivative's direction will not be that different from the actual value of the function $y$ if the time step is small enough. Further, it is assumed that in case of a small enough time step, the difference between time samples is $h$, i.e., the time step. In order to model this mathematical relationship between the functions and its repurespective derivative, these methods use iteration-based approximations. For instance, the following equation represents one step of the first-order Euler method, the simplest numerical method: 
 
 \begin{equation}
 y_{n + 1} = y_n + hf(t_n, y_n)
@@ -194,18 +194,18 @@ $$ y_{5} = y_4 + 1 * f(4, y_4) \rightarrow y_{5} = 27 + 1 * (27 + 4) \rightarrow
 
 Our primary goal is to combine the knowledge levered in section \ref{sec:types} --- modeling capabilities of Haskell's algebraic type system --- with the core notion of differential equations presented in section \ref{sec:diff}. The type system will model equation \ref{eq:nextStep}, detailed in the previous section.
 
-Any representation of a physical system that can be modeled by a set of differential equations has an outcome value at any given moment in time. The type \texttt{CT} in Figure \ref{fig:firstDynamics} is a first draft of representing the continuous physical dynamics~\cite{LeeModeling} --- the evolution of a system state in time:
+Any representation of a physical system that can be modeled by a set of differential equations has an outcome value at any given moment in time. The type \texttt{CT} (stands for \textit{continuous machine}) in Figure \ref{fig:firstDynamics} is a first draft of representing the continuous physical dynamics~\cite{LeeModeling} --- the evolution of a system state in time:
 
 \begin{figure}[ht!]
 \centering
 \begin{minipage}{.43\textwidth}
   \centering
-  \begin{spec}
+  \begin{purespec}
   type Time = Double
   type Outcome = Double
   data CT =
        CT (Time -> Outcome)
-  \end{spec}
+  \end{purespec}
 \end{minipage}
 \begin{minipage}{.56\textwidth}
   \centering
@@ -258,16 +258,16 @@ data Parameters = Parameters { interval  :: Interval,
 
 The above auxiliary types serve a common purpose: to provide at any given moment in time, all the information to execute a solver method until the end of the simulation. The type \texttt{Interval} determines when the simulation should start and when it should end. The \texttt{Method} sum type is used inside the \texttt{Solver} type to set solver sensible information, such as the size of the time step, which method will be used and in which stage the method is in at the current moment (more about the stage field later on). Finally, the \texttt{Parameters} type combines everything together, alongside with the current time value as well as its discrete counterpart, iteration.
 
-Further, the new \texttt{CT} type can also be parametrically polymorphic, removing the limitation of only using \texttt{Double} values as the outcome. Figure \ref{fig:dynamics} depicts the final type for the physical dynamics. The \texttt{IO} wrapper is needed to cope with memory management and side effects, all of which will be explained in the next chapter.
+Further, the new \texttt{CT} type can also be parametrically polymorphic, removing the limitation of only using \texttt{Double} values as the outcome. Figure \ref{fig:dynamics} depicts the final type for the physical dynamics. The \texttt{IO} wrapper is needed to cope with memory management and side effects, all of which will be explained in the next chapter. Below,
+we have the definition for the \texttt{CT} type used in previous work~\cite{Lemos2022}:
 
 \begin{figure}[H]
 \centering
 \begin{minipage}{.44\textwidth}
   \centering
-\begin{spec}
-data CT a =
-     CT (Parameters -> IO a)
-\end{spec}
+\begin{purespec}
+data CT a = CT (Parameters -> IO a)
+\end{purespec}
 \end{minipage}
 \begin{minipage}{.55\textwidth}
   \centering
@@ -290,7 +290,6 @@ type CT a = ReaderT Parameters IO a
 \caption{The \texttt{CT} type can leverage monad transformers in Haskell via \texttt{Reader} in combination with \texttt{IO}.}
 \label{fig:dynamics}
 \end{figure}
-
 
 \ignore{
 \begin{code}
