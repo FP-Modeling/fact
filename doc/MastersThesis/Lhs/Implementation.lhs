@@ -256,6 +256,28 @@ y_{n+1} = y_n + hf(t_n,y_n) \rightarrow y_n = y_{n-1} + hf(t_{n-1}, y_{n-1})
 
 The value of the current iteration, $y_n$, can be described in terms of the sum of the previous value and the product between the time step $h$ with the differential equation from the previous iteration and time. With this difference taken into account, the following code is the implementation of the Euler method. In terms of main functionality, the family of Runge-Kutta methods is analogous:
 
+\begin{spec}
+integEuler :: CT Double
+           -> CT Double
+           -> CT Double
+           -> CT Double
+integEuler diff init compute = do
+  ps <- ask
+  case iteration ps of
+    0 -> init
+    n -> do
+      let iv  = interval ps
+          sl  = solver ps
+          ty  = iterToTime iv sl (n - 1) 0
+          psy =
+            ps { time = ty, iteration = n - 1, solver = sl { stage = 0} }
+      a <- local (const psy) compute
+      b <- local (const psy) diff
+      let !v = a + dt (solver ps) * b
+      return v
+\end{spec}
+
+\ignore{
 \begin{code}
 integEuler :: CT Double
            -> CT Double
@@ -276,6 +298,7 @@ integEuler diff init compute = do
       let !v = a + dt (solver ps) * b
       return v
 \end{code}
+}
 
 On line 5, it is possible to see which functions are available in order to execute a step in the solver. The dependency \texttt{diff} is the representation of the differential equation itself. The initial value, $y(t_0)$, can be obtained by applying any \texttt{Parameters} record to the \texttt{init} dependency function. The next dependency, \texttt{compute}, execute everything previously defined in \textit{updateInteg}; thus effectively executing a new step using the \textbf{same} solver. The result of \texttt{compute} depends on which parametric record will be applied, meaning that we call a new and different solver step in the current one, potentially building a chain of solver step calls. This mechanism --- of executing again a solver step, inside the solver itself --- is the aforementioned implicit recursion, described in the earlier section. By changing the \texttt{ps} record, originally obtained via the \texttt{ReaderT} with the \texttt{ask} function, to the \textbf{previous} moment and iteration with the solver starting from initial stage, it is guaranteed that for any step the previous one can be computed, a requirement when using numerical methods.
 

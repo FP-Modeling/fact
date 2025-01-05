@@ -131,8 +131,8 @@ runCT m t sl =
   let iv = Interval 0 t
       (nl, nu) = iterationBnds iv (dt sl)
       parameterize n =
-          let time = iterToTime iv sl n (SolverStage 0)
-              solver = sl {stage = SolverStage 0}
+          let time = iterToTime iv sl n 0
+              solver = sl {stage = 0}
           in Parameters { interval = iv,
                           time = time,
                           iteration = n,
