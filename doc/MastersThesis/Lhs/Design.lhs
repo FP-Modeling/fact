@@ -217,10 +217,7 @@ Any representation of a physical system that can be modeled by a set of differen
 
 This type seems to capture the concept, whilst being compatible with the definition of a tagged system presented by Lee and Sangiovanni~\cite{LeeSangiovanni}. However, because numerical methods assume that the time variable is \textbf{discrete}, i.e., it is in the form of \textbf{iterations} that they solve differential equations. Thus, some tweaks to this type are needed, such as the number of the current iteration, which method is being used, in which stage the method is and when the final time of the simulation will be reached. With this in mind, new types are introduced. Figure \ref{fig:dynamicsAux} shows the auxiliary types to build a new version of the \texttt{CT} type.
 
-\begin{figure}[ht!]
-\centering
-\begin{minipage}{.62\textwidth}
-  \centering
+\ignore{
 \begin{code}
 data Interval = Interval { startTime :: Double,
                            stopTime  :: Double 
@@ -247,6 +244,34 @@ data Parameters = Parameters { interval  :: Interval,
                              } deriving (Eq, Show)
 
 \end{code}
+}
+
+\begin{figure}[ht!]
+\centering
+\begin{minipage}{.62\textwidth}
+  \centering
+\begin{purespec}
+data Interval = Interval { startTime :: Double,
+                           stopTime  :: Double 
+                         } deriving (Eq, Ord, Show)
+
+data Method = Euler
+            | RungeKutta2
+            | RungeKutta4
+            deriving (Eq, Ord, Show)
+
+data Solver = Solver { dt        :: Double,     
+                       method    :: Method, 
+                       stage     :: Int
+                     } deriving (Eq, Ord, Show)
+
+data Parameters = Parameters { interval  :: Interval,
+                               solver    :: Solver,
+                               time      :: Double,
+                               iteration :: Int
+                             } deriving (Eq, Show)
+
+\end{purespec}
 \end{minipage}
 \begin{minipage}{.37\textwidth}
   \centering
@@ -256,7 +281,7 @@ data Parameters = Parameters { interval  :: Interval,
 \label{fig:dynamicsAux}
 \end{figure}
 
-The above auxiliary types serve a common purpose: to provide at any given moment in time, all the information to execute a solver method until the end of the simulation. The type \texttt{Interval} determines when the simulation should start and when it should end. The \texttt{Method} sum type is used inside the \texttt{Solver} type to set solver sensible information, such as the size of the time step, which method will be used and in which stage the method is in at the current moment (more about the stage field later on). Finally, the \texttt{Parameters} type combines everything together, alongside with the current time value as well as its discrete counterpart, iteration.
+The above auxiliary types serve a common purpose: to provide at any given moment in time, all the information to execute a solver method until the end of the simulation. The type \texttt{Interval} determines when the simulation should start and when it should end. The \texttt{Method} sum type is used inside the \texttt{Solver} type to set solver sensible information, such as the size of the time step, which method will be used and in which stage the method is in at the current moment (more about the stage field on a later chapter). Finally, the \texttt{Parameters} type combines everything together, alongside with the current time value as well as its discrete counterpart, iteration.
 
 Further, the new \texttt{CT} type can also be parametrically polymorphic, removing the limitation of only using \texttt{Double} values as the outcome. Figure \ref{fig:dynamics} depicts the final type for the physical dynamics. The \texttt{IO} wrapper is needed to cope with memory management and side effects, all of which will be explained in the next chapter. Below,
 we have the definition for the \texttt{CT} type used in previous work~\cite{Lemos2022}:
