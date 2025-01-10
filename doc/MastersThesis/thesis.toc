@@ -27,17 +27,21 @@
 \contentsline {section}{\numberline {5.2}Tweak I: Interpolation}{44}{section.5.2}%
 \contentsline {chapter}{\numberline {6}Caching the Speed Pill}{49}{chapter.6}%
 \contentsline {section}{\numberline {6.1}Performance}{49}{section.6.1}%
-\contentsline {section}{\numberline {6.2}The Saving Strategy}{50}{section.6.2}%
+\contentsline {section}{\numberline {6.2}The Saving Strategy}{51}{section.6.2}%
 \contentsline {section}{\numberline {6.3}Tweak II: Memoization}{52}{section.6.3}%
 \contentsline {section}{\numberline {6.4}A change in Perspective}{58}{section.6.4}%
 \contentsline {section}{\numberline {6.5}Tweak III: Model and Driver}{59}{section.6.5}%
 \contentsline {section}{\numberline {6.6}Results with Caching}{61}{section.6.6}%
 \contentsline {chapter}{\numberline {7}Fixing Recursion}{64}{chapter.7}%
-\contentsline {chapter}{\numberline {8}Conclusion}{65}{chapter.8}%
-\contentsline {section}{\numberline {8.1}Limitations}{65}{section.8.1}%
-\contentsline {section}{\numberline {8.2}Future Improvements}{66}{section.8.2}%
-\contentsline {section}{\numberline {8.3}Final Thoughts}{69}{section.8.3}%
-\contentsline {chapter}{References}{70}{section*.54}%
+\contentsline {section}{\numberline {7.1}Integrator's Noise}{64}{section.7.1}%
+\contentsline {section}{\numberline {7.2}The Fixed-Point Combinator}{65}{section.7.2}%
+\contentsline {section}{\numberline {7.3}Value Recursion with Fixed-Points}{67}{section.7.3}%
+\contentsline {section}{\numberline {7.4}Tweak IV: Fixing FACT}{70}{section.7.4}%
+\contentsline {chapter}{\numberline {8}Conclusion}{74}{chapter.8}%
+\contentsline {section}{\numberline {8.1}Limitations}{74}{section.8.1}%
+\contentsline {section}{\numberline {8.2}Future Improvements}{75}{section.8.2}%
+\contentsline {section}{\numberline {8.3}Final Thoughts}{78}{section.8.3}%
+\contentsline {chapter}{References}{79}{section*.57}%
 \babel@toc {american}{}\relax 
 \babel@toc {american}{}\relax 
 \babel@toc {american}{}\relax 

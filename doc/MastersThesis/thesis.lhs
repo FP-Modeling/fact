@@ -26,6 +26,7 @@
 \usepackage{amsmath}
 \usepackage{footmisc}
 \usepackage{xcolor}
+\usepackage{listings}
 
 \usepackage[outputdir=MastersThesis/]{minted}
 \newminted[code]{haskell}{breaklines,autogobble,linenos=true, numberblanklines=false, fontsize=\footnotesize}

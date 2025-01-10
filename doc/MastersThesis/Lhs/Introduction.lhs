@@ -33,6 +33,7 @@ the DSL's usability, will be assured by the use of the \textit{fixed-point combi
 With these three core properties in mind, the proposed DSL will translate GPAC's original set of black boxes to some executable software leveraging mathematical constructs to simplify its usability.
 
 \section{Goal}
+\label{sec:intro}
 
 The main goal of the present work is to build an executable software that can solve differential equations and resembles the core idea of the GPAC model. The programming language of choice was \textbf{Haskell}, due to a variety of different reasons. First, the approach of making specialized programming languages, or \textit{vocabularies}, within consistent and well-defined host programming languages has already proven to be valuable, as noted by Landin~\cite{Landin1966}. Second, this strategy is already being used in the CPS domain in some degree, as showed by the ForSyDe framework~\cite{Sander2017, Seyed2020}. Third, Lee describes a lot of properties~\cite{LeeModeling} that matches the functional programming paradigm almost perfectly:
 
