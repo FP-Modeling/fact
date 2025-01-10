@@ -40,8 +40,8 @@
 \contentsline {chapter}{\numberline {8}Conclusion}{74}{chapter.8}%
 \contentsline {section}{\numberline {8.1}Limitations}{74}{section.8.1}%
 \contentsline {section}{\numberline {8.2}Future Improvements}{75}{section.8.2}%
-\contentsline {section}{\numberline {8.3}Final Thoughts}{78}{section.8.3}%
-\contentsline {chapter}{References}{79}{section*.57}%
+\contentsline {section}{\numberline {8.3}Final Thoughts}{77}{section.8.3}%
+\contentsline {chapter}{References}{78}{section*.57}%
 \babel@toc {american}{}\relax 
 \babel@toc {american}{}\relax 
 \babel@toc {american}{}\relax 
