@@ -377,9 +377,6 @@ most time is spent preparing the caching setup --- the in-memory data structure,
 \caption{\label{tab:betterResults}These values were obtained using the same hardware. It shows that the caching strategy drastically improves \texttt{FACT}'s performance. Again, the concrete memory values obtained from GHC should be considered as just an indicative of improvement due to the garbage collector interference.}
 \end{table}
 
-[(1.5727480058558285e-3,Just 2738192),(5.800099999760278e-3,Just 26954960),(5.055565599468537e-2,Just 269614800),(0.5199284920090577,Just 2696053352),(5.099893376012915,Just 26960657104),(51.95702488601091,Just 269606505168),(520.6636059879966,Just 2696065051344)]
-
-
 \begin{table}[H]
 \centering
 \begin{tabular}{ccc}
@@ -396,7 +393,7 @@ Total of Iterations & Execution Time (milliseconds) & Consumed Memory (MB) \\ \h
 \caption{\label{tab:masterResults}These values were obtained using the same hardware. More complicated simulations can be done with \texttt{FACT} after adding memoization.}
 \end{table}
 
-\figuraBib{Graph2}{By using a logarithmic scale, we can see that the final implementation is performant with more than 100 million iterations in the simulation}{}{fig:graph2}{width=.85\textwidth}%
+\figuraBib{Graph2}{By using a logarithmic scale, we can see that the final implementation is performant with more than 100 million iterations in the simulation}{}{fig:graph2}{width=.97\textwidth}%
 
 The project is currently capable of executing interpolation as well as applying memoization to speed up results. These two drawback solutions, detailed in chapter 5 and 6, adds practicality to \texttt{FACT} as well as makes it more competitive. But we can, however, go even further and adds more familiarity to the DSL. The next chapter, \textit{Fixing Recursion}, will
 address this concern.
