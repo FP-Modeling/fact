@@ -51,6 +51,7 @@
 \contentsline {figure}{\numberline {6.5}{\ignorespaces Caching changes the direction of walking through the iteration axis. It also removes an entire pass through the previous iterations.}}{59}{figure.caption.50}%
 \contentsline {figure}{\numberline {6.6}{\ignorespaces By using a logarithmic scale, we can see that the final implementation is performant with more than 100 million iterations in the simulation.}}{63}{figure.caption.53}%
 \addvspace {10\p@ }
+\addvspace {10\p@ }
 \babel@toc {american}{}\relax 
 \babel@toc {american}{}\relax 
 \babel@toc {american}{}\relax 

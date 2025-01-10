@@ -137,13 +137,14 @@ runCT m t sl =
                             solver = solver }
          disct = iterToTime iv sl nu (SolverStage 0)
          values = map (runReaderT m . parameterize) [nl .. nu]
-  if disct - t < epslon
-  then values
-  else let ps = Parameters { interval = iv,
-                             time = t,
-                             iteration = nu,
-                             solver = sl {stage = Interpolate} }
-       in init values ++ [runReaderT m ps]
+  sequence $
+    if disct - t < epslon
+    then values
+    else let ps = Parameters { interval = iv,
+                               time = t,
+                               iteration = nu,
+                               solver = sl {stage = Interpolate} }
+         in init values ++ [runReaderT m ps]
 \end{spec}
 
 The implementation of \textit{iterationBnds} uses \textit{ceiling} function because this rounding is used to go to the iteration domain. However, given that the interpolation \textbf{requires} both solver steps --- the one that came before $t_x$ and the one immediately
@@ -151,10 +152,10 @@ afterwards --- the number of iterations needs always to surpass the requested ti
 
 Lines 5 to 15 are equal to the previous implementation of the \textit{runCT} function. On line 16, the discrete version of \texttt{t}, \texttt{disct}, will be used for detecting if an
 interpolation will be needed. All the simulation values are being prepared on line 17 --- Haskell being a lazy language the label \texttt{values} will not necessarily
-be evaluated strictly. Line 18 establishes a condition, checkiing if the difference between the time of interest \texttt{t} and \texttt{disct} is greater or not
+be evaluated strictly. Line 19 establishes a condition, checkiing if the difference between the time of interest \texttt{t} and \texttt{disct} is greater or not
 than a value \texttt{epslon}, to identify if
-the normal flow of execution can proceed. If it can't, on line 20 a new record of type \texttt{Parameters} is created (\texttt{ps}), especifically to these special cases of mismatch between discrete and continuous time. The main difference within this special record is relevant: the stage field of the solver is being set to \texttt{Interpolate}.
-Finally, on line 24 the last element from the list of outputs \texttt{values} is removed and it is appended the simulation using the created \texttt{ps} with
+the normal flow of execution can proceed. If it can't, on line 22 a new record of type \texttt{Parameters} is created (\texttt{ps}), especifically to these special cases of mismatch between discrete and continuous time. The main difference within this special record is relevant: the stage field of the solver is being set to \texttt{Interpolate}.
+Finally, on line 25 the last element from the list of outputs \texttt{values} is removed and it is appended the simulation using the created \texttt{ps} with
 interpolation configured.
 
 \begin{code}

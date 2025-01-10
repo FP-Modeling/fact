@@ -32,11 +32,12 @@
 \contentsline {section}{\numberline {6.4}A change in Perspective}{58}{section.6.4}%
 \contentsline {section}{\numberline {6.5}Tweak III: Model and Driver}{59}{section.6.5}%
 \contentsline {section}{\numberline {6.6}Results with Caching}{61}{section.6.6}%
-\contentsline {chapter}{\numberline {7}Conclusion}{64}{chapter.7}%
-\contentsline {section}{\numberline {7.1}Limitations}{64}{section.7.1}%
-\contentsline {section}{\numberline {7.2}Future Improvements}{65}{section.7.2}%
-\contentsline {section}{\numberline {7.3}Final Thoughts}{68}{section.7.3}%
-\contentsline {chapter}{References}{69}{section*.54}%
+\contentsline {chapter}{\numberline {7}Fixing Recursion}{64}{chapter.7}%
+\contentsline {chapter}{\numberline {8}Conclusion}{65}{chapter.8}%
+\contentsline {section}{\numberline {8.1}Limitations}{65}{section.8.1}%
+\contentsline {section}{\numberline {8.2}Future Improvements}{66}{section.8.2}%
+\contentsline {section}{\numberline {8.3}Final Thoughts}{69}{section.8.3}%
+\contentsline {chapter}{References}{70}{section*.54}%
 \babel@toc {american}{}\relax 
 \babel@toc {american}{}\relax 
 \babel@toc {american}{}\relax 

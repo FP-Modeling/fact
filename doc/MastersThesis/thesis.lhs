@@ -93,6 +93,13 @@
   \input{MastersThesis/Lhs/Caching.lhs}
 \fi
 
+\literateChapter{Fixing Recursion}
+%include MastersThesis/Lhs/Fixing.lhs
+
+\ifdefined\iscolorful
+  \input{MastersThesis/Lhs/Fixing.lhs}
+\fi
+
 \literateChapter{Conclusion}
 %include MastersThesis/Lhs/Conclusion.lhs
 
@@ -109,6 +116,7 @@ import MastersThesis.Lhs.Interpolation
 import MastersThesis.Lhs.Introduction
 import MastersThesis.Lhs.Caching
 import MastersThesis.Lhs.Design
+import MastersThesis.Lhs.Fixing
 
 main :: IO ()
 main =
