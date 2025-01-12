@@ -2,7 +2,7 @@
 \babel@toc {american}{}\relax 
 \babel@toc {american}{}\relax 
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {1.1}{\ignorespaces The translation between the world of software and the mathematical description of differential equations are explicit in the final version of \texttt {FACT}.}}{6}{figure.caption.8}%
+\contentsline {figure}{\numberline {1.1}{\ignorespaces The translation between the world of software and the mathematical description of differential equations are explicit in the final version of \texttt {FACT}.}}{5}{figure.caption.8}%
 \addvspace {10\p@ }
 \contentsline {figure}{\numberline {2.1}{\ignorespaces The combination of these four basic units compose any GPAC circuit (taken from~\cite {Edil2018} with permission).}}{8}{figure.caption.9}%
 \contentsline {figure}{\numberline {2.2}{\ignorespaces Polynomial circuits resembles combinational circuits, in which the circuit respond instantly to changes on its inputs (taken from~\cite {Edil2018} with permission).}}{9}{figure.caption.10}%
@@ -53,7 +53,8 @@
 \addvspace {10\p@ }
 \contentsline {figure}{\numberline {7.1}{\ignorespaces Resettable counter in hardware, inspired by Levent's works~\cite {levent2000, levent2002}.}}{68}{figure.caption.54}%
 \contentsline {figure}{\numberline {7.2}{\ignorespaces Diagram of \texttt {createInteg} primitive for intuition..}}{70}{figure.caption.55}%
-\contentsline {figure}{\numberline {7.3}{\ignorespaces Results of FFACT are similar to the final version of FACT..}}{72}{figure.caption.56}%
+\contentsline {figure}{\numberline {7.3}{\ignorespaces Results of FFACT are similar to the final version of FACT..}}{73}{figure.caption.56}%
+\addvspace {10\p@ }
 \addvspace {10\p@ }
 \babel@toc {american}{}\relax 
 \babel@toc {american}{}\relax 

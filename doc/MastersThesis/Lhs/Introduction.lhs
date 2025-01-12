@@ -7,8 +7,6 @@ import MastersThesis.Lhs.Enlightenment
 \end{code}
 }
 
-\section{Context}
-
 Continuous behaviours are deeply embedded into the real world. However, even our most advanced computers are not capable of completely modeling such phenomena due to its discrete nature; thus becoming a still-unsolved challenge. Cyber-physical systems (CPS) --- the integration of computers and physical processes~\cite{LeeModeling, LeeChallenges} --- tackles this problem by attempting to include into the \textit{semantics} of computing the physical notion of \textit{time}~\cite{LeeChallenges, Lee2016, Lee2014, Ungureanu2018, Seyed2020, Edil2021}, i.e., treating time as a measurement of \textit{correctness}, not \textit{performance}~\cite{LeeModeling} nor just an accident of implementation~\cite{LeeChallenges}. Additionally, many systems perform in parallel, which requires precise and sensitive management of time; a non-achievable goal by using traditional computing abstractions, e.g., \textit{threads}~\cite{LeeChallenges}.
 
 Examples of these concepts are older than the digital computers; analog computers were used to model battleships' fire systems and core functionalities of fly-by-wire aircraft~\cite{Graca2003}. The mechanical metrics involved in these problems change continuously, such as space, speed and area, e.g., the firing's range and velocity are crucial in fire systems, and surfaces of control are indispensable to model aircraft's flaps. The main goal of such models was, and still is, to abstract away the continuous facet of the scenario to the computer. In this manner, the human in the loop aspect only matters when interfacing with the computer, with all the heavy-lifting being done by formalized use of shafts and gears in analog machines~\cite{Shannon, Bush1931, Graca2003}, and by \textbf{software} after the digital era.
@@ -88,6 +86,17 @@ Thus, continuous time being specified in mathematical terms,  we believe that th
 
 \section{Outline}
 
-Although written in Haskell, a high level programming language, \texttt{FACT} explores a mix of advanced abstractions with some direct memory manipulation --- usually associated with low level programming languages. Hence, the proposed software will be explained in multiple chapters, each one with a separate and concrete objective.
+This thesis is a step in a broader story, started in 2018 by Edil Medeiros~\cite{Edil2018}. Medeiros' work had some limitations, such as having difficulty
+modeling systems via explicit signal manipulation, and later publications addressed this issue~\cite{Lemos2022, EdilLemos2023}. The chapters
+in this work encompass the previous milestones from this story, giving the reader a complete overview from the ground up in this research thread.
 
-Chapter 2, \textit{Design Philosophy}, will explain basic Haskell concepts, such as the type system and different sorts of polymorphism, and it will bind them to numerical methods and GPAC's circuits. The next chapter, \textit{Effectful Integrals}, is dedicated to introduce GPAC's integrator representative in software, alongside further improvements in the overall modeling of physical systems. The next chapter, \textit{Execution Walkthrough}, will discuss how the proposed types aligns with mathematical definitions introduced in Chapter 2. Moreover, how to execute a simulation as well as a guided example are presented. At the end, some issues will be identified with the implementation at that point. Chapters 6 and 7, \textit{Travelling across Domains} and \textit{Caching the Speed Pill} respectively, address these concerns. The follow-up chapter and main contribution of this work, \textit{Fixing Recursion}, will introduce the fixed-point combinator, alongside its use in Haskell, to upgrade the so-far developed DSL, simplifying its design and usability. Finally, limitations, future improvements and final thoughts are drawn in chapter 8, \textit{Conclusion}.
+Chapter 2, \textit{Design Philosophy}, presents the foundation of this work, started in 2018~\cite{Edil2018}. Although the artifacts presented in the
+original work and this work are far apart, the mathematical base is the same. Chapters 3 to 6 describe future improvements made in 2022~\cite{Lemos2022} and
+2023~\cite{EdilLemos2023}. These chapters go in detail about the DSL's implementation details, such as the used abstractions, going through executable examples,
+pointing out and addressing problems in its usability and design. Issues like performance, and continuous time implementation are explained
+and then addressed. The main contribution of this work is concentrated in Chapter 7, \textit{Fixing Recursion}, which dedicates itself to improving an abstraction
+leak in the most recent published version of the DSL~\cite{EdilLemos2023}. Those improvements leverage the \textit{fixed point combinator} to eliminate
+abstraction leaks, thus making the DSL more familiar to a system's designer.
+These enhacements were submitted and are waiting approval in a related journal~\footnote{\href{https://www.cambridge.org/core/journals/journal-of-functional-programming}{\textcolor{blue}{Journal of Functional Programming}}.}.
+
+Finally, limitations, future improvements and final thoughts are drawn in chapter 8, \textit{Conclusion}.

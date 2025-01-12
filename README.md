@@ -19,22 +19,26 @@ All the examples in the `Examples` folder are acessible via the REPL environment
 
 ## Literate Programming
 
-There are two types of documentation: `thesis.lhs` and `manual.lhs`, both of which use [literate programming](https://en.wikipedia.org/wiki/Literate_programming), given that Haskell has [great support](https://wiki.haskell.org/Literate_programming) to this feature. The former is the graduation thesis of one contributor, and latter is the manual of the software.
+There are two types of documentation: `thesis.lhs`, both of which use [literate programming](https://en.wikipedia.org/wiki/Literate_programming), given that Haskell has [great support](https://wiki.haskell.org/Literate_programming) to this feature.
+
+### Dependencies
+
+- `ghc` - minimum version `9.6.6`.
+- `pdflatex` - minimum version `3.141592653-2.6-1.40.25`.
+- `bibtex` - minimum version `0.99d`.
+
+The library `lhs2Tex` is necessary specifically to run the `gray` subcommand (check next subsection).
 
 ### How to Use
 
 The most convenient way to compile the documentation and the executable from these files is by using the script `literate.sh`, inside the `doc` folder. Below, there are the available commands to execute in the terminal:
 
-- `/literate.sh manual compile` - It is necessary to have installed the `ghc` compiler (must be in your PATH variable). It will compile the file `manual.lhs`.
-- `/literate.sh manual repl` - It is necessary to have installed the `ghci` interactive enironment (must be in your PATH variable). It will start a REPL of the file `manual.lhs`.
-- `/literate.sh manual gray` - It is necessary to have installed [lhs2Tex](https://hackage.haskell.org/package/lhs2tex) and pdflatex (both must be in your PATH variable). It will generate a black and white document from `manual.lhs`, following lhs2Tex guidelines.
-- `/literate.sh manual colorful` - It is necessary to have installed [pygments](https://pygments.org/download/) (must be in your PATH variable). It will generate a colorful version of the document from `manual.lhs` using the minted package.
-- `/literate.sh thesis compile` - It is necessary to have installed the `ghc` compiler (must be in your PATH variable). It will compile the file `thesis.lhs`.
-- `/literate.sh thesis repl` - It is necessary to have installed the `ghci` interactive enironment (must be in your PATH variable). It will start a REPL of the file `thesis.lhs`.
-- `/literate.sh thesis gray` - It is necessary to have installed [lhs2Tex](https://hackage.haskell.org/package/lhs2tex) and pdflatex (both must be in your PATH variable). It will generate a black and white document from `thesis.lhs`, following lhs2Tex guidelines.
-- `/literate.sh thesis colorful` - It is necessary to have installed [pygments](https://pygments.org/download/) (must be in your PATH variable). It will generate a colorful version of the document from `thesis.lhs` using the minted package.
+- `/literate.sh compile` - It is necessary to have installed the `ghc` compiler (must be in your PATH variable). It will compile the file `thesis.lhs`.
+- `/literate.sh repl` - It is necessary to have installed the `ghci` interactive enironment (must be in your PATH variable). It will start a REPL of the file `thesis.lhs`.
+- `/literate.sh gray` - It is necessary to have installed [lhs2Tex](https://hackage.haskell.org/package/lhs2tex) and pdflatex (both must be in your PATH variable). It will generate a black and white document from `thesis.lhs`, following lhs2Tex guidelines.
+- `/literate.sh colorful` - It is necessary to have installed [pygments](https://pygments.org/download/) (must be in your PATH variable). It will generate a colorful version of the document from `thesis.lhs` using the minted package.
 
-**All commands need to be executed inside the doc folder**. All of these commands use the same file, `manual.lhs` or `thesis.lhs`, to execute different things. In this way, documentation and source code come from the same file.
+**All commands need to be executed inside the doc folder**. All of these commands use the same file, `thesis.lhs`, to execute different things. In this way, documentation and source code come from the same file.
 
 ### Shortcut
 
@@ -44,7 +48,7 @@ As a shortcut, the colorful version of the thesis can be compiled using the foll
 sudo apt-get install texlive-latex-base
 sudo apt-get install texlive-fonts-extra
 cd doc
-./literate.sh thesis colorful
+./literate.sh colorful
 ```
 
 ## Credits
