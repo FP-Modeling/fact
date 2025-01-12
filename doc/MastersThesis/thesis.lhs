@@ -108,6 +108,13 @@
   \input{MastersThesis/Lhs/Conclusion.lhs}
 \fi
 
+\literateChapter{Appendix}
+%include MastersThesis/Lhs/Appendix.lhs
+
+\ifdefined\iscolorful
+  \input{MastersThesis/Lhs/Appendix.lhs}
+\fi
+
 \ignore{
 \begin{code}
 module Main where
@@ -121,7 +128,7 @@ import MastersThesis.Lhs.Fixing
 
 main :: IO ()
 main =
-  do ans <- oldLorenzSystem
+  do ans <- lorenzSystem
      print ans
 \end{code}
 }

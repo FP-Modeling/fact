@@ -6,6 +6,7 @@ import MastersThesis.Lhs.Implementation
 import MastersThesis.Lhs.Interpolation
 import MastersThesis.Lhs.Design
 import MastersThesis.Lhs.Caching
+import MastersThesis.Lhs.Enlightenment
 
 import Control.Monad.Trans.Reader
 import Control.Monad
@@ -302,11 +303,27 @@ integ diff i =
 \end{code}
 \vspace{-0.2cm}
 %
-Interpolation and memoization requirements from FACT are being maintained, as shown on line 3. Lines 3 to 6 demonstrate the use case for FFACT's \texttt{mdo}.
+This new functin received the differential equation of interest, named \texttt{diff}, and the initial condition of the simulation, identified
+as \texttt{i}, on line 2. Interpolation and memoization requirements from FACT are being maintained, as shown on line 3. Lines 3 to 6 demonstrate the use case for FFACT's \texttt{mdo}.
 A continuous machine created by the memoization function (line 3), \texttt{y}, uses another continuous machine, \texttt{z}, yet to be defined.
 This continuous machine, defined on line 4, retrieves the numerical method chosen by a value of type \texttt{Parameters}, via the function \texttt{f}.
 The outcome of the function \texttt{integ} is the outcome of running the simulation of interest in the context of memoization and interpolation.
-As a final note, just as with \texttt{fix}, there is a need for the function being applied to the combinator to terminate the recursive process: this is being done via the function \texttt{memo} within the \texttt{integ} function. Not surprisingly, the results of this new approach using the monadic fixed-point combinator are very similar to the
+As a final note, just as with \texttt{fix}, there is a need for the function being applied to the combinator to terminate the recursive process: this is being done via the function \texttt{memo} within the \texttt{integ} function.
+
+Finally, the Lorenz Attractor example is rewritten as the following:
+
+\begin{code}
+lorenzModel :: Model Vector
+lorenzModel = mdo
+   x <- integ (sigma * (y - x)) 1.0
+   y <- integ (x * (rho - z) - y) 1.0
+   z <- integ (x * y - beta * z) 1.0
+   return $ sequence [x, y, z]          
+
+lorenzSystem = runCT lorenzModel 100 lorenzSolver
+\end{code}
+
+Not surprisingly, the results of this new approach using the monadic fixed-point combinator are very similar to the
 performance metrics depicted in chapter 6, \textit{Caching the Speed Pill}. Figure~\ref{fig:fixed-graph} shows the new results:
 
 \figuraBib{Graph3}{Results of FFACT are similar to the final version of FACT.}{}{fig:fixed-graph}{width=.97\textwidth}%
