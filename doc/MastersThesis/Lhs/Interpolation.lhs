@@ -185,7 +185,7 @@ interpolate m = do
       in z1 + (z2 - z1) * pure ((t - t1) / (t2 - t1))
 \end{code}
 
-Lines 1 to 5 continues the simulation with the normal workflow. If a corner case comes in, the reminaing code applies \textbf{linear interpolation} to it. It accomplishes this by first comparing the next and previous discrete times (lines 16 and 19) relative to \texttt{x} (line 11) --- the discrete counterpart of the time of interest \texttt{t} (line 9). These time points are calculated by their correspondent iterations (lines 12 and 13). Then, the integrator calculates the outcomes at these two points, i.e., do applications of the previous and next modeled times points with their respective parametric records (lines 22 and 23). Finally, line 24 executes the linear interpolation with the obtained values that surround the non-discrete time point. Figure \ref{fig:interpolate} illustrates the effect of the \textit{interpolate} function when converting domains.
+Lines 1 to 5 continues the simulation with the normal workflow. If a corner case comes in, the reminaing code applies \textbf{linear interpolation} to it. It accomplishes this by first comparing the next and previous discrete times (lines 16 and 19) relative to \texttt{x} (line 11) --- the discrete counterpart of the time of interest \texttt{t} (line 9). These time points are calculated by their correspondent iterations (lines 12 and 13). Then, the integrator calculates the outcomes at these two points, i.e., do applications of the previous and next modeled times points with their respective parametric records (lines 22 and 23). Finally, line 24 executes the linear interpolation with the obtained values that surround the non-discrete time point. This particular interpolation was chosen for the sake of simplicity, but it can be replaced by higher order methods. Figure \ref{fig:interpolate} illustrates the effect of the \textit{interpolate} function when converting domains.
 
 \begin{spec}
 updateInteg :: Integrator -> CT Double -> CT ()
@@ -201,10 +201,10 @@ updateInteg integ diff = do
   liftIO $ writeIORef (computation integ) (interpolate z)
 \end{spec}
 
-\figuraBib{Interpolate}{Linear interpolation is a transformation that transition us back to the continuous domain}{}{fig:interpolate}{width=.7\textwidth}%
+\figuraBib{Interpolate}{Linear interpolation is being used to transition us back to the continuous domain.}{}{fig:interpolate}{width=.7\textwidth}%
 
 The last step in this tweak is to add this function into the integrator function \textit{updateInteg}. The code is almost identical to the one presented in chapter 3, \textit{Effectful Integrals}. The main difference is in line 11, where the interpolation function is being applied to \texttt{z}. Figure \ref{fig:diffInterpolate} shows the same visual representation for the \textit{updateInteg} function used in chapter 4, but with the aforementioned modifications.
 
 \figuraBib{DiffIntegInterpolate}{The new \textit{updateInteg} function add linear interpolation to the pipeline when receiving a parametric record}{}{fig:diffInterpolate}{width=.9\textwidth}%
 
-This concludes the first tweak in \texttt{FACT}. Now, the mismatches between the stop time of the simulation and the time step are being treated differently, going back to the continuous domain thanks to the added linear interpolation. The next chapter, \textit{Caching the Speed Pill}, goes deep into the program's performance and how this can be fixed with a caching strategy.
+This concludes the first tweak in \texttt{FACT}. Now, the mismatches between the stop time of the simulation and the time step are being treated differently, going back to the continuous domain thanks to the added interpolation. The next chapter, \textit{Caching the Speed Pill}, goes deep into the program's performance and how this can be fixed with a caching strategy.
