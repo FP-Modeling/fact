@@ -1,4 +1,4 @@
-\documentclass[mestrado,ppgi]{UnB-CIC}
+\documentclass[qualificacao,mestrado,ppgi]{UnB-CIC}
 
 %include polycode.fmt
 %include MastersThesis/lineno.fmt
@@ -38,8 +38,8 @@
 \coordenador{\prof João José Costa Gondim}{CIC/UnB}%
 \diamesano{11}{Feb}{2025}%
 
-\membrobanca{\prof Vander Ramos Alves}{CIC/UnB}%
-\membrobanca{\dr George Ungureanu}{Ericsson Sweden}%
+\membrobanca{\prof Rodrigo Bonifácio de Almeida}{CIC/UnB}%
+\membrobanca{\prof Denis Loubach}{ITA}%
 
 \autor{Eduardo L.}{Rocha}%
 

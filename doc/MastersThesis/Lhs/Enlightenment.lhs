@@ -145,9 +145,7 @@ way up to the requested time. Next up, on line 4, we convert the interval to an 
 index, and creates a new record with the type \texttt{Parameters}. Additionally, it uses the auxiliary function \textit{iterToTime} (line 7), which converts the iteration number from
 the domain of discrete \textbf{steps} to the domain of \textbf{discrete time}, i.e., the time the solver methods can operate with (chapter 5 will explore more of this concept). This conversion is based on the time step being used, as well as which method and in which stage it is for that specific iteration. Finally, line 13 produces the outcome of the \textit{runCT} function. The final result is the output from a function called \textit{map} piped it as an argument for the \textit{sequence} function.
 
-The \textit{map} operation is provided by the \texttt{Functor} of the list monad, and it applies an arbitrary function to the internal members of a list in a \textbf{sequential} manner. In this case, the \textit{parameterise} function, composed with the continuous machine \texttt{m}, is the one being mapped. Thus, a custom value of the type \texttt{Parameters} is taking place of each natural natural number in the list, and this is being applied to the received \texttt{CT} value. It produces a list of answers in order, each one wrapped in the \texttt{IO} monad. To abstract out the \texttt{IO}, thus getting \texttt{IO [a]} rather than \texttt{[IO a]}, the \textit{sequence} function finishes the implementation.
-
-Additionally, there is an analogous implementation of this function, so-called \textit{runCTFinal}, that return only the final result of the simulation instead of the outputs at the time step samples.
+The \textit{map} operation is provided by the \texttt{Functor} of the list monad, and it applies an arbitrary function to the internal members of a list in a \textbf{sequential} manner. In this case, the \textit{parameterise} function, composed with the continuous machine \texttt{m}, is the one being mapped. Thus, a custom value of the type \texttt{Parameters} is taking place of each natural natural number in the list, and this is being applied to the received \texttt{CT} value. It produces a list of answers in order, each one wrapped in the \texttt{IO} monad. To abstract out the \texttt{IO}, thus getting \texttt{IO [a]} rather than \texttt{[IO a]}, the \textit{sequence} function finishes the implementation. Additionally, there is an analogous implementation of this function, so-called \textit{runCTFinal}, that return only the final result of the simulation instead of the outputs at the time step samples.
 
 \section{An attractive example}
 
@@ -205,17 +203,15 @@ To understand the model, we need to follow the execution sequence of the output:
 
 The next step is the creation of the independent state variable $x$ via \textit{readInteg} function (line 15). This variable will read the computations that are executing under the hood by the integrator. The core idea is to read from the computation pointer inside the integrator and create a new \texttt{CT Double} value. Figure \ref{fig:readExample} portrays this mental image. When reading a value from an integrator, the computation pointer is being used to access the memory region previously allocated. Also, what's being stored in memory is a \texttt{CT Double} value. The state variable, $x$ in this case, combines its received \texttt{Parameters} value, so-called \texttt{ps}, and \textbf{applies} it to the stored continuous machine. The result \texttt{v} is then returned.
 
-\figuraBib{ExampleRead}{After \textit{readInteg}, the final floating point values is obtained by reading from memory a dynamic computation and passing to it the received parameters record. The result of this application, $v$, is the returned value}{}{fig:readExample}{width=.90\textwidth}%
+\figuraBib{ExampleRead}{After \textit{readInteg}, the final floating point values is obtained by reading from memory a computation and passing to it the received parameters record. The result of this application, $v$, is the returned value}{}{fig:readExample}{width=.90\textwidth}%
 
 The final step is to \textbf{change} the computation \textbf{inside} the memory region (line 18). Until this moment, the stored computation is always returning the value of the system at $t_0$, whilst changing the obtained parameters record to be correct via the \textit{initialize} function. Our goal is to modify this behaviour to the actual solution of the differential equations via using numerical methods, i.e., using the solver of the simulation. The function \textit{updateInteg} fulfills this role and its functionality is illustrated in Figure \ref{fig:changeExample}. With the integrator \texttt{integX} and the differential equation $\sigma (y - x)$ on hand, this function picks the provided parametric record \texttt{ps} and it returns the result of a step of the solver \texttt{RK2}, second-order Runge-Kutta method in this case. Additionally, the solver method receives as a dependency what is being pointed by the \texttt{computation} pointer, represented by \texttt{c} in the image, alongside the differential equation and initial value, pictured by \texttt{d} and \texttt{i} respectively.
 
-\figuraBib{ExampleChange}{The \textit{updateInteg} function only does side effects, meaning that only affects memory. The internal variable \texttt{c} is a pointer to the computation \textit{itself}, i.e., the dynamic computation being created references this exact procedure}{}{fig:changeExample}{width=.90\textwidth}%
-
-Figure \ref{fig:finalModelExample} shows the final image for state variable $x$ after until this point in the execution.
+\figuraBib{ExampleChange}{The \textit{updateInteg} function only does side effects, meaning that only affects memory. The internal variable \texttt{c} is a pointer to the computation \textit{itself}, i.e., the computation being created references this exact procedure}{}{fig:changeExample}{width=.90\textwidth}%
 
 \figuraBib{ExampleFinalModel}{After setting up the environment, this is the final depiction of an independent variable. The reader $x$ reads the values computed by the procedure stored in memory, a second-order Runge-Kutta method in this case}{}{fig:finalModelExample}{width=.90\textwidth}%
 
-Lastly, the state variable is wrapped inside a list and it is applied to the \textit{sequence} function, as explained in the previous section. This means that the list of variable(s) in the model, with the signature \texttt{[CT Double]}, is transformed into a value with the type \texttt{CT [Double]}. The transformation can be visually understood when looking at Figure \ref{fig:finalModelExample}. Instead of picking one \texttt{ps} of type \texttt{Parameters} and returning a value \textit{v}, the same parametric record returns a \textbf{list} of values, with the \textbf{same} parametric dependency being applied to all state variables inside $[x, y, z]$.
+Figure \ref{fig:finalModelExample} shows the final image for state variable $x$ after until this point in the execution. Lastly, the state variable is wrapped inside a list and it is applied to the \textit{sequence} function, as explained in the previous section. This means that the list of variable(s) in the model, with the signature \texttt{[CT Double]}, is transformed into a value with the type \texttt{CT [Double]}. The transformation can be visually understood when looking at Figure \ref{fig:finalModelExample}. Instead of picking one \texttt{ps} of type \texttt{Parameters} and returning a value \textit{v}, the same parametric record returns a \textbf{list} of values, with the \textbf{same} parametric dependency being applied to all state variables inside $[x, y, z]$.
 
 However, this only addresses \textbf{how} the driver triggers the entire execution, but does \textbf{not} explain how the differential equations are actually being calculated with the \texttt{RK2} numerical method. This is done by the solver functions (\textit{integEuler}, \textit{integRK2} and \textit{integRK4}) and those are all based on equation \ref{eq:solverEquation} regardless of the chosen method. The equation goes as the following:
 
@@ -233,21 +229,7 @@ It is worth mentioning that the dependency \texttt{c} is a call of a \textbf{sol
 
 \section{Lorenz's Butterfly}
 
-After all the explained theory behind the project, it remains to be seen if this can be converted into practical results. With certain constant values, the generated graph of the Lorenz's Attractor example used in the last chapter is known for oscillation and getting the shape of two fixed point attractors, meaning that the system evolves to an oscillating state even if slightly disturbed. As showed in Figure \ref{fig:lorenzPlots}, the obtained graph from the Lorenz's Attractor model matches what was expected for a Lorenz's system. It is worth noting that changing the values of $\sigma$, $\rho$ and $\beta$ can produce completely different answers, destroying the resembled "butterfly" shape of the graph.
+After all the explained theory behind the project, it remains to be seen if this can be converted into practical results. With certain constant values, the generated graph of the Lorenz's Attractor example used in the last chapter is known for oscillation and getting the shape of two fixed point attractors, meaning that the system evolves to an oscillating state even if slightly disturbed. As showed in Figure \ref{fig:lorenzPlots}, the obtained graph from the Lorenz's Attractor model matches what was expected for a Lorenz's system. It is worth noting that changing the values of $\sigma$, $\rho$ and $\beta$ can produce completely different answers, destroying the resembled "butterfly" shape of the graph. Although correct, the presented solution has a few drawbacks. The next three chapters will explain and address the identified problems with the current implementation.
 
-\begin{figure}[ht!]
-\begin{minipage}{.60\textwidth}
-\begin{center}
-  \includegraphics[width=1.0\linewidth]{MastersThesis/img/LorenzPlot1}
-\end{center}
-\end{minipage}
-\begin{minipage}{.39\textwidth}
-\begin{center}
-  \includegraphics[width=1.0\linewidth]{MastersThesis/img/LorenzPlot2}
-\end{center}
-\end{minipage}
-\caption{The Lorenz's Attractor example has a very famous butterfly shape from certain angles and constant values in the graph generated by the solution of the differential equations.}
-\label{fig:lorenzPlots}
-\end{figure}
+\figuraBib{LorenzPlot1}{The Lorenz's Attractor example has a very famous butterfly shape from certain angles and constant values in the graph generated by the solution of the differential equations.}{}{fig:lorenzPlots}{width=.90\textwidth}%
 
-Although correct, the presented solution has a few drawbacks. The next three chapters will explain and address the identified problems with the current implementation.

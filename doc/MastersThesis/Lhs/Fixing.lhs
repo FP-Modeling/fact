@@ -28,7 +28,7 @@ and its mapping to a simulation-ready description provided by FACT.
 Below we have this example modeled using FACT (same code as provided in section~\ref{sec:intro}):
 %
 \vspace{0.1cm}
-\begin{purespec}
+\begin{spec}
 sigma = 10.0
 rho = 28.0
 beta = 8.0 / 3.0
@@ -45,7 +45,7 @@ lorenzModel =
      updateInteg integY (x * (rho - z) - y)
      updateInteg integZ (x * y - beta * z)
      return $ sequence [x, y, z]
-\end{purespec}
+\end{spec}
 \vspace{0.1cm}
 % $
 
@@ -80,7 +80,7 @@ a point \emph{p} is a fixed-point of a function \emph{f} if \emph{f(p)} lies on 
 Not all functions have fixed-points, and some functions may have more than one~\cite{tennent1991}.
 Further, we seek to establish theorems and algorithms in which one can guarantees fixed-points and their uniqueness, such as the Banach fixed-point theorem~\cite{bryant1985}.
 In programming terms, by following specific requirements one could find the fixed-point of a function via an iterative process
-that involves going back and forth between it and the identity function until the difference in outcomes is less than or equal to an arbitrary $\epsilon$.
+that involves going back and forth between it and the identity function until the difference in outcomes is less than or equal to an arbitrary~$\epsilon$.
 
 %
 % \begin{figure}[ht!]
@@ -115,7 +115,7 @@ For readers unfamiliar with the use of this combinator, equational reasoning~\ci
 %
 \begin{lstlisting}[basicstyle=\footnotesize]
   factorial 5
-= {definition of factorial, $\alpha$ equivalence to remove clashes on f}
+= {definition of factorial, alpha equivalence to remove clashes on f}
   fix (\g n -> if n == 1 then 1 else n * g (n - 1)) 5
 = {definition of fix}
   (\f -> f (f (f (...)))) (\g n -> if n == 1 then 1 else n * g (n - 1)) 5
@@ -271,7 +271,7 @@ This way allowed the use of good translation of differential equations into Hask
 
 In contrast, FFACT's use of \texttt{mdo} removes this existing limitation in FACT's \texttt{do}.
 With \texttt{letrec}'s flexibility via the type class \texttt{MonadFix}, one can use order-independent bindings, which may need effects to be defined, as one would do with a piece of paper.
-From an usability's perspective, value recursion is closing the gap between the informal notion of bindings mathematians have and the more restricted notion programmers have, which usually vary from programming language to programming language and each one comes with its own different quirks and solutions to not incur into scoping issues.
+From an usability's perspective, value recursion is closing the gap between the informal notion of bindings mathematicians have and the more restricted notion programmers have, which usually vary from programming language to programming language and each one comes with its own different quirks and solutions to not incur into scoping issues.
 
 With this context in mind, below we present the definition of \texttt{mfix} in the \texttt{MonadFix} type class for the
 \texttt{ReaderT} type, the underlying type of the \texttt{CT} type alias, present in the \texttt{Control.Monad.Trans.Reader}~\footnote{\texttt{Control.Monad.Trans.Reader} \href{https://hackage.haskell.org/package/mtl-2.3.1/docs/Control-Monad-Reader.html}{\textcolor{blue}{hackage documentation}}.} package:
