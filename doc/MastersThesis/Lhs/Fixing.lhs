@@ -21,7 +21,7 @@ it leaks noise into the designer's mind. The designer's concern should be to pay
 step of translation or noisy setups just adds an extra burden with no real gains on the engineering of simulating continuous time. This chapter
 will present \textit{FFACT}, an evolution of FACT which aims to reduce the noise even further.
 
-It is worth noting that the term \textit{fixed-point} has different meanings in the domains of engineering and mathematics. When refericing the
+It is worth noting that the term \textit{fixed-point} has different meanings in the domains of engineering and mathematics. When referecing the
 fractional representations within a computer, one may use the \textit{fixed-point method}. Thus, to avoid confusion, section~\ref{subsec:fix} starts
 by defining the term as a mathematical combinator that can be used to implement recursion.
 
