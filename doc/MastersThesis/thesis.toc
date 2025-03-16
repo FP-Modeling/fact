@@ -42,7 +42,7 @@
 \contentsline {section}{\numberline {8.3}Final Thoughts}{77}{section.8.3}%
 \contentsline {chapter}{\numberline {9}Appendix}{78}{chapter.9}%
 \contentsline {section}{\numberline {9.1}Literate Programming}{78}{section.9.1}%
-\contentsline {chapter}{References}{80}{section*.55}%
+\contentsline {chapter}{References}{80}{section*.57}%
 \babel@toc {american}{}\relax 
 \babel@toc {american}{}\relax 
 \babel@toc {american}{}\relax 

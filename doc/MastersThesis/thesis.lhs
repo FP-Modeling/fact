@@ -1,4 +1,4 @@
-\documentclass[qualificacao,mestrado,ppgi]{UnB-CIC}
+\documentclass[mestrado,ppgi]{UnB-CIC}
 
 %include polycode.fmt
 %include MastersThesis/lineno.fmt
