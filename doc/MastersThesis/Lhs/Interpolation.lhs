@@ -25,22 +25,22 @@ iterToTime interv solver n (SolverStage st) =
 \end{code}
 }
 
-The previous chapter ended anouncing that drawbacks are present in the current implementation. This chapter will introduce the first concern: numerical methods do not reside in the continuous domain, the one we are actually interested in. After this chapter, this domain issue will be addressed via \textbf{interpolation}, with a few tweaks in the integrator and driver.
+The previous chapter ended anouncing that drawbacks are present in the current implementation. This chapter will introduce the first concern: numerical methods do not reside in the continuous domain, the one we are actually interested in. After this chapter, this domain issue will be addressed via \textit{interpolation}, with a few tweaks in the integrator and driver.
 
 \section{Time Domains}
 
-When dealing with continuous time, \texttt{FACT} changes the domain in which \textbf{time} is being modeled. Figure \ref{fig:timeDomains} shows the domains that the implementation interact with during execution:
+When dealing with continuous time, \texttt{FACT} changes the domain in which \textit{time} is being modeled. Figure \ref{fig:timeDomains} shows the domains that the implementation interact with during execution:
 
 \figuraBib{TimeDomains}{During simulation, functions change the time domain to the one that better fits certain entities, such as the \texttt{Solver} and the driver. The image is heavily inspired by a figure in~\cite{Edil2017}}{}{fig:timeDomains}{width=.85\textwidth}%
 
-The problems starts in the physical domain. The goal is to obtain a value of an unknown function $y(t)$ at time $t_x$. However, because the solution is based on \textbf{numerical methods} a sampling process occurs and the continuous time domain is transformed into a \textbf{discrete} time domain, where the solver methods reside --- those are represented by the functions \textit{integEuler}, \textit{integRK2} and \textit{integRK4}. A solver depends on the chosen time step to execute a numerical algorithm. Thus, time is modeled by the sum of $t_0$ with $n\Delta$, where $n$ is a natural number. Hence, from the solver perspective, time is always dependent on the time step, i.e., only values that can be described as $t_0 + n\Delta$ can be properly visualized by the solver. Finally, there's the \textbf{iteration} domain, used by the driver functions, \textit{runCT} and \textit{runCTFinal}. When executing the driver, one of its first steps is to call the function \textit{iterationsBnds}, which converts the simulation time interval to a tuple of numbers that represent the amount of iterations based on the time step of the solver. This function is presented bellow:
+The problems starts in the physical domain. The goal is to obtain a value of an unknown function $y(t)$ at time $t_x$. However, because the solution is based on \textit{numerical methods} a sampling process occurs and the continuous time domain is transformed into a \textit{discrete} time domain, where the solver methods reside --- those are represented by the functions \textit{integEuler}, \textit{integRK2} and \textit{integRK4}. A solver depends on the chosen time step to execute a numerical algorithm. Thus, time is modeled by the sum of $t_0$ with $n\Delta$, where $n$ is a natural number. Hence, from the solver perspective, time is always dependent on the time step, i.e., only values that can be described as $t_0 + n\Delta$ can be properly visualized by the solver. Finally, there's the \textit{iteration} domain, used by the driver functions, \textit{runCT} and \textit{runCTFinal}. When executing the driver, one of its first steps is to call the function \textit{iterationsBnds}, which converts the simulation time interval to a tuple of numbers that represent the amount of iterations based on the time step of the solver. This function is presented bellow:
 
 \begin{spec}
 iterationBnds :: Interval -> Double -> (Int, Int)
 iterationBnds interv dt = (0, ceiling ((stopTime interv - startTime interv) / dt))
 \end{spec}
 
-To achieve the total number of iterations, the function \textit{iterationBnds} does a \textbf{ceiling} operation on the sampled result of iterations, based on the time interval (\textit{startTime} and \textit{stopTime}) and the time step (\texttt{dt}). The second member of the tuple is always the answer, given that it is assumed that the first member of the tuple is always zero.
+To achieve the total number of iterations, the function \textit{iterationBnds} does a \textit{ceiling} operation on the sampled result of iterations, based on the time interval (\textit{startTime} and \textit{stopTime}) and the time step (\texttt{dt}). The second member of the tuple is always the answer, given that it is assumed that the first member of the tuple is always zero.
 
 The function that allows us to go back to the discrete time domain being in the iteration axis is the \textit{iterToTime} function. It uses the solver information, the current iteration and the interval to transition back to time, as depicted by the following code:
 
@@ -64,7 +64,7 @@ iterToTime interv solver n st =
 A transformation from iteration to time depends on and on the chosen solver method due to their next step functions.
 For instance, the second and forth order Runge-Kutta methods have more stages, and it uses fractions of the time step for more granular use of the derivative function. This is why lines 11 and 12 are using half of the time step. Moreover, all discrete time calculations assume that the value starts from the beginning of the simulation (\textit{startTime}). The result is obtained by the sum of the initial value, the solver-dependent \textit{delta} function and the iteration times the solver time step (line 6).
 
-There is, however, a missing transition: from the discrete time domain to the domain of interest in CPS --- the continuous time axis. This means that if the time value $t_x$ is not present from the solver point of view, it is not possible to obtain $y(t_x)$. The proposed solution is to add an \textbf{interpolation} function into the pipeline, which addresses this transition. Thus, values in between solver steps will be transfered back to the continuous domain.
+There is, however, a missing transition: from the discrete time domain to the domain of interest in CPS --- the continuous time axis. This means that if the time value $t_x$ is not present from the solver point of view, it is not possible to obtain $y(t_x)$. The proposed solution is to add an \textit{interpolation} function into the pipeline, which addresses this transition. Thus, values in between solver steps will be transfered back to the continuous domain.
 
 \section{Tweak I: Interpolation}
 
@@ -97,7 +97,7 @@ type instead of the original \texttt{Int} previously proposed (in chapter 2, \te
 functions like \textit{integEuler}, \textit{iterToTime}, and \textit{runCT} need to be updated accordingly. In all of those instances, processing will just continue
 normally; \texttt{SolverStage} will be used.
 
-Next, the driver needs to be updated. So, the proposed mechanism is the following: the driver will identify these corner cases and communicate to the integrator --- via the new \texttt{Stage} field in the \texttt{Solver} data type --- that the interpolation needs to be added into the pipeline of execution. When this flag is not on, i.e., the \texttt{Stage} informs to continue execution normally, the implementation goes as the previous chapters detailed. This behaviour is altered \textbf{only} in particular scenarios, which the driver will be responsible for identifying.
+Next, the driver needs to be updated. So, the proposed mechanism is the following: the driver will identify these corner cases and communicate to the integrator --- via the new \texttt{Stage} field in the \texttt{Solver} data type --- that the interpolation needs to be added into the pipeline of execution. When this flag is not on, i.e., the \texttt{Stage} informs to continue execution normally, the implementation goes as the previous chapters detailed. This behaviour is altered \textit{only} in particular scenarios, which the driver will be responsible for identifying.
 
 It remains to re-implement the driver functions. The driver will notify the integrator that an interpolation needs to take place. The code below shows these changes:
 
@@ -147,7 +147,7 @@ runCT m t sl =
          in init values ++ [runReaderT m ps]
 \end{spec}
 
-The implementation of \textit{iterationBnds} uses \textit{ceiling} function because this rounding is used to go to the iteration domain. However, given that the interpolation \textbf{requires} both solver steps --- the one that came before $t_x$ and the one immediately
+The implementation of \textit{iterationBnds} uses \textit{ceiling} function because this rounding is used to go to the iteration domain. However, given that the interpolation \textit{requires} both solver steps --- the one that came before $t_x$ and the one immediately
 afterwards --- the number of iterations needs always to surpass the requested time. For instance, the time 5.3 seconds will demand the fifth and sixth iterations with a time step of 1 second. When using \textit{ceiling}, it is assured that the value of interest will be in the interval of computed values. So, when dealing with 5.3, the integrator will calculate all values up to 6 seconds.
 
 Lines 5 to 15 are equal to the previous implementation of the \textit{runCT} function. On line 16, the discrete version of \texttt{t}, \texttt{disct}, will be used for detecting if an
@@ -185,7 +185,7 @@ interpolate m = do
       in z1 + (z2 - z1) * pure ((t - t1) / (t2 - t1))
 \end{code}
 
-Lines 1 to 5 continues the simulation with the normal workflow. If a corner case comes in, the reminaing code applies \textbf{linear interpolation} to it. It accomplishes this by first comparing the next and previous discrete times (lines 16 and 19) relative to \texttt{x} (line 11) --- the discrete counterpart of the time of interest \texttt{t} (line 9). These time points are calculated by their correspondent iterations (lines 12 and 13). Then, the integrator calculates the outcomes at these two points, i.e., do applications of the previous and next modeled times points with their respective parametric records (lines 22 and 23). Finally, line 24 executes the linear interpolation with the obtained values that surround the non-discrete time point. This particular interpolation was chosen for the sake of simplicity, but it can be replaced by higher order methods. Figure \ref{fig:interpolate} illustrates the effect of the \textit{interpolate} function when converting domains.
+Lines 1 to 5 continues the simulation with the normal workflow. If a corner case comes in, the reminaing code applies \textit{linear interpolation} to it. It accomplishes this by first comparing the next and previous discrete times (lines 16 and 19) relative to \texttt{x} (line 11) --- the discrete counterpart of the time of interest \texttt{t} (line 9). These time points are calculated by their correspondent iterations (lines 12 and 13). Then, the integrator calculates the outcomes at these two points, i.e., do applications of the previous and next modeled times points with their respective parametric records (lines 22 and 23). Finally, line 24 executes the linear interpolation with the obtained values that surround the non-discrete time point. This particular interpolation was chosen for the sake of simplicity, but it can be replaced by higher order methods. Figure \ref{fig:interpolate} illustrates the effect of the \textit{interpolate} function when converting domains.
 
 \begin{spec}
 updateInteg :: Integrator -> CT Double -> CT ()

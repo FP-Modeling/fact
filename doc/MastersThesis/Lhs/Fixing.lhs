@@ -21,6 +21,10 @@ it leaks noise into the designer's mind. The designer's concern should be to pay
 step of translation or noisy setups just adds an extra burden with no real gains on the engineering of simulating continuous time. This chapter
 will present \textit{FFACT}, an evolution of FACT which aims to reduce the noise even further.
 
+It is worth noting that the term \textit{fixed-point} has different meanings in the domains of engineering and mathematics. When refericing the
+fractional representations within a computer, one may use the \textit{fixed-point method}. Thus, to avoid confusion, section~\ref{subsec:fix} starts
+by defining the term as a mathematical combinator that can be used to implement recursion.
+
 \section{Integrator's Noise}
 
 Chapter 4, \textit{Execution Walkthrough}, described the semantics and usability on an example of a system in mathematical specification
@@ -137,7 +141,7 @@ For readers unfamiliar with the use of this combinator, equational reasoning~\ci
 ...
 \end{lstlisting}
 
-We left as exercise for the reader to check that the result of this process will yield the factorial of 5, i.e., 120.
+The result of this process will yield the factorial of 5, i.e., 120.
 When using \texttt{fix} to define recursive processes, the function being \emph{applied} to it must be the one defining the convergence criteria for the iterative process of looking for the fixed-point.
 In our factorial case, this is done via the conditional check at the beginning of body of the lambda.
 The fixed point combinator's responsibility is to keep the \emph{repetition} process going -- something that may diverge and run out of computer resources.
@@ -191,7 +195,7 @@ The former case, however, needs a special kind of recursion, so-called \emph{val
 
 As we are about to understand on Section~\ref{sec:ffact}, the use of value recursion to have monadic's bindings with the same convenience of \texttt{letrec} will be the key to our improvement on FFACT over FACT.
 Fundamentally, it will \emph{tie the recursion knot} done in FACT via the complicated implicit recursion mentioned in Section~\ref{sec:integrator}.
-In terms of implementation, this is being achieved by the use of the \texttt{mfix} construct~\cite{levent2000}, which is accompained by a \emph{recursive do} syntax sugar~\cite{levent2002}, with the caveat of not being able to do shadowing -- much like the \texttt{let} and \texttt{where} constructs in Haskell.
+In terms of implementation, this is being achieved by the use of the \texttt{mfix} construct~\cite{levent2000}, which is accompained by a \emph{recursive do} syntax sugar~\cite{levent2002}, with the caveat of not being able to do shadowing -- much like the \texttt{let} and \texttt{where} clauses in Haskell.
 In order for a type to be able to use this construct, it should follow specific algebraic laws~\cite{leventThesis} to then implement the \texttt{MonadFix} type class found in \texttt{Control.Monad.Fix}~\footnote{\texttt{Control.Monad.Fix} \href{https://hackage.haskell.org/package/base-4.21.0.0/docs/Control-Monad-Fix.html}{\textcolor{blue}{hackage documentation}}.} package:
 %
 %% \vspace{-0.8cm}
@@ -324,7 +328,8 @@ lorenzSystem = runCT lorenzModel 100 lorenzSolver
 \end{code}
 
 Not surprisingly, the results of this new approach using the monadic fixed-point combinator are very similar to the
-performance metrics depicted in chapter 6, \textit{Caching the Speed Pill}. Figure~\ref{fig:fixed-graph} shows the new results:
+performance metrics depicted in chapter 6, \textit{Caching the Speed Pill} --- indicating that we are \textit{not} trading performance
+for a gain in conciseness. Figure~\ref{fig:fixed-graph} shows the new results:
 
 \figuraBib{Graph3}{Results of FFACT are similar to the final version of FACT.}{}{fig:fixed-graph}{width=.97\textwidth}%
 

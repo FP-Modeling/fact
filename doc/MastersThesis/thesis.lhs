@@ -43,7 +43,7 @@
 
 \autor{Eduardo L.}{Rocha}%
 
-\titulo{Continuous Time Modeling Made Functional: Fixing Differential Equations with Haskell}%
+\titulo{FFACT: A Fix-based Domain-Specific Language based on a Functional Algebra for Continuous Time Modeling}%
 
 \palavraschave{equações diferenciais, sistemas contínuos, GPAC, integrador, ponto fixo, recursão monádica}
 \keywords{differential equations, continuous systems, GPAC, integrator, fixed-point, fixed-point combinator, monadic recursion}%

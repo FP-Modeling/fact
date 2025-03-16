@@ -1,7 +1,7 @@
 
 \section{Literate Programming}
 
-This thesis leverages~\footnote{\href{https://en.wikipedia.org/wiki/Literate_programming}{\textcolor{blue}{Literate Programming}}.}, a concept
+This dissertation made use of literate programming~\footnote{\href{https://en.wikipedia.org/wiki/Literate_programming}{\textcolor{blue}{Literate Programming}}.}, a concept
 introduced by Donald Knuth~\cite{knuth1992}. Hence, this thesis can be executed using the same source files that the \texttt{PDF} is created
 
 This process requires the following dependencies:
