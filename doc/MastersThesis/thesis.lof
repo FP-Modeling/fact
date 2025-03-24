@@ -7,7 +7,7 @@
 \contentsline {figure}{\numberline {1.3}{\ignorespaces Comparison of the Lorenz Attractor Model between FFACT and a Matlab implementation.}}{7}{figure.caption.10}%
 \contentsline {figure}{\numberline {1.4}{\ignorespaces Comparison of the Lorenz Attractor Model between FFACT and a Python implementation.}}{7}{figure.caption.11}%
 \contentsline {figure}{\numberline {1.5}{\ignorespaces Comparison of the Lorenz Attractor Model between FFACT and a Mathematica implementation.}}{7}{figure.caption.12}%
-\contentsline {figure}{\numberline {1.6}{\ignorespaces Comparison of the Lorenz Attractor Model between FFACT and a Yampa implementation (also in Haskell).}}{7}{figure.caption.13}%
+\contentsline {figure}{\numberline {1.6}{\ignorespaces Comparison of the Lorenz Attractor Model between FFACT and a Yampa implementation~\cite {Yampa} (also in Haskell).}}{7}{figure.caption.13}%
 \addvspace {10\p@ }
 \contentsline {figure}{\numberline {2.1}{\ignorespaces The combination of these four basic units compose any GPAC circuit (taken from~\cite {Edil2018} with permission).}}{10}{figure.caption.14}%
 \contentsline {figure}{\numberline {2.2}{\ignorespaces Polynomial circuits resembles combinational circuits, in which the circuit respond instantly to changes on its inputs (taken from~\cite {Edil2018} with permission).}}{11}{figure.caption.15}%

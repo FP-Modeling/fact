@@ -239,7 +239,7 @@ are being omitted.
           returnA -< (x, y, z)
     \end{purespec}
   \end{minipage}
-\caption{Comparison of the Lorenz Attractor Model between FFACT and a Yampa implementation (also in Haskell).}
+\caption{Comparison of the Lorenz Attractor Model between FFACT and a Yampa implementation~\cite{Yampa} (also in Haskell).}
 \label{fig:lorenz-yampa}
 \end{figure}
 
