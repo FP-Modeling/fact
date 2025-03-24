@@ -120,7 +120,7 @@ are being omitted.
       \centering
       \includegraphics[width=0.95\linewidth]{MastersThesis/img/lorenzSimulink}
   \end{minipage}
-\caption{Comparison of the Lorenz Attractor Model between FFACT and a Simulink implementation.}
+\caption{Comparison of the Lorenz Attractor Model between FFACT and a Simulink implementation~\cite{Simulink}.}
 \label{fig:lorenz-simulink}
 \end{figure}
 
