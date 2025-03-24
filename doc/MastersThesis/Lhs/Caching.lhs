@@ -62,7 +62,7 @@ subRunCTFinal m t sl = do
 \end{code}
 }
 
-Chapter 5, \textit{Travelling across Domains}, leveraged a major concern with the proposed software: the solvers don't work in the domain of interest, continuous time. This chapter, \textit{Caching the Speed Pill}, addresses a second problem: the performance in \texttt{FACT}. At the end of it, the simulation will be orders of magnitude faster by using a common modern caching strategy to speed up computing processes: memoization.
+Chapter 5, \textit{Travelling across Domains}, leveraged a major concern with the proposed software: the solvers don't work in the domain of interest, continuous time. This Chapter, \textit{Caching the Speed Pill}, addresses a second problem: the performance in \texttt{FACT}. At the end of it, the simulation will be orders of magnitude faster by using a common modern caching strategy to speed up computing processes: memoization.
 
 \section{Performance}
 
@@ -91,7 +91,7 @@ Total of Iterations  & Execution Time (milliseconds) & Consumed Memory (KB) \\ \
 
 \section{The Saving Strategy}
 
-Before explaining the solution, it is worth describing \textit{why} and \textit{where} this problem arises. First, we need to take a look back onto the solvers' functions, such as the \textit{integEuler} function, introduced in chapter 3, \textit{Effectful Integrals}:
+Before explaining the solution, it is worth describing \textit{why} and \textit{where} this problem arises. First, we need to take a look back onto the solvers' functions, such as the \textit{integEuler} function, introduced in Chapter 3, \textit{Effectful Integrals}:
 
 \begin{spec}
 integEuler :: CT Double
@@ -113,9 +113,9 @@ integEuler diff i y = do
       return v
 \end{spec}
 
-From chapter 3, we know that lines 10 to 13 serve the purpose of creating a new parametric record to execute a new solver step for the \textit{previous} iteration, in order to calculate the current one. From chapter 4, this code section turned out to be where the implicit recursion came in, because the current iteration needs to calculate the previous one. Effectively, this means that for \textit{all} iterations, \textit{all} previous steps from each one needs to be calculated. The problem is now clear: unnecessary computations are being made for all iterations, because the same solvers steps are not being saved for future steps, although these values do \textit{not} change. In other words, to calculate step 3 of the solver, steps 1 and 2 are the same to calculate step 4 as well, but these values are being lost during the simulation.
+From Chapter 3, we know that lines 10 to 13 serve the purpose of creating a new parametric record to execute a new solver step for the \textit{previous} iteration, in order to calculate the current one. From Chapter 4, this code section turned out to be where the implicit recursion came in, because the current iteration needs to calculate the previous one. Effectively, this means that for \textit{all} iterations, \textit{all} previous steps from each one needs to be calculated. The problem is now clear: unnecessary computations are being made for all iterations, because the same solvers steps are not being saved for future steps, although these values do \textit{not} change. In other words, to calculate step 3 of the solver, steps 1 and 2 are the same to calculate step 4 as well, but these values are being lost during the simulation.
 
-To estimate how this lack of optimization affects performance, we can calculate how many solver steps will be executed to simulate theLorenz's Attractor example used in chapter 4, \textit{Execution Walkthrough}. The Table \ref{tab:solverSteps} shows the total number of solver steps needed per iteration simulating the Lorenz example with the Euler method. In addition, the amount of steps also increase depending on which solver method is being used, given that in the higher order Runge-Kutta methods, multiple stages count as a new step as well.
+To estimate how this lack of optimization affects performance, we can calculate how many solver steps will be executed to simulate theLorenz's Attractor example used in Chapter 4, \textit{Execution Walkthrough}. The Table \ref{tab:solverSteps} shows the total number of solver steps needed per iteration simulating the Lorenz example with the Euler method. In addition, the amount of steps also increase depending on which solver method is being used, given that in the higher order Runge-Kutta methods, multiple stages count as a new step as well.
 
 \begin{table}[H]
 \centering
@@ -138,7 +138,7 @@ This is the cause of the imense hit in performance. However, it also clarifies t
 
 The first tweak, \textit{Memoization}, alters the \texttt{Integrator} type. The integrator will now have a pointer to the memory region that stores the previous computed values, meaning that before executing a new computation, it will consult this region first. Because the process is executed in a \textit{sequential} manner, it is guaranteed that the previous result will be used. Thus, the accumulation of the solver steps will be addressed, and the amount of steps will be equal to the amount of iterations times how many stages the solver method uses.
 
-The \textit{memo} function creates this memory region for storing values, as well as providing read access to it. This is the only function in \texttt{FACT} that uses a \textit{constraint}, i.e., it restricts the parametric types to the ones that have implemented the requirement. In our case, this function requires that the internal type \texttt{CT} dependency has implemented the \texttt{UMemo} typeclass. Because this typeclass is too complicated to be in the scope of this project, we will settle with the following explanation: it is required that the parametric values are capable of being contained inside an \textit{mutable} array, which is the case for our \texttt{Double} values. As dependencies, the \textit{memo} function receives the computation, as well as the interpolation function that is assumed to be used, in order to attenuate the domain problem described in the previous chapter. This means that at the end, the final result will be piped to the interpolation function. 
+The \textit{memo} function creates this memory region for storing values, as well as providing read access to it. This is the only function in \texttt{FACT} that uses a \textit{constraint}, i.e., it restricts the parametric types to the ones that have implemented the requirement. In our case, this function requires that the internal type \texttt{CT} dependency has implemented the \texttt{UMemo} typeclass. Because this typeclass is too complicated to be in the scope of this project, we will settle with the following explanation: it is required that the parametric values are capable of being contained inside an \textit{mutable} array, which is the case for our \texttt{Double} values. As dependencies, the \textit{memo} function receives the computation, as well as the interpolation function that is assumed to be used, in order to attenuate the domain problem described in the previous Chapter. This means that at the end, the final result will be piped to the interpolation function. 
 
 \begin{code}
 memo :: UMemo e => (CT e -> CT e) -> CT e -> CT (CT e)
@@ -199,9 +199,9 @@ data Integrator = Integrator { initial :: CT Double,
                              }
 \end{code}
 
-Next, two other functions need to be adapted: \textit{createInteg} and \textit{readInteg}. In the former function, the new pointer will be used, and it points to the region where the mutable array will be allocated. In the latter, instead of reading from the computation itself, the read-only pointer will be looking at the \textit{cached} version. These differences will be illustrated by using the same integrator and state variables used in the Lorenz's Attractor example, detailed in chapter 4, \textit{Execution Walkthrough}.
+Next, two other functions need to be adapted: \textit{createInteg} and \textit{readInteg}. In the former function, the new pointer will be used, and it points to the region where the mutable array will be allocated. In the latter, instead of reading from the computation itself, the read-only pointer will be looking at the \textit{cached} version. These differences will be illustrated by using the same integrator and state variables used in the Lorenz's Attractor example, detailed in Chapter 4, \textit{Execution Walkthrough}.
 
-The main difference in the updated version of the \textit{createInteg} function is the inclusion of the new pointer that reads the cached memory (lines 4 to 7). The pointer \texttt{computation}, which will be changed by \textit{updateInteg} in a model to the differential equation, is being read in lines 8 to 11 and piped with interpolation and memoization in line 12. This approach maintains the interpolation, justified in the previous chapter, and adds the aforementioned caching strategy. Finally, the final result is written in the memory region pointed by the caching pointer (line 13).
+The main difference in the updated version of the \textit{createInteg} function is the inclusion of the new pointer that reads the cached memory (lines 4 to 7). The pointer \texttt{computation}, which will be changed by \textit{updateInteg} in a model to the differential equation, is being read in lines 8 to 11 and piped with interpolation and memoization in line 12. This approach maintains the interpolation, justified in the previous Chapter, and adds the aforementioned caching strategy. Finally, the final result is written in the memory region pointed by the caching pointer (line 13).
 
 Figure \ref{fig:createInteg} shows that the updated version of the \textit{createInteg} function is similar to the previous implementation. The new field, \texttt{cached}, is a pointer that refers to \texttt{readComp} --- the result of memoization (\texttt{memo}), interpolation (\texttt{interpolate}) and the value obtained by the region pointed by the \texttt{computation} pointer. Given a parametric record \texttt{ps}, \texttt{readComp} gives this record to the value stored in the region pointed by \texttt{computation}. This result is then interpolated via the \texttt{interpolate} block and it is used as a dependency for the \texttt{memo} block.
 
@@ -286,7 +286,7 @@ Figure \ref{fig:memoDirection} depicts this stark difference in approach when us
 
 \section{Tweak III: Model and Driver}
 
-The memoization added to \texttt{FACT} needs a second tweak, related to the executable models established in chapter 4. The code bellow is the same example model used in that chapter:
+The memoization added to \texttt{FACT} needs a second tweak, related to the executable models established in Chapter 4. The code bellow is the same example model used in that Chapter:
 
 \begin{spec}
 exampleModel :: Model Vector
@@ -354,7 +354,7 @@ The main change is the division of the driver into two: one dedicated to "initia
 
 \section{Results with Caching}
 
-The following table (Table \ref{tab:betterResults}) shows the same Lorenz's Attractor example used in the first section, but with the preceding tweaks in the \texttt{Integrator} type and the integrator functions. It is worth noting that there is an overhead due to the memoization strategy when running fewer iterations (such as 1 in the table), in which
+The following table (Table \ref{tab:betterResults}) shows the same Lorenz's Attractor example used in the first Section, but with the preceding tweaks in the \texttt{Integrator} type and the integrator functions. It is worth noting that there is an overhead due to the memoization strategy when running fewer iterations (such as 1 in the table), in which
 most time is spent preparing the caching setup --- the in-memory data structure, and etc.These modifications allows better and more complicated models to be simulated. For instance, the Lorenz example with a variety of total number of iterations can be checked in Table \ref{tab:masterResults} and in Figure \ref{fig:graph2}.
 
 \begin{table}[H]
@@ -395,6 +395,6 @@ Total of Iterations & Execution Time (milliseconds) & Consumed Memory (MB) \\ \h
 
 \figuraBib{Graph2}{By using a logarithmic scale, we can see that the final implementation is performant with more than 100 million iterations in the simulation}{}{fig:graph2}{width=.97\textwidth}%
 
-The project is currently capable of executing interpolation as well as applying memoization to speed up results. These two drawback solutions, detailed in chapter 5 and 6, adds practicality to \texttt{FACT} as well as makes it more competitive. But we can, however, go even further and adds more familiarity to the DSL. The next chapter, \textit{Fixing Recursion}, will
+The project is currently capable of executing interpolation as well as applying memoization to speed up results. These two drawback solutions, detailed in Chapter 5 and 6, adds practicality to \texttt{FACT} as well as makes it more competitive. But we can, however, go even further and adds more familiarity to the DSL. The next Chapter, \textit{Fixing Recursion}, will
 address this concern.
 

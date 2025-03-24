@@ -1,4 +1,19 @@
-Chapters 2 and 3 explained the relationship between software, FF-GPAC and the mathematical world of differential equations. As a follow-up, Chapter 4 raised intuition and practical understanding of \texttt{FACT} via a detailed walkthrough of an example. Chapters 5, 6, and 7 identified some problems with the current implementation, such as lack of performance, the discrete time issue, DSL's conciseness, and addressed both problems via caching and interpolation. This chapter, \textit{Conclusion}, draws limitations, future improvements that can bring \texttt{FACT} to a higher level of abstraction and some final conclusions about the project.
+Chapter 2 established the foundation of the implementation, introducing FP concepts and the necessary types
+to model continuous time simulation --- with \texttt{CT} being the main type. Chapter 3 extended its power via
+the implementation of typeclasses to add functionality for the \texttt{CT} type, such as binary operations and
+numerical representation. Further, it also introduced the \texttt{Integrator}, a CRUD-like interface
+for it, as well as the available numerical methods for simulation.
+As a follow-up, Chapter 4 raised intuition and practical understanding of \texttt{FACT} via a detailed walkthrough of an example.
+Chapter 5 explained and fixed the mix between different domains in the simulation, e.g., continuous time, discrete time and iterations,
+via an additional linear interpolation when executing a model. Chapter 6 addressed performance concerns via a memoization strategy. Finally,
+Chapter 7 introduced the fixed-point combinator in order to increase conciseness of the HEDSL, bringing more familiarity to systems designers
+experienced with the mathematical descriptions of their systems of interest. This notation enhancement is the defining feature between FACT and FFACT.
+
+\section{Final Thoughts}
+
+When Shannon proposed a formal foundation for the Differential Analyzer~\cite{Shannon}, mathematical abstractions were leveraged to model continuous time. However, after the transistor era, a new set of concepts that lack this formal basis was developed, and some of which crippled our capacity of simulating reality. Later, the need for some formalism made a comeback for modeling physical phenomena with abstractions that take \textit{time} into consideration. Models of computation~\cite{LeeModeling, LeeChallenges, LeeComponent, LeeSangiovanni} and the ForSyDe framework~\cite{Sander2017, Seyed2020} are examples of this change in direction. Nevertheless, Shannon's original idea is now being discussed again with some improvements~\cite{Graca2003, Graca2004, Graca2016} and being transposed to high level programming languages in the hybrid system domain~\cite{Edil2018}.
+
+The \texttt{FACT} EDSL~\footnote{\texttt{FACT} \href{https://github.com/FP-Modeling/fact/releases/tag/3.0}{\textcolor{blue}{source code}}.} follows this path of bringing CPS simulation to the highest level of abstraction, via the Haskell programming language, but still taking into account a formal background inspired by the GPAC model. The software uses advanced functional programming techniques to solve differential equations, mapping the abstractions to FF-GPAC's analog units. Although still limited by the discrete nature of numerical methods, the solution is performant and accurate enough for studies in the cyber-physical domain.
 
 \section{Future Work}
 
@@ -23,8 +38,3 @@ For instance, if the reader and state monads, something like the \texttt{RWS} mo
 
 Also, there's GPAC and its mapping to Haskell features. As explained previously, some basic units of GPAC are being modeled by the \texttt{Num} typeclass, present in Haskell's \texttt{Prelude} module. By using more specific and customized numerical typeclasses~\footnote{Examples of \href{https://guide.aelve.com/haskell/alternative-preludes-zr69k1hc}{\textcolor{blue}{alternative preludes}}.}, it might be possible to better express these basic units and take advantage of better performance and convenience that these alternatives provide.
 
-\section{Final Thoughts}
-
-When Shannon proposed a formal foundation for the Differential Analyzer~\cite{Shannon}, mathematical abstractions were leveraged to model continuous time. However, after the transistor era, a new set of concepts that lack this formal basis was developed, and some of which crippled our capacity of simulating reality. Later, the need for some formalism made a comeback for modeling physical phenomena with abstractions that take \textit{time} into consideration. Models of computation~\cite{LeeModeling, LeeChallenges, LeeComponent, LeeSangiovanni} and the ForSyDe framework~\cite{Sander2017, Seyed2020} are examples of this change in direction. Nevertheless, Shannon's original idea is now being discussed again with some improvements~\cite{Graca2003, Graca2004, Graca2016} and being transposed to high level programming languages in the hybrid system domain~\cite{Edil2018}.
-
-The \texttt{FACT} EDSL~\footnote{\texttt{FACT} \href{https://github.com/FP-Modeling/fact/releases/tag/3.0}{\textcolor{blue}{source code}}.} follows this path of bringing CPS simulation to the highest level of abstraction, via the Haskell programming language, but still taking into account a formal background inspired by the GPAC model. The software uses advanced functional programming techniques to solve differential equations, mapping the abstractions to FF-GPAC's analog units. Although still limited by the discrete nature of numerical methods, the solution is performant and accurate enough for studies in the cyber-physical domain.

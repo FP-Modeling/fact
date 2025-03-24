@@ -47,7 +47,7 @@ lorenzSolver100M = Solver { dt = 0.000001,
                             method = RungeKutta2,
                             stage = SolverStage 0
                           }
-
+  
 
 lorenzSolver1B = Solver { dt = 0.0000001,
                             method = RungeKutta2,
@@ -75,6 +75,13 @@ lorenzModel = mdo
        rho = 28.0
        beta = 8.0 / 3.0
    return $ sequence [x, y, z]
+
+lorenzSolverYampa = Solver { dt = 0.01,
+                           method = Euler,
+                           stage = SolverStage 0
+                         }
+
+lorenzYampa = runCTFinal lorenzModel 1000 lorenzSolverYampa
 
 lorenz100 = runCTFinal lorenzModel 100 lorenzSolver100
 

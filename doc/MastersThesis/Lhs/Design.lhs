@@ -6,7 +6,7 @@ import Control.Monad.Trans.Reader ( ReaderT )
 \end{code}
 }
 
-In the previous chapter, the importance of making a bridge between two different sets of abstractions --- computers and the physical domain --- was established. This chapter will explain the core philosophy behind the implementation of this link, starting with an introduction to GPAC, followed by the type and typeclass systems used in Haskell, as well as understanding how to model the main entities of the problem. At the end, the presented modeling strategy will justify the data types used in the solution, paving the way for the next chapter \textit{Effectful Integrals}.
+In the previous Chapter, the importance of making a bridge between two different sets of abstractions --- computers and the physical domain --- was established. This Chapter will explain the core philosophy behind the implementation of this link, starting with an introduction to GPAC, followed by the type and typeclass systems used in Haskell, as well as understanding how to model the main entities of the problem. At the end, the presented modeling strategy will justify the data types used in the solution, paving the way for the next Chapter \textit{Effectful Integrals}.
 
 \section{Shannon's Foundation: GPAC}
 \label{sec:gpac}
@@ -35,7 +35,7 @@ Composition rules that restrict how these units can be hooked to one another. Sh
   \item Each variable of integration of an integrator is the input \textit{t}.
 \end{itemize}
 
-During the definition of the DSL, parallels will map the aforementioned basic units and composition rules to the implementation. With this strategy, all the mathematical formalism leveraged for analog computers will drive the implementation in the digital computer. Although we do not formally prove a refinement between the GPAC theory, i.e., our epurespecification, and the final implementation of \texttt{FACT}, is an attempt to build a tool with formalism taken into account; one of the most frequent critiques in the CPS domain, as explained in the previous chapter.
+During the definition of the DSL, parallels will map the aforementioned basic units and composition rules to the implementation. With this strategy, all the mathematical formalism leveraged for analog computers will drive the implementation in the digital computer. Although we do not formally prove a refinement between the GPAC theory, i.e., our epurespecification, and the final implementation of \texttt{FACT}, is an attempt to build a tool with formalism taken into account; one of the most frequent critiques in the CPS domain, as explained in the previous Chapter.
 
 \section{The Shape of Information}
 \label{sec:types}
@@ -192,7 +192,7 @@ $$ y_{5} = y_4 + 1 * f(4, y_4) \rightarrow y_{5} = 27 + 1 * (27 + 4) \rightarrow
 
 \section{Making Mathematics Cyber}
 
-Our primary goal is to combine the knowledge levered in section \ref{sec:types} --- modeling capabilities of Haskell's algebraic type system --- with the core notion of differential equations presented in section \ref{sec:diff}. The type system will model equation \ref{eq:nextStep}, detailed in the previous section.
+Our primary goal is to combine the knowledge levered in Section \ref{sec:types} --- modeling capabilities of Haskell's algebraic type system --- with the core notion of differential equations presented in Section \ref{sec:diff}. The type system will model equation \ref{eq:nextStep}, detailed in the previous Section.
 
 Any representation of a physical system that can be modeled by a set of differential equations has an outcome value at any given moment in time. The type \texttt{CT} (stands for \textit{continuous machine}) in Figure \ref{fig:firstDynamics} is a first draft of representing the continuous physical dynamics~\cite{LeeModeling} --- the evolution of a system state in time:
 
@@ -281,9 +281,9 @@ data Parameters = Parameters { interval  :: Interval,
 \label{fig:dynamicsAux}
 \end{figure}
 
-The above auxiliary types serve a common purpose: to provide at any given moment in time, all the information to execute a solver method until the end of the simulation. The type \texttt{Interval} determines when the simulation should start and when it should end. The \texttt{Method} sum type is used inside the \texttt{Solver} type to set solver sensible information, such as the size of the time step, which method will be used and in which stage the method is in at the current moment (more about the stage field on a later chapter). Finally, the \texttt{Parameters} type combines everything together, alongside with the current time value as well as its discrete counterpart, iteration.
+The above auxiliary types serve a common purpose: to provide at any given moment in time, all the information to execute a solver method until the end of the simulation. The type \texttt{Interval} determines when the simulation should start and when it should end. The \texttt{Method} sum type is used inside the \texttt{Solver} type to set solver sensible information, such as the size of the time step, which method will be used and in which stage the method is in at the current moment (more about the stage field on a later Chapter). Finally, the \texttt{Parameters} type combines everything together, alongside with the current time value as well as its discrete counterpart, iteration.
 
-Further, the new \texttt{CT} type can also be parametrically polymorphic, removing the limitation of only using \texttt{Double} values as the outcome. Figure \ref{fig:dynamics} depicts the final type for the physical dynamics. The \texttt{IO} wrapper is needed to cope with memory management and side effects, all of which will be explained in the next chapter. Below,
+Further, the new \texttt{CT} type can also be parametrically polymorphic, removing the limitation of only using \texttt{Double} values as the outcome. Figure \ref{fig:dynamics} depicts the final type for the physical dynamics. The \texttt{IO} wrapper is needed to cope with memory management and side effects, all of which will be explained in the next Chapter. Below,
 we have the definition for the \texttt{CT} type used in previous work~\cite{Lemos2022}:
 
 \begin{figure}[H]
@@ -371,4 +371,4 @@ instance (Floating a) => Floating (CT a) where
 \end{code}
 }
 
-This summarizes the main pilars in the design: FF-GPAC, the mathematical definition of the problem and how we are modeling this domain in Haskell. The next chapter, \textit{Effectful Integrals}, will start from this foundation, by adding typeclasses to the \texttt{CT} type, and will later describe the last core type before explaining the solver execution: the \texttt{Integrator} type. These improvements for the \texttt{CT} type and the new \texttt{Integrator} type will later be mapped to their FF-GPAC counterparts, explaining that they resemble the basic units mentioned in section \ref{sec:gpac}.
+This summarizes the main pilars in the design: FF-GPAC, the mathematical definition of the problem and how we are modeling this domain in Haskell. The next Chapter, \textit{Effectful Integrals}, will start from this foundation, by adding typeclasses to the \texttt{CT} type, and will later describe the last core type before explaining the solver execution: the \texttt{Integrator} type. These improvements for the \texttt{CT} type and the new \texttt{Integrator} type will later be mapped to their FF-GPAC counterparts, explaining that they resemble the basic units mentioned in Section \ref{sec:gpac}.

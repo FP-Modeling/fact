@@ -25,7 +25,7 @@ iterToTime interv solver n (SolverStage st) =
 \end{code}
 }
 
-The previous chapter ended anouncing that drawbacks are present in the current implementation. This chapter will introduce the first concern: numerical methods do not reside in the continuous domain, the one we are actually interested in. After this chapter, this domain issue will be addressed via \textit{interpolation}, with a few tweaks in the integrator and driver.
+The previous Chapter ended anouncing that drawbacks are present in the current implementation. This Chapter will introduce the first concern: numerical methods do not reside in the continuous domain, the one we are actually interested in. After this Chapter, this domain issue will be addressed via \textit{interpolation}, with a few tweaks in the integrator and driver.
 
 \section{Time Domains}
 
@@ -93,7 +93,7 @@ data Stage = SolverStage Int
 The type \texttt{Stage} allows values to be either the normal flow of execution, marked by the use of \texttt{SolverStage}, or the
 indication that an extra step for interpolation needs to be done, marked by the \texttt{Interpolate} tag. Moreover, previous types and functions
 described in previous chapters, such as \textit{Design Philosophy}, and \textit{Effectful Integrals} need to be adapted to use this new
-type instead of the original \texttt{Int} previously proposed (in chapter 2, \textit{Design Philosophy}). Types like \texttt{Parameters} and
+type instead of the original \texttt{Int} previously proposed (in Chapter 2, \textit{Design Philosophy}). Types like \texttt{Parameters} and
 functions like \textit{integEuler}, \textit{iterToTime}, and \textit{runCT} need to be updated accordingly. In all of those instances, processing will just continue
 normally; \texttt{SolverStage} will be used.
 
@@ -203,8 +203,8 @@ updateInteg integ diff = do
 
 \figuraBib{Interpolate}{Linear interpolation is being used to transition us back to the continuous domain.}{}{fig:interpolate}{width=.7\textwidth}%
 
-The last step in this tweak is to add this function into the integrator function \textit{updateInteg}. The code is almost identical to the one presented in chapter 3, \textit{Effectful Integrals}. The main difference is in line 11, where the interpolation function is being applied to \texttt{z}. Figure \ref{fig:diffInterpolate} shows the same visual representation for the \textit{updateInteg} function used in chapter 4, but with the aforementioned modifications.
+The last step in this tweak is to add this function into the integrator function \textit{updateInteg}. The code is almost identical to the one presented in Chapter 3, \textit{Effectful Integrals}. The main difference is in line 11, where the interpolation function is being applied to \texttt{z}. Figure \ref{fig:diffInterpolate} shows the same visual representation for the \textit{updateInteg} function used in Chapter 4, but with the aforementioned modifications.
 
 \figuraBib{DiffIntegInterpolate}{The new \textit{updateInteg} function add linear interpolation to the pipeline when receiving a parametric record}{}{fig:diffInterpolate}{width=.9\textwidth}%
 
-This concludes the first tweak in \texttt{FACT}. Now, the mismatches between the stop time of the simulation and the time step are being treated differently, going back to the continuous domain thanks to the added interpolation. The next chapter, \textit{Caching the Speed Pill}, goes deep into the program's performance and how this can be fixed with a caching strategy.
+This concludes the first tweak in \texttt{FACT}. Now, the mismatches between the stop time of the simulation and the time step are being treated differently, going back to the continuous domain thanks to the added interpolation. The next Chapter, \textit{Caching the Speed Pill}, goes deep into the program's performance and how this can be fixed with a caching strategy.

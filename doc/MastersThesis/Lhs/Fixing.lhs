@@ -18,18 +18,14 @@ The last improvement for FACT is in terms of \textit{familiarity}. When someone 
 the main goal should be that the least amount of friction when using the simulation software, the better.
 Hence, the requirement of knowing implementation details or programming language details is something we would like to avoid, given that
 it leaks noise into the designer's mind. The designer's concern should be to pay attention to the system's description and FACT having an extra
-step of translation or noisy setups just adds an extra burden with no real gains on the engineering of simulating continuous time. This chapter
+step of translation or noisy setups just adds an extra burden with no real gains on the engineering of simulating continuous time. This Chapter
 will present \textit{FFACT}, an evolution of FACT which aims to reduce the noise even further.
-
-It is worth noting that the term \textit{fixed-point} has different meanings in the domains of engineering and mathematics. When referecing the
-fractional representations within a computer, one may use the \textit{fixed-point method}. Thus, to avoid confusion, section~\ref{subsec:fix} starts
-by defining the term as a mathematical combinator that can be used to implement recursion.
 
 \section{Integrator's Noise}
 
 Chapter 4, \textit{Execution Walkthrough}, described the semantics and usability on an example of a system in mathematical specification
 and its mapping to a simulation-ready description provided by FACT.
-Below we have this example modeled using FACT (same code as provided in section~\ref{sec:intro}):
+Below we have this example modeled using FACT (same code as provided in Section~\ref{sec:intro}):
 %
 \vspace{0.1cm}
 \begin{spec}
@@ -55,7 +51,7 @@ lorenzModel =
 
 It is noticeable, however, that FACT imposes a significant amount of overhead from the user's perspective due to the \textbf{explicit use of integrators} for most memory-required simulations.
 When creating stateful circuits, an user of FACT is obligated to use the integrator's API, i.e., use the functions \texttt{createInteg} (lines 6 to 8), \texttt{readInteg} (lines 9 to 11), and \texttt{updateInteg} (lines 12 to 14). Although these functions remove the
-management of the aforementioned implicit mutual recursion mentioned in chapter 3, \textit{Effectful Integrals}, from the user, it is still required to follow
+management of the aforementioned implicit mutual recursion mentioned in Chapter 3, \textit{Effectful Integrals}, from the user, it is still required to follow
 a specific sequence of steps to complete a model for any simulation:
 %
 \begin{enumerate}
@@ -64,7 +60,7 @@ a specific sequence of steps to complete a model for any simulation:
 \item Update integrators with the actual ODEs of interest (via the use of \textit{updateInteg}).
 \end{enumerate}
 
-Visually, this step-by-step list for FACT's models follow the pattern detailed in Figure~\ref{fig:modelPipe} in chapter 4, \textit{Execution Walkthrough}.
+Visually, this step-by-step list for FACT's models follow the pattern detailed in Figure~\ref{fig:modelPipe} in Chapter 4, \textit{Execution Walkthrough}.
 More importantly, \emph{all} those steps are visible and transparent from an usability's point of view.
 Hence, a system's designer \emph{must} be aware of this \emph{entire} sequence of mandatory steps, even if his interest probably only relates to lines 12 to 14.
 Although one's goal is being able to specify a system and start a simulation, there is no escape -- one has to bear the noise created due to
@@ -78,6 +74,10 @@ required piece to get rid of the \texttt{Integrator} type, thus also removing it
 
 \section{The Fixed-Point Combinator}
 \label{subsec:fix}
+
+It is worth noting that the term \textit{fixed-point} has different meanings in the domains of engineering and mathematics. When referecing the
+fractional representations within a computer, one may use the \textit{fixed-point method}. Thus, to avoid confusion, the following is the definition
+of such concept in this dissertation, alongside a set of examples of its use case as a mathematical combinator that can be used to implement recursion.
 
 On the surface, the fixed-point combinator is a simple mapping that fulfills the following property:
 a point \emph{p} is a fixed-point of a function \emph{f} if \emph{f(p)} lies on the identity function, i.e., \emph{f(p) = p}.
@@ -189,7 +189,7 @@ By allowing this behavior, mutually recursive bindings are made possible and thu
 Haskell's vanilla \texttt{let} already acts like a \texttt{letrec}, and it would be useful to replicate this property to monadic bindings as well.
 
 In the case of the \texttt{counter} example, the execution of a side-effect is mandatory to evaluate the values of the bindings, such as \texttt{next}, \texttt{inc}, \texttt{out}, and \texttt{zero} (lines 2 to 5).
-In contrast, the example \texttt{countDown} in section~\ref{subsec:fix} has none of its bindings locked by side-effects, e.g, the bindings \texttt{f} and \texttt{n} have nothing to do with the effect of printing a message on \texttt{stdout}.
+In contrast, the example \texttt{countDown} in Section~\ref{subsec:fix} has none of its bindings locked by side-effects, e.g, the bindings \texttt{f} and \texttt{n} have nothing to do with the effect of printing a message on \texttt{stdout}.
 When dealing with the latter of these cases, the usual fixed-point combinator is enough to model its recursion.
 The former case, however, needs a special kind of recursion, so-called \emph{value recursion}~\cite{leventThesis}.
 
@@ -328,11 +328,11 @@ lorenzSystem = runCT lorenzModel 100 lorenzSolver
 \end{code}
 
 Not surprisingly, the results of this new approach using the monadic fixed-point combinator are very similar to the
-performance metrics depicted in chapter 6, \textit{Caching the Speed Pill} --- indicating that we are \textit{not} trading performance
+performance metrics depicted in Chapter 6, \textit{Caching the Speed Pill} --- indicating that we are \textit{not} trading performance
 for a gain in conciseness. Figure~\ref{fig:fixed-graph} shows the new results:
 
 \figuraBib{Graph3}{Results of FFACT are similar to the final version of FACT.}{}{fig:fixed-graph}{width=.97\textwidth}%
 
 The function \texttt{integ} alone in FFACT ties the recursion knot previously done via the \texttt{computation} and \texttt{cache} fields from the original integrator data type in FACT.
-Hence, a lot of implementation noise of the DSL is kept away from the user --- the designer of the system --- when using FFACT. With this chapter, we addressed
-the third and final concerned explained in chapter 1, \textit{Introduction}. The final chapter, \textit{Conclusion}, will conclude this work, pointing out limitations of the project, as well as future improvements and final thoughts about the project.
+Hence, a lot of implementation noise of the DSL is kept away from the user --- the designer of the system --- when using FFACT. With this Chapter, we addressed
+the third and final concerned explained in Chapter 1, \textit{Introduction}. The final Chapter, \textit{Conclusion}, will conclude this work, pointing out limitations of the project, as well as future improvements and final thoughts about the project.

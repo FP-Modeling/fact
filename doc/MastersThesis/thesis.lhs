@@ -32,6 +32,9 @@
 \newminted[code]{haskell}{breaklines,autogobble,linenos=true, numberblanklines=false, fontsize=\footnotesize}
 \newminted[spec]{haskell}{breaklines,autogobble,linenos=true, numberblanklines=false, fontsize=\footnotesize}
 \newminted[purespec]{haskell}{breaklines,autogobble,linenos=false, numberblanklines=false, fontsize=\footnotesize}
+\newminted[matlab]{matlab}{breaklines,autogobble,linenos=false, numberblanklines=false, fontsize=\footnotesize}
+\newminted[python]{python}{breaklines,autogobble,linenos=false, numberblanklines=false, fontsize=\footnotesize}
+\newminted[mathematica]{mathematica}{breaklines,autogobble,linenos=false, numberblanklines=false, fontsize=\footnotesize}
 
 \orientador{\prof Eduardo Peixoto}{CIC/UnB}%
 \coorientador{\prof José Edil Guimarães}{ENE/UnB}%
