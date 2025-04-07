@@ -6,47 +6,48 @@
 \contentsline {subsection}{\numberline {1.1.1}Executable Simulation}{3}{subsection.1.1.1}%
 \contentsline {subsection}{\numberline {1.1.2}Formal Foundation}{4}{subsection.1.1.2}%
 \contentsline {subsection}{\numberline {1.1.3}Conciseness}{5}{subsection.1.1.3}%
-\contentsline {section}{\numberline {1.2}Outline}{7}{section.1.2}%
-\contentsline {chapter}{\numberline {2}Design Philosophy}{9}{chapter.2}%
-\contentsline {section}{\numberline {2.1}Shannon's Foundation: GPAC}{9}{section.2.1}%
-\contentsline {section}{\numberline {2.2}The Shape of Information}{11}{section.2.2}%
-\contentsline {section}{\numberline {2.3}Modeling Reality}{15}{section.2.3}%
-\contentsline {section}{\numberline {2.4}Making Mathematics Cyber}{17}{section.2.4}%
-\contentsline {chapter}{\numberline {3}Effectful Integrals}{20}{chapter.3}%
-\contentsline {section}{\numberline {3.1}Uplifting the CT Type}{20}{section.3.1}%
-\contentsline {section}{\numberline {3.2}GPAC Bind I: CT}{23}{section.3.2}%
-\contentsline {section}{\numberline {3.3}Exploiting Impurity}{25}{section.3.3}%
-\contentsline {section}{\numberline {3.4}GPAC Bind II: Integrator}{28}{section.3.4}%
-\contentsline {section}{\numberline {3.5}Using Recursion to solve Math}{30}{section.3.5}%
-\contentsline {chapter}{\numberline {4}Execution Walkthrough}{33}{chapter.4}%
-\contentsline {section}{\numberline {4.1}From Models to Models}{33}{section.4.1}%
-\contentsline {section}{\numberline {4.2}Driving the Model}{36}{section.4.2}%
-\contentsline {section}{\numberline {4.3}An attractive example}{37}{section.4.3}%
-\contentsline {section}{\numberline {4.4}Lorenz's Butterfly}{43}{section.4.4}%
-\contentsline {chapter}{\numberline {5}Travelling across Domains}{44}{chapter.5}%
-\contentsline {section}{\numberline {5.1}Time Domains}{44}{section.5.1}%
-\contentsline {section}{\numberline {5.2}Tweak I: Interpolation}{46}{section.5.2}%
-\contentsline {chapter}{\numberline {6}Caching the Speed Pill}{51}{chapter.6}%
-\contentsline {section}{\numberline {6.1}Performance}{51}{section.6.1}%
-\contentsline {section}{\numberline {6.2}The Saving Strategy}{53}{section.6.2}%
-\contentsline {section}{\numberline {6.3}Tweak II: Memoization}{54}{section.6.3}%
-\contentsline {section}{\numberline {6.4}A change in Perspective}{60}{section.6.4}%
-\contentsline {section}{\numberline {6.5}Tweak III: Model and Driver}{61}{section.6.5}%
-\contentsline {section}{\numberline {6.6}Results with Caching}{63}{section.6.6}%
-\contentsline {chapter}{\numberline {7}Fixing Recursion}{66}{chapter.7}%
-\contentsline {section}{\numberline {7.1}Integrator's Noise}{66}{section.7.1}%
-\contentsline {section}{\numberline {7.2}The Fixed-Point Combinator}{68}{section.7.2}%
-\contentsline {section}{\numberline {7.3}Value Recursion with Fixed-Points}{70}{section.7.3}%
-\contentsline {section}{\numberline {7.4}Tweak IV: Fixing FACT}{72}{section.7.4}%
-\contentsline {chapter}{\numberline {8}Conclusion}{77}{chapter.8}%
-\contentsline {section}{\numberline {8.1}Final Thoughts}{77}{section.8.1}%
-\contentsline {section}{\numberline {8.2}Future Work}{78}{section.8.2}%
-\contentsline {subsection}{\numberline {8.2.1}Formalism}{78}{subsection.8.2.1}%
-\contentsline {subsection}{\numberline {8.2.2}Extensions}{79}{subsection.8.2.2}%
-\contentsline {subsection}{\numberline {8.2.3}Refactoring}{79}{subsection.8.2.3}%
-\contentsline {chapter}{\numberline {9}Appendix}{81}{chapter.9}%
-\contentsline {section}{\numberline {9.1}Literate Programming}{81}{section.9.1}%
-\contentsline {chapter}{References}{83}{section*.63}%
+\contentsline {section}{\numberline {1.2}Outline}{6}{section.1.2}%
+\contentsline {chapter}{\numberline {2}Design Philosophy}{8}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Shannon's Foundation: GPAC}{8}{section.2.1}%
+\contentsline {section}{\numberline {2.2}The Shape of Information}{10}{section.2.2}%
+\contentsline {section}{\numberline {2.3}Modeling Reality}{14}{section.2.3}%
+\contentsline {section}{\numberline {2.4}Making Mathematics Cyber}{16}{section.2.4}%
+\contentsline {chapter}{\numberline {3}Effectful Integrals}{19}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Uplifting the CT Type}{19}{section.3.1}%
+\contentsline {section}{\numberline {3.2}GPAC Bind I: CT}{22}{section.3.2}%
+\contentsline {section}{\numberline {3.3}Exploiting Impurity}{24}{section.3.3}%
+\contentsline {section}{\numberline {3.4}GPAC Bind II: Integrator}{27}{section.3.4}%
+\contentsline {section}{\numberline {3.5}Using Recursion to solve Math}{29}{section.3.5}%
+\contentsline {chapter}{\numberline {4}Execution Walkthrough}{32}{chapter.4}%
+\contentsline {section}{\numberline {4.1}From Models to Models}{32}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Driving the Model}{35}{section.4.2}%
+\contentsline {section}{\numberline {4.3}An attractive example}{36}{section.4.3}%
+\contentsline {section}{\numberline {4.4}Lorenz's Butterfly}{42}{section.4.4}%
+\contentsline {chapter}{\numberline {5}Travelling across Domains}{43}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Time Domains}{43}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Tweak I: Interpolation}{45}{section.5.2}%
+\contentsline {chapter}{\numberline {6}Caching the Speed Pill}{50}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Performance}{50}{section.6.1}%
+\contentsline {section}{\numberline {6.2}The Saving Strategy}{52}{section.6.2}%
+\contentsline {section}{\numberline {6.3}Tweak II: Memoization}{53}{section.6.3}%
+\contentsline {section}{\numberline {6.4}A change in Perspective}{59}{section.6.4}%
+\contentsline {section}{\numberline {6.5}Tweak III: Model and Driver}{60}{section.6.5}%
+\contentsline {section}{\numberline {6.6}Results with Caching}{62}{section.6.6}%
+\contentsline {chapter}{\numberline {7}Fixing Recursion}{65}{chapter.7}%
+\contentsline {section}{\numberline {7.1}Integrator's Noise}{65}{section.7.1}%
+\contentsline {section}{\numberline {7.2}The Fixed-Point Combinator}{67}{section.7.2}%
+\contentsline {section}{\numberline {7.3}Value Recursion with Fixed-Points}{69}{section.7.3}%
+\contentsline {section}{\numberline {7.4}Tweak IV: Fixing FACT}{71}{section.7.4}%
+\contentsline {section}{\numberline {7.5}Examples and Comparisons}{75}{section.7.5}%
+\contentsline {chapter}{\numberline {8}Conclusion}{78}{chapter.8}%
+\contentsline {section}{\numberline {8.1}Final Thoughts}{78}{section.8.1}%
+\contentsline {section}{\numberline {8.2}Future Work}{79}{section.8.2}%
+\contentsline {subsection}{\numberline {8.2.1}Formalism}{79}{subsection.8.2.1}%
+\contentsline {subsection}{\numberline {8.2.2}Extensions}{80}{subsection.8.2.2}%
+\contentsline {subsection}{\numberline {8.2.3}Refactoring}{80}{subsection.8.2.3}%
+\contentsline {chapter}{\numberline {9}Appendix}{82}{chapter.9}%
+\contentsline {section}{\numberline {9.1}Literate Programming}{82}{section.9.1}%
+\contentsline {chapter}{References}{84}{section*.62}%
 \babel@toc {american}{}\relax 
 \babel@toc {american}{}\relax 
 \babel@toc {american}{}\relax 

@@ -340,6 +340,150 @@ for a gain in conciseness. Figure~\ref{fig:fixed-graph} shows the new results.
 
 \figuraBib{Graph3}{Results of FFACT are similar to the final version of FACT.}{}{fig:fixed-graph}{width=.97\textwidth}%
 
+\newpage
+
+\section{Examples and Comparisons}
+\label{sec:examples}
+
+In order to assess how \textit{concise} model can be in FFACT, in comparison with the mathematical descriptions of the models,
+we present comparisons between this dissertation's proposed implementation and the same example in SimulinkSimulink~\footnote{Simulink \href{http://www.mathworks.com/products/simulink/}{\textcolor{blue}{documentation}}.}, Matlab~\footnote{Matlab \href{https://www.mathworks.com/products/matlab.html}{\textcolor{blue}{documentation}}.}, Mathematica~\footnote{Mathematica \href{https://www.wolfram.com/mathematica/}{\textcolor{blue}{documentation}}.}, and \texttt{Yampa}~\footnote{Yampa \href{https://hackage.haskell.org/package/Yampa}{\textcolor{blue}{hackage documentation}}.}. It is worth noting that the last one, \texttt{Yampa}, is also implemented in Haskell as a HEDSL. In each pair of comparisons both conciseness and differences will be considered when implementing the Lorenz Attractor model. Ideally, a system's description should contain the \textit{least} amount of notation noise and artifacts to his mathematical counterpart. It is worth noting that these examples only show \textit{the system's description}, i.e., the \textit{drivers} of the simulations
+are being omitted when not necessary to describe the system.
+
+Figure~\ref{fig:lorenz-simulink} depicts a side-by-side comparison between FFACT and Simulink. The Haskell HEDSL specifies a model in text format, whilst Simulink
+is a visual tool --- you draw a diagram that represents the system, including the feedback loop of integrators, something exposed in Simulink.
+A visual tool can be useful for educational purposes, and a pictorial version of FFACT could be made by an external tool that from a diagram
+it compiles down to the correspondent Haskell code of the HEDSL.
+
+\begin{figure}[ht!]
+  \begin{minipage}{0.45\linewidth}
+     \begin{purespec}
+        lorenzModel = mdo
+          x <- integ (sigma * (y - x)) 1.0
+          y <- integ (x * (rho - z) - y) 1.0
+          z <- integ (x * y - beta * z) 1.0
+          let sigma = 10.0
+              rho = 28.0
+              beta = 8.0 / 3.0
+          return $ sequence [x, y, z]          
+     \end{purespec}
+  \end{minipage}
+  \begin{minipage}{0.5\linewidth}
+      \centering
+      \includegraphics[width=0.95\linewidth]{MastersThesis/img/lorenzSimulink}
+  \end{minipage}
+\caption{Comparison of the Lorenz Attractor Model between FFACT and a Simulink implementation~\cite{Simulink}.}
+\label{fig:lorenz-simulink}
+\end{figure}
+
+Figure ~\ref{fig:lorenz-matlab} shows a comparison between FFACT and Matlab. The main differetiating factor between the two
+implementations is in Matlab the system, constructed via a separate lambda function (named \texttt{f} in the example), has the initial
+conditions of the system at \(t_0\) only added when calling the \textit{driver} of the simulation --- the call of the \texttt{ode45}
+function. In FFACT, the interval for the simulation and which numerical method will be used are completely separate of the system's
+description; a \textit{model}. Furthermore, Matlab's description of the system introduces some notation noise via the use of \texttt{vars}, exposing
+implementation details to the system's designer.
+
+\begin{figure}[ht!]
+  \begin{minipage}{0.45\linewidth}
+     \begin{purespec}
+        lorenzModel = mdo
+          x <- integ (sigma * (y - x)) 1.0
+          y <- integ (x * (rho - z) - y) 1.0
+          z <- integ (x * y - beta * z) 1.0
+          let sigma = 10.0
+              rho = 28.0
+              beta = 8.0 / 3.0
+          return $ sequence [x, y, z]          
+    \end{purespec}
+  \end{minipage} \;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;
+  \begin{minipage}{0.54\linewidth}
+    \begin{matlab}
+       sigma = 10;
+       beta = 8/3;
+       rho = 28;
+       f = @(t,vars) 
+           [sigma*(vars(2) - vars(1)); 
+            vars(1)*(rho - vars(3)) - vars(2); 
+            vars(1)*vars(2) - beta*vars(3)];
+       [t,vars] = ode45(f,[0 50],[1 1 1]);
+    \end{matlab}
+  \end{minipage}
+\caption{Comparison of the Lorenz Attractor Model between FFACT and a Matlab implementation.}
+\label{fig:lorenz-matlab}
+\end{figure}
+
+
+The next comparison is between Mathematica and FFACT, as depicted in Figure~\ref{fig:lorenz-mathematica}.
+Differently than Matlab, Mathematica uses the state variables' names when describing the system. However, just like
+with Matlab, the initial conditions of the system are only provided when calling the driver of the simulation. Moreover,
+there's significant noise in Mathematica's version in comparison to FFACT's version.
+
+\begin{figure}[ht!]
+  \begin{minipage}{0.45\linewidth}
+     \begin{purespec}
+        lorenzModel = mdo
+          x <- integ (sigma * (y - x)) 1.0
+          y <- integ (x * (rho - z) - y) 1.0
+          z <- integ (x * y - beta * z) 1.0
+          let sigma = 10.0
+              rho = 28.0
+              beta = 8.0 / 3.0
+          return $ sequence [x, y, z]          
+    \end{purespec}
+  \end{minipage} \;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;
+  \begin{minipage}{0.54\linewidth}
+    \begin{mathematica}
+       lorenzModel = NonlinearStateSpaceModel[
+          {{sigma (y - x),
+            x (rho - z) - y,
+            x y - beta z}, {}},
+          {x, y, z},
+          {sigma, rho, beta}];
+       soln[t_] = StateResponse[
+          {lorenzModel, {1, 1, 1}},
+          {10, 28, 8/3},
+          {t, 0, 50}];
+    \end{mathematica}
+  \end{minipage}
+\caption{Comparison of the Lorenz Attractor Model between FFACT and a Mathematica implementation.}
+\label{fig:lorenz-mathematica}
+\end{figure}
+
+Finally, Figure~\ref{fig:lorenz-yampa} contrasts FFACT with \texttt{Yampa}, another HEDSL for time modeling and simulation.
+Although \texttt{Yampa} is more powerful and expressive than FFACT --- \texttt{Yampa} can accomodate hybrid simulations with
+both \textit{discrete} and \textit{continuous} time modeling --- its approach introduces some noise in the Lorenz Attractor model.
+The introduction of \texttt{proc}, \texttt{pre}, \texttt{>>>}, \texttt{imIntegral}, and \texttt{-<} all introduce extra burden on the
+system's designer to describe the system. After learning about \texttt{proc-notation}~\cite{Yampa} and Arrows~\footnote{Arrows \href{https://hackage.haskell.org/package/base-4.18.1.0/docs/Control-Arrow.html}{\textcolor{blue}{hackage documentation}}.}, one can describe more complex systems in Yampa.
+
+\begin{figure}[ht!]
+  \begin{minipage}{0.45\linewidth}
+     \begin{purespec}
+        lorenzModel = mdo
+          x <- integ (sigma * (y - x)) 1.0
+          y <- integ (x * (rho - z) - y) 1.0
+          z <- integ (x * y - beta * z) 1.0
+          let sigma = 10.0
+              rho = 28.0
+              beta = 8.0 / 3.0
+          return $ sequence [x, y, z]          
+    \end{purespec}
+  \end{minipage} \;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;
+  \hspace{-2.4cm}
+  \begin{minipage}{0.64\linewidth}
+     \begin{purespec}
+        lorenzModel = proc () -> do
+          rec x <- pre >>> imIntegral 1.0 -< sigma*(y - x)
+              y <- pre >>> imIntegral 1.0 -< x*(rho - z) - y
+              z <- pre >>> imIntegral 1.0 -< (x*y) - (beta*z)
+              let sigma = 10.0
+                  rho = 28.0
+                  beta = 8.0 / 3.0
+          returnA -< (x, y, z)
+    \end{purespec}
+  \end{minipage}
+\caption{Comparison of the Lorenz Attractor Model between FFACT and a Yampa implementation.}
+\label{fig:lorenz-yampa}
+\end{figure}
+
 The function \texttt{integ} alone in FFACT ties the recursion knot previously done via the \texttt{computation} and \texttt{cache} fields from the original integrator data type in FACT.
 Hence, a lot of implementation noise of the DSL is kept away from the user --- the designer of the system --- when using FFACT. With this Chapter, we addressed
 the third and final concerned explained in Chapter 1, \textit{Introduction}. The final Chapter, \textit{Conclusion}, will conclude this work, pointing out limitations of the project, as well as future improvements and final thoughts about the project.
