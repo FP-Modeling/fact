@@ -15,7 +15,7 @@ Within software, the aforementioned issues --- the lack of time semantics and th
 
 The development of a \textit{model of computation} (MoC) to define and express models is the major hero towards this better set of abstractions, given that it provides clear, formal and well-defined semantics~\cite{LeeModeling} on how engineering artifacts should behave~\cite{Lee2016}. These MoCs determine how concurrency works in the model, choose which communication protocols will be used, define whether different components share the notion of time, as well as whether and how they share state~\cite{LeeModeling, LeeComponent}. Also, Sangiovanni and Lee~\cite{LeeSangiovanni} proposed a formalized denotational framework to allow understanding and comparison between mixtures of MoCs, thus solving the heterogeneity issue that raises naturally in many situations during design~\cite{LeeModeling, LeeComponent}. Moreover, their framework also describes how to compose different MoCs, along with addressing the absence of time in models, via what is defined as \textit{tagged systems}~\cite{Chupin2019, Perez2023, Rovers2011} --- a relationship between a \textit{tag}, generally used to order events, and an output value.
 
-Ingo et al. went even further~\cite{Sander2017} by presenting a framework based on the idea of tagged systems, known as \textit{ForSyDe}. The tool's main goal is to push system design to a higher level of abstraction, by combining MoCs with the functional programming paradigm. The technique separates the design into two phases, specification and synthesis. The former stage, specification, focus on creating a high-level abstraction model, in which mathematical formalism is taken into account. The latter part, synthesis, is responsible for applying design transformations --- the model is adapted to ForSyDe's semantics --- and mapping this result onto a chosen architecture for later be implemented in a target programming language or hardware platform~\cite{Sander2017}. Afterward, Seyed-Hosein and Ingo~\cite{Seyed2020} created a co-simulation architecture for multiple models based on ForSyDe's methodology, addressing heterogeneity across languages and tools with different semantics. One example of such tools treated in the reference is Simulink~\footnote{Simulink \href{http://www.mathworks.com/products/simulink/}{\textcolor{blue}{documentation}}.}, the de facto model-based design tool that lacks a formal semantics basis~\cite{Seyed2020}. Simulink being the standard tool for modeling means that, despite all the effort into utilizing a formal approach to model-based design, this is still an open problem.
+Ingo et al. went even further~\cite{Sander2017} by presenting a framework based on the idea of tagged systems, known as \textit{ForSyDe}. The tool's main goal is to push system design to a higher level of abstraction, by combining MoCs with the functional programming paradigm. The technique separates the design into two phases, specification and synthesis. The former stage, specification, focus on creating a high-level abstraction model, in which mathematical formalism is taken into account. The latter part, synthesis, is responsible for applying design transformations --- the model is adapted to ForSyDe's semantics --- and mapping this result onto a chosen architecture to be implemented later in a target programming language or hardware platform~\cite{Sander2017}. Afterward, Seyed-Hosein and Ingo~\cite{Seyed2020} created a co-simulation architecture for multiple models based on ForSyDe's methodology, addressing heterogeneity across languages and tools with different semantics. One example of such tools treated in the reference is Simulink~\footnote{Simulink \href{http://www.mathworks.com/products/simulink/}{\textcolor{blue}{documentation}}.}, the de facto model-based design tool that lacks a formal semantics basis~\cite{Seyed2020}. Simulink being the standard tool for modeling means that, despite all the effort into utilizing a formal approach to model-based design, this is still an open problem.
 
 \section{Contribution}
 \label{sec:intro}
@@ -39,7 +39,7 @@ Furthermore, this implementation is based on \texttt{Aivika}~\footnote{\texttt{A
 \begin{figure}[ht!]
   \begin{minipage}{0.45\linewidth}
     \begin{purespec}
-        -- Original version of FACT
+        -- FACT
         lorenzModel = do
         integX <- createInteg 1.0
         integY <- createInteg 1.0
@@ -58,7 +58,7 @@ Furthermore, this implementation is based on \texttt{Aivika}~\footnote{\texttt{A
   \end{minipage} \;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;
   \begin{minipage}{0.45\linewidth}
     \begin{purespec}
-        -- Final version of FACT
+        -- FFACT
         lorenzModel = mdo
           x <- integ (sigma * (y - x)) 1.0
           y <- integ (x * (rho - z) - y) 1.0
@@ -69,7 +69,7 @@ Furthermore, this implementation is based on \texttt{Aivika}~\footnote{\texttt{A
           return $ sequence [x, y, z]          
     \end{purespec}
   \end{minipage}
-\caption{The translation between the world of software and the mathematical description of differential equations are explicit in the final version of \texttt{FACT}.}
+\caption{The translation between the world of software and the mathematical description of differential equations are more concise and explicit in \texttt{FFACT}.}
 \label{fig:introExample}
 \end{figure}
 
@@ -100,7 +100,7 @@ When comparing models in FFACT to other implementations in other ecosystems and 
 one using the HEDSL needs less knowledge about the host programming language, Haskell in our case, \textit{and} one can more easily bridge the gap between a mathematical
 description of the problem and its analogous written in FFACT, due to less syntatical burden and noise from a user's perpective. Figures~\ref{fig:lorenz-simulink},
 ~\ref{fig:lorenz-matlab},~\ref{fig:lorenz-python},~\ref{fig:lorenz-mathematica}, and~\ref{fig:lorenz-yampa} show some comparisons
-between the same Lorenz Attractor model in different tecnologies. It is worth noting that these examples only show \textit{the system's description}, i.e., the \textit{drivers} of the simulations
+between the same Lorenz Attractor model in different tecnologies, thus allowing a contrast in notation's conciseness between them. Ideally, a system's description should contain the \textit{least} amount of notation noise and artifacts to his mathematical counterpart. It is worth noting that these examples only show \textit{the system's description}, i.e., the \textit{drivers} of the simulations
 are being omitted.
 
 \begin{figure}[ht!]

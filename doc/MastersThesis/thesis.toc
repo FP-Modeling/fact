@@ -35,18 +35,18 @@
 \contentsline {section}{\numberline {6.6}Results with Caching}{63}{section.6.6}%
 \contentsline {chapter}{\numberline {7}Fixing Recursion}{66}{chapter.7}%
 \contentsline {section}{\numberline {7.1}Integrator's Noise}{66}{section.7.1}%
-\contentsline {section}{\numberline {7.2}The Fixed-Point Combinator}{67}{section.7.2}%
-\contentsline {section}{\numberline {7.3}Value Recursion with Fixed-Points}{69}{section.7.3}%
+\contentsline {section}{\numberline {7.2}The Fixed-Point Combinator}{68}{section.7.2}%
+\contentsline {section}{\numberline {7.3}Value Recursion with Fixed-Points}{70}{section.7.3}%
 \contentsline {section}{\numberline {7.4}Tweak IV: Fixing FACT}{72}{section.7.4}%
-\contentsline {chapter}{\numberline {8}Conclusion}{76}{chapter.8}%
-\contentsline {section}{\numberline {8.1}Final Thoughts}{76}{section.8.1}%
-\contentsline {section}{\numberline {8.2}Future Work}{77}{section.8.2}%
-\contentsline {subsection}{\numberline {8.2.1}Formalism}{77}{subsection.8.2.1}%
-\contentsline {subsection}{\numberline {8.2.2}Extensions}{77}{subsection.8.2.2}%
-\contentsline {subsection}{\numberline {8.2.3}Refactoring}{78}{subsection.8.2.3}%
-\contentsline {chapter}{\numberline {9}Appendix}{79}{chapter.9}%
-\contentsline {section}{\numberline {9.1}Literate Programming}{79}{section.9.1}%
-\contentsline {chapter}{References}{81}{section*.62}%
+\contentsline {chapter}{\numberline {8}Conclusion}{77}{chapter.8}%
+\contentsline {section}{\numberline {8.1}Final Thoughts}{77}{section.8.1}%
+\contentsline {section}{\numberline {8.2}Future Work}{78}{section.8.2}%
+\contentsline {subsection}{\numberline {8.2.1}Formalism}{78}{subsection.8.2.1}%
+\contentsline {subsection}{\numberline {8.2.2}Extensions}{79}{subsection.8.2.2}%
+\contentsline {subsection}{\numberline {8.2.3}Refactoring}{79}{subsection.8.2.3}%
+\contentsline {chapter}{\numberline {9}Appendix}{81}{chapter.9}%
+\contentsline {section}{\numberline {9.1}Literate Programming}{81}{section.9.1}%
+\contentsline {chapter}{References}{83}{section*.63}%
 \babel@toc {american}{}\relax 
 \babel@toc {american}{}\relax 
 \babel@toc {american}{}\relax 

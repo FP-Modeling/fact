@@ -61,8 +61,8 @@ iterToTime interv solver n st =
             delta RungeKutta4 3 = dt solver
 \end{spec}
 
-A transformation from iteration to time depends on and on the chosen solver method due to their next step functions.
-For instance, the second and forth order Runge-Kutta methods have more stages, and it uses fractions of the time step for more granular use of the derivative function. This is why lines 11 and 12 are using half of the time step. Moreover, all discrete time calculations assume that the value starts from the beginning of the simulation (\textit{startTime}). The result is obtained by the sum of the initial value, the solver-dependent \textit{delta} function and the iteration times the solver time step (line 6).
+A transformation from iteration to time depends on the chosen solver method due to their next step functions.
+For instance, the second and fourth order Runge-Kutta methods have more stages, and it uses fractions of the time step for more granular use of the derivative function. This is why lines 11 and 12 are using half of the time step. Moreover, all discrete time calculations assume that the value starts from the beginning of the simulation (\textit{startTime}). The result is obtained by the sum of the initial value, the solver-dependent \textit{delta} function and the iteration times the solver time step (line 6).
 
 There is, however, a missing transition: from the discrete time domain to the domain of interest in CPS --- the continuous time axis. This means that if the time value $t_x$ is not present from the solver point of view, it is not possible to obtain $y(t_x)$. The proposed solution is to add an \textit{interpolation} function into the pipeline, which addresses this transition. Thus, values in between solver steps will be transfered back to the continuous domain.
 
@@ -99,7 +99,7 @@ normally; \texttt{SolverStage} will be used.
 
 Next, the driver needs to be updated. So, the proposed mechanism is the following: the driver will identify these corner cases and communicate to the integrator --- via the new \texttt{Stage} field in the \texttt{Solver} data type --- that the interpolation needs to be added into the pipeline of execution. When this flag is not on, i.e., the \texttt{Stage} informs to continue execution normally, the implementation goes as the previous chapters detailed. This behaviour is altered \textit{only} in particular scenarios, which the driver will be responsible for identifying.
 
-It remains to re-implement the driver functions. The driver will notify the integrator that an interpolation needs to take place. The code below shows these changes:
+It remains to re-implement the driver functions. The driver will notify the integrator that an interpolation needs to take place. The following code shows these changes:
 
 \ignore{
 \begin{code}
@@ -150,9 +150,9 @@ runCT m t sl =
 The implementation of \textit{iterationBnds} uses \textit{ceiling} function because this rounding is used to go to the iteration domain. However, given that the interpolation \textit{requires} both solver steps --- the one that came before $t_x$ and the one immediately
 afterwards --- the number of iterations needs always to surpass the requested time. For instance, the time 5.3 seconds will demand the fifth and sixth iterations with a time step of 1 second. When using \textit{ceiling}, it is assured that the value of interest will be in the interval of computed values. So, when dealing with 5.3, the integrator will calculate all values up to 6 seconds.
 
-Lines 5 to 15 are equal to the previous implementation of the \textit{runCT} function. On line 16, the discrete version of \texttt{t}, \texttt{disct}, will be used for detecting if an
+Lines 5 to 15 (from the previous code snippet) are equal to the previous implementation of the \textit{runCT} function. On line 16, the discrete version of \texttt{t}, \texttt{disct}, will be used for detecting if an
 interpolation will be needed. All the simulation values are being prepared on line 17 --- Haskell being a lazy language the label \texttt{values} will not necessarily
-be evaluated strictly. Line 19 establishes a condition, checkiing if the difference between the time of interest \texttt{t} and \texttt{disct} is greater or not
+be evaluated strictly. Line 19 establishes a condition, checking if the difference between the time of interest \texttt{t} and \texttt{disct} is greater or not
 than a value \texttt{epslon}, to identify if
 the normal flow of execution can proceed. If it can't, on line 22 a new record of type \texttt{Parameters} is created (\texttt{ps}), especifically to these special cases of mismatch between discrete and continuous time. The main difference within this special record is relevant: the stage field of the solver is being set to \texttt{Interpolate}.
 Finally, on line 25 the last element from the list of outputs \texttt{values} is removed and it is appended the simulation using the created \texttt{ps} with
@@ -185,7 +185,7 @@ interpolate m = do
       in z1 + (z2 - z1) * pure ((t - t1) / (t2 - t1))
 \end{code}
 
-Lines 1 to 5 continues the simulation with the normal workflow. If a corner case comes in, the reminaing code applies \textit{linear interpolation} to it. It accomplishes this by first comparing the next and previous discrete times (lines 16 and 19) relative to \texttt{x} (line 11) --- the discrete counterpart of the time of interest \texttt{t} (line 9). These time points are calculated by their correspondent iterations (lines 12 and 13). Then, the integrator calculates the outcomes at these two points, i.e., do applications of the previous and next modeled times points with their respective parametric records (lines 22 and 23). Finally, line 24 executes the linear interpolation with the obtained values that surround the non-discrete time point. This particular interpolation was chosen for the sake of simplicity, but it can be replaced by higher order methods. Figure \ref{fig:interpolate} illustrates the effect of the \textit{interpolate} function when converting domains.
+Lines 1 to 5 (from the previuos code snippet) continues the simulation with the normal workflow. If a corner case comes in, the reminaing code applies \textit{linear interpolation} to it. It accomplishes this by first comparing the next and previous discrete times (lines 16 and 19) relative to \texttt{x} (line 11) --- the discrete counterpart of the time of interest \texttt{t} (line 9). These time points are calculated by their correspondent iterations (lines 12 and 13). Then, the integrator calculates the outcomes at these two points, i.e., do applications of the previous and next modeled times points with their respective parametric records (lines 22 and 23). Finally, line 24 executes the linear interpolation with the obtained values that surround the non-discrete time point. This particular interpolation was chosen for the sake of simplicity, but it can be replaced by higher order methods. Figure \ref{fig:interpolate} illustrates the effect of the \textit{interpolate} function when converting domains.
 
 \begin{spec}
 updateInteg :: Integrator -> CT Double -> CT ()

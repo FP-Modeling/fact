@@ -25,7 +25,7 @@ will present \textit{FFACT}, an evolution of FACT which aims to reduce the noise
 
 Chapter 4, \textit{Execution Walkthrough}, described the semantics and usability on an example of a system in mathematical specification
 and its mapping to a simulation-ready description provided by FACT.
-Below we have this example modeled using FACT (same code as provided in Section~\ref{sec:intro}):
+We have this example modeled using FACT (same code as provided in Section~\ref{sec:intro}):
 %
 \vspace{0.1cm}
 \begin{spec}
@@ -60,7 +60,15 @@ a specific sequence of steps to complete a model for any simulation:
 \item Update integrators with the actual ODEs of interest (via the use of \textit{updateInteg}).
 \end{enumerate}
 
-Visually, this step-by-step list for FACT's models follow the pattern detailed in Figure~\ref{fig:modelPipe} in Chapter 4, \textit{Execution Walkthrough}.
+Visually, this step-by-step list for FACT's models follow the pattern detailed in Figure~\ref{fig:modelPipe} in Chapter 4, \textit{Execution Walkthrough}:
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[width=0.97\linewidth]{MastersThesis/img/ModelPipeline}
+\end{center}
+\caption[Execution pipeline of a model.]{Pipeline of execution when creating a model in \texttt{FACT}.}
+\end{figure}
+
 More importantly, \emph{all} those steps are visible and transparent from an usability's point of view.
 Hence, a system's designer \emph{must} be aware of this \emph{entire} sequence of mandatory steps, even if his interest probably only relates to lines 12 to 14.
 Although one's goal is being able to specify a system and start a simulation, there is no escape -- one has to bear the noise created due to
@@ -75,14 +83,14 @@ required piece to get rid of the \texttt{Integrator} type, thus also removing it
 \section{The Fixed-Point Combinator}
 \label{subsec:fix}
 
-It is worth noting that the term \textit{fixed-point} has different meanings in the domains of engineering and mathematics. When referecing the
+It is worth noting that the term \textit{fixed-point} has different meanings in the domains of engineering and mathematics. When referencing the
 fractional representations within a computer, one may use the \textit{fixed-point method}. Thus, to avoid confusion, the following is the definition
 of such concept in this dissertation, alongside a set of examples of its use case as a mathematical combinator that can be used to implement recursion.
 
 On the surface, the fixed-point combinator is a simple mapping that fulfills the following property:
 a point \emph{p} is a fixed-point of a function \emph{f} if \emph{f(p)} lies on the identity function, i.e., \emph{f(p) = p}.
 Not all functions have fixed-points, and some functions may have more than one~\cite{tennent1991}.
-Further, we seek to establish theorems and algorithms in which one can guarantees fixed-points and their uniqueness, such as the Banach fixed-point theorem~\cite{bryant1985}.
+Further, we seek to establish theorems and algorithms in which one can guarantee fixed-points and their uniqueness, such as the Banach fixed-point theorem~\cite{bryant1985}.
 In programming terms, by following specific requirements one could find the fixed-point of a function via an iterative process
 that involves going back and forth between it and the identity function until the difference in outcomes is less than or equal to an arbitrary~$\epsilon$.
 
@@ -158,8 +166,7 @@ Furthermore, this process can be used in conjunction with monadic operations as 
 \end{purespec}
 \vspace{-0.1cm}
 %
-This combination, however, cannot address \emph{all} cases when using side-effects.
-In the above, executing the side-effect in \texttt{countDown} do not contribute to its own \emph{definition}.
+This combination, however, cannot address \emph{all} cases when using side-effects. Executing the side-effect in \texttt{countDown} do not contribute to its own \emph{definition}.
 There is no construct or variable that requires the side-effect to be executed in order to determine its meaning.
 This ability -- being able to set values based on the result of running side-effects whilst keep the fixed-point running -- is something of interest because, as we are about to see, this allows the use of \emph{cyclic} definitions.
 
@@ -195,7 +202,7 @@ The former case, however, needs a special kind of recursion, so-called \emph{val
 
 As we are about to understand on Section~\ref{sec:ffact}, the use of value recursion to have monadic's bindings with the same convenience of \texttt{letrec} will be the key to our improvement on FFACT over FACT.
 Fundamentally, it will \emph{tie the recursion knot} done in FACT via the complicated implicit recursion mentioned in Section~\ref{sec:integrator}.
-In terms of implementation, this is being achieved by the use of the \texttt{mfix} construct~\cite{levent2000}, which is accompained by a \emph{recursive do} syntax sugar~\cite{levent2002}, with the caveat of not being able to do shadowing -- much like the \texttt{let} and \texttt{where} clauses in Haskell.
+In terms of implementation, this is being achieved by the use of the \texttt{mfix} construct~\cite{levent2000}, which is accompanied by a \emph{recursive do} syntax sugar~\cite{levent2002}, with the caveat of not being able to do shadowing -- much like the \texttt{let} and \texttt{where} clauses in Haskell.
 In order for a type to be able to use this construct, it should follow specific algebraic laws~\cite{leventThesis} to then implement the \texttt{MonadFix} type class found in \texttt{Control.Monad.Fix}~\footnote{\texttt{Control.Monad.Fix} \href{https://hackage.haskell.org/package/base-4.21.0.0/docs/Control-Monad-Fix.html}{\textcolor{blue}{hackage documentation}}.} package:
 %
 %% \vspace{-0.8cm}
@@ -239,7 +246,7 @@ updateInteg integ diff = do
   liftIO $ writeIORef (computation integ) z
 \end{purespec}
 
-\figuraBib{createInteg}{Diagram of \texttt{createInteg} primitive for intuition.}{}{fig:createIntegDiagram}{width=.97\textwidth}%
+\figuraBib{createInteg}{Diagram of \texttt{createInteg} primitive for intuition}{}{fig:createIntegDiagram}{width=.97\textwidth}%
 
 \section{Tweak IV: Fixing FACT}
 \label{sec:ffact}
@@ -307,7 +314,7 @@ integ diff i =
 \end{code}
 \vspace{-0.2cm}
 %
-This new functin received the differential equation of interest, named \texttt{diff}, and the initial condition of the simulation, identified
+This new function received the differential equation of interest, named \texttt{diff}, and the initial condition of the simulation, identified
 as \texttt{i}, on line 2. Interpolation and memoization requirements from FACT are being maintained, as shown on line 3. Lines 3 to 6 demonstrate the use case for FFACT's \texttt{mdo}.
 A continuous machine created by the memoization function (line 3), \texttt{y}, uses another continuous machine, \texttt{z}, yet to be defined.
 This continuous machine, defined on line 4, retrieves the numerical method chosen by a value of type \texttt{Parameters}, via the function \texttt{f}.
@@ -329,7 +336,7 @@ lorenzSystem = runCT lorenzModel 100 lorenzSolver
 
 Not surprisingly, the results of this new approach using the monadic fixed-point combinator are very similar to the
 performance metrics depicted in Chapter 6, \textit{Caching the Speed Pill} --- indicating that we are \textit{not} trading performance
-for a gain in conciseness. Figure~\ref{fig:fixed-graph} shows the new results:
+for a gain in conciseness. Figure~\ref{fig:fixed-graph} shows the new results.
 
 \figuraBib{Graph3}{Results of FFACT are similar to the final version of FACT.}{}{fig:fixed-graph}{width=.97\textwidth}%
 

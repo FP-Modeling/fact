@@ -1,5 +1,6 @@
-Chapter 2 established the foundation of the implementation, introducing FP concepts and the necessary types
-to model continuous time simulation --- with \texttt{CT} being the main type. Chapter 3 extended its power via
+Chapter 2 established the foundation of the implementation, introducing
+functional programming (FP) concepts and the necessary types
+to model continuous time simulation --- with continuous time machines (\texttt{CT}) being the main type. Chapter 3 extended its power via
 the implementation of typeclasses to add functionality for the \texttt{CT} type, such as binary operations and
 numerical representation. Further, it also introduced the \texttt{Integrator}, a CRUD-like interface
 for it, as well as the available numerical methods for simulation.
@@ -17,6 +18,8 @@ The \texttt{FACT} EDSL~\footnote{\texttt{FACT} \href{https://github.com/FP-Model
 
 \section{Future Work}
 
+The following subsections describe the three main areas for future improvements in \texttt{FFACT}: formalism, possible extensions, and code refactoring. 
+
 \subsection{Formalism}
 
 One of the main concerns is the \textit{correctness} of \texttt{FACT} between its specification and its final implementation, i.e., refinement. Shannon's GPAC concept acted as the specification of the project, whilst the proposed software attempted to implement it. The criteria used to verify that the software fulfilled its goal were by using it for simulation and via code inspection, both of which are based on human analysis. This connection, however, was \textit{not} formally verified --- no model checking tools were used for its validation. In order to know that the mathematical description of the problem is being correctly mapped onto a model representation some formal work needs to be done. This was not explored, and it was considered out of the scope for this work.
@@ -26,7 +29,7 @@ use of the chosen typeclasses.
 
 \subsection{Extensions}
 
-As explained in Chapters 1 and 2, there are some extensions that increase the capabilities of Shannon's original GPAC model. One of these extensions, FF-GPAC, was the one chosen to be modeled via software. However, there are other extensions that not only expand the types of functions that can be modeled, e.g., hypertranscendental functions, but also explore new properties, such as Turing universitality~\cite{Graca2004, Graca2016}. The proposed software didn't touch on those enhancements and restricted the set of functions to only algebraic functions. More recent extensions of GPAC should also be explored to simulate an even broader set of functions present in the continuous time domain.
+As explained in Chapters 1 and 2, there are some extensions that increase the capabilities of Shannon's original GPAC model. One of these extensions, FF-GPAC, was the one chosen to be modeled via software. However, there are other extensions that not only expand the types of functions that can be modeled, e.g., hypertranscendental functions, but also explore new properties, such as Turing universality~\cite{Graca2004, Graca2016}. The proposed software didn't touch on those enhancements and restricted the set of functions to only algebraic functions. More recent extensions of GPAC should also be explored to simulate an even broader set of functions present in the continuous time domain.
 
 In regards to numerical methods, one of the immediate improvements would be to use \textit{adaptive} size for the solver time step that \textit{change dynamically} in run time. This strategy controls the errors accumulated when using the derivative by adapting the size of the time step. Hence, it starts backtracking previous steps with smaller time steps until some error threshold is satisfied, thus providing finer and granular control to the numerical methods, coping with approximation errors due to larger time steps.
 
