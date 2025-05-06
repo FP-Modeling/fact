@@ -1,4 +1,4 @@
-\documentclass[qualificacao,mestrado,ppgi]{UnB-CIC}
+\documentclass[mestrado,ppgi]{UnB-CIC}
 
 %include polycode.fmt
 %include MastersThesis/lineno.fmt
@@ -32,6 +32,9 @@
 \newminted[code]{haskell}{breaklines,autogobble,linenos=true, numberblanklines=false, fontsize=\footnotesize}
 \newminted[spec]{haskell}{breaklines,autogobble,linenos=true, numberblanklines=false, fontsize=\footnotesize}
 \newminted[purespec]{haskell}{breaklines,autogobble,linenos=false, numberblanklines=false, fontsize=\footnotesize}
+\newminted[matlab]{matlab}{breaklines,autogobble,linenos=false, numberblanklines=false, fontsize=\footnotesize}
+\newminted[python]{python}{breaklines,autogobble,linenos=false, numberblanklines=false, fontsize=\footnotesize}
+\newminted[mathematica]{mathematica}{breaklines,autogobble,linenos=false, numberblanklines=false, fontsize=\footnotesize}
 
 \orientador{\prof Eduardo Peixoto}{CIC/UnB}%
 \coorientador{\prof José Edil Guimarães}{ENE/UnB}%
@@ -43,7 +46,7 @@
 
 \autor{Eduardo L.}{Rocha}%
 
-\titulo{Continuous Time Modeling Made Functional: Fixing Differential Equations with Haskell}%
+\titulo{FFACT: A Fix-based Domain-Specific Language based on a Functional Algebra for Continuous Time Modeling}%
 
 \palavraschave{equações diferenciais, sistemas contínuos, GPAC, integrador, ponto fixo, recursão monádica}
 \keywords{differential equations, continuous systems, GPAC, integrator, fixed-point, fixed-point combinator, monadic recursion}%

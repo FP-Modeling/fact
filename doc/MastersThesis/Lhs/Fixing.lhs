@@ -18,14 +18,14 @@ The last improvement for FACT is in terms of \textit{familiarity}. When someone 
 the main goal should be that the least amount of friction when using the simulation software, the better.
 Hence, the requirement of knowing implementation details or programming language details is something we would like to avoid, given that
 it leaks noise into the designer's mind. The designer's concern should be to pay attention to the system's description and FACT having an extra
-step of translation or noisy setups just adds an extra burden with no real gains on the engineering of simulating continuous time. This chapter
+step of translation or noisy setups just adds an extra burden with no real gains on the engineering of simulating continuous time. This Chapter
 will present \textit{FFACT}, an evolution of FACT which aims to reduce the noise even further.
 
 \section{Integrator's Noise}
 
 Chapter 4, \textit{Execution Walkthrough}, described the semantics and usability on an example of a system in mathematical specification
 and its mapping to a simulation-ready description provided by FACT.
-Below we have this example modeled using FACT (same code as provided in section~\ref{sec:intro}):
+We have this example modeled using FACT (same code as provided in Section~\ref{sec:intro}):
 %
 \vspace{0.1cm}
 \begin{spec}
@@ -51,7 +51,7 @@ lorenzModel =
 
 It is noticeable, however, that FACT imposes a significant amount of overhead from the user's perspective due to the \textbf{explicit use of integrators} for most memory-required simulations.
 When creating stateful circuits, an user of FACT is obligated to use the integrator's API, i.e., use the functions \texttt{createInteg} (lines 6 to 8), \texttt{readInteg} (lines 9 to 11), and \texttt{updateInteg} (lines 12 to 14). Although these functions remove the
-management of the aforementioned implicit mutual recursion mentioned in chapter 3, \textit{Effectful Integrals}, from the user, it is still required to follow
+management of the aforementioned implicit mutual recursion mentioned in Chapter 3, \textit{Effectful Integrals}, from the user, it is still required to follow
 a specific sequence of steps to complete a model for any simulation:
 %
 \begin{enumerate}
@@ -60,7 +60,15 @@ a specific sequence of steps to complete a model for any simulation:
 \item Update integrators with the actual ODEs of interest (via the use of \textit{updateInteg}).
 \end{enumerate}
 
-Visually, this step-by-step list for FACT's models follow the pattern detailed in Figure~\ref{fig:modelPipe} in chapter 4, \textit{Execution Walkthrough}.
+Visually, this step-by-step list for FACT's models follow the pattern detailed in Figure~\ref{fig:modelPipe} in Chapter 4, \textit{Execution Walkthrough}:
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[width=0.97\linewidth]{MastersThesis/img/ModelPipeline}
+\end{center}
+\caption[Execution pipeline of a model.]{Pipeline of execution when creating a model in \texttt{FACT}.}
+\end{figure}
+
 More importantly, \emph{all} those steps are visible and transparent from an usability's point of view.
 Hence, a system's designer \emph{must} be aware of this \emph{entire} sequence of mandatory steps, even if his interest probably only relates to lines 12 to 14.
 Although one's goal is being able to specify a system and start a simulation, there is no escape -- one has to bear the noise created due to
@@ -75,10 +83,14 @@ required piece to get rid of the \texttt{Integrator} type, thus also removing it
 \section{The Fixed-Point Combinator}
 \label{subsec:fix}
 
+It is worth noting that the term \textit{fixed-point} has different meanings in the domains of engineering and mathematics. When referencing the
+fractional representations within a computer, one may use the \textit{fixed-point method}. Thus, to avoid confusion, the following is the definition
+of such concept in this dissertation, alongside a set of examples of its use case as a mathematical combinator that can be used to implement recursion.
+
 On the surface, the fixed-point combinator is a simple mapping that fulfills the following property:
 a point \emph{p} is a fixed-point of a function \emph{f} if \emph{f(p)} lies on the identity function, i.e., \emph{f(p) = p}.
 Not all functions have fixed-points, and some functions may have more than one~\cite{tennent1991}.
-Further, we seek to establish theorems and algorithms in which one can guarantees fixed-points and their uniqueness, such as the Banach fixed-point theorem~\cite{bryant1985}.
+Further, we seek to establish theorems and algorithms in which one can guarantee fixed-points and their uniqueness, such as the Banach fixed-point theorem~\cite{bryant1985}.
 In programming terms, by following specific requirements one could find the fixed-point of a function via an iterative process
 that involves going back and forth between it and the identity function until the difference in outcomes is less than or equal to an arbitrary~$\epsilon$.
 
@@ -137,7 +149,7 @@ For readers unfamiliar with the use of this combinator, equational reasoning~\ci
 ...
 \end{lstlisting}
 
-We left as exercise for the reader to check that the result of this process will yield the factorial of 5, i.e., 120.
+The result of this process will yield the factorial of 5, i.e., 120.
 When using \texttt{fix} to define recursive processes, the function being \emph{applied} to it must be the one defining the convergence criteria for the iterative process of looking for the fixed-point.
 In our factorial case, this is done via the conditional check at the beginning of body of the lambda.
 The fixed point combinator's responsibility is to keep the \emph{repetition} process going -- something that may diverge and run out of computer resources.
@@ -154,8 +166,7 @@ Furthermore, this process can be used in conjunction with monadic operations as 
 \end{purespec}
 \vspace{-0.1cm}
 %
-This combination, however, cannot address \emph{all} cases when using side-effects.
-In the above, executing the side-effect in \texttt{countDown} do not contribute to its own \emph{definition}.
+This combination, however, cannot address \emph{all} cases when using side-effects. Executing the side-effect in \texttt{countDown} do not contribute to its own \emph{definition}.
 There is no construct or variable that requires the side-effect to be executed in order to determine its meaning.
 This ability -- being able to set values based on the result of running side-effects whilst keep the fixed-point running -- is something of interest because, as we are about to see, this allows the use of \emph{cyclic} definitions.
 
@@ -185,13 +196,13 @@ By allowing this behavior, mutually recursive bindings are made possible and thu
 Haskell's vanilla \texttt{let} already acts like a \texttt{letrec}, and it would be useful to replicate this property to monadic bindings as well.
 
 In the case of the \texttt{counter} example, the execution of a side-effect is mandatory to evaluate the values of the bindings, such as \texttt{next}, \texttt{inc}, \texttt{out}, and \texttt{zero} (lines 2 to 5).
-In contrast, the example \texttt{countDown} in section~\ref{subsec:fix} has none of its bindings locked by side-effects, e.g, the bindings \texttt{f} and \texttt{n} have nothing to do with the effect of printing a message on \texttt{stdout}.
+In contrast, the example \texttt{countDown} in Section~\ref{subsec:fix} has none of its bindings locked by side-effects, e.g, the bindings \texttt{f} and \texttt{n} have nothing to do with the effect of printing a message on \texttt{stdout}.
 When dealing with the latter of these cases, the usual fixed-point combinator is enough to model its recursion.
 The former case, however, needs a special kind of recursion, so-called \emph{value recursion}~\cite{leventThesis}.
 
 As we are about to understand on Section~\ref{sec:ffact}, the use of value recursion to have monadic's bindings with the same convenience of \texttt{letrec} will be the key to our improvement on FFACT over FACT.
 Fundamentally, it will \emph{tie the recursion knot} done in FACT via the complicated implicit recursion mentioned in Section~\ref{sec:integrator}.
-In terms of implementation, this is being achieved by the use of the \texttt{mfix} construct~\cite{levent2000}, which is accompained by a \emph{recursive do} syntax sugar~\cite{levent2002}, with the caveat of not being able to do shadowing -- much like the \texttt{let} and \texttt{where} constructs in Haskell.
+In terms of implementation, this is being achieved by the use of the \texttt{mfix} construct~\cite{levent2000}, which is accompanied by a \emph{recursive do} syntax sugar~\cite{levent2002}, with the caveat of not being able to do shadowing -- much like the \texttt{let} and \texttt{where} clauses in Haskell.
 In order for a type to be able to use this construct, it should follow specific algebraic laws~\cite{leventThesis} to then implement the \texttt{MonadFix} type class found in \texttt{Control.Monad.Fix}~\footnote{\texttt{Control.Monad.Fix} \href{https://hackage.haskell.org/package/base-4.21.0.0/docs/Control-Monad-Fix.html}{\textcolor{blue}{hackage documentation}}.} package:
 %
 %% \vspace{-0.8cm}
@@ -235,7 +246,7 @@ updateInteg integ diff = do
   liftIO $ writeIORef (computation integ) z
 \end{purespec}
 
-\figuraBib{createInteg}{Diagram of \texttt{createInteg} primitive for intuition.}{}{fig:createIntegDiagram}{width=.97\textwidth}%
+\figuraBib{createInteg}{Diagram of \texttt{createInteg} primitive for intuition}{}{fig:createIntegDiagram}{width=.97\textwidth}%
 
 \section{Tweak IV: Fixing FACT}
 \label{sec:ffact}
@@ -303,7 +314,7 @@ integ diff i =
 \end{code}
 \vspace{-0.2cm}
 %
-This new functin received the differential equation of interest, named \texttt{diff}, and the initial condition of the simulation, identified
+This new function received the differential equation of interest, named \texttt{diff}, and the initial condition of the simulation, identified
 as \texttt{i}, on line 2. Interpolation and memoization requirements from FACT are being maintained, as shown on line 3. Lines 3 to 6 demonstrate the use case for FFACT's \texttt{mdo}.
 A continuous machine created by the memoization function (line 3), \texttt{y}, uses another continuous machine, \texttt{z}, yet to be defined.
 This continuous machine, defined on line 4, retrieves the numerical method chosen by a value of type \texttt{Parameters}, via the function \texttt{f}.
@@ -324,10 +335,155 @@ lorenzSystem = runCT lorenzModel 100 lorenzSolver
 \end{code}
 
 Not surprisingly, the results of this new approach using the monadic fixed-point combinator are very similar to the
-performance metrics depicted in chapter 6, \textit{Caching the Speed Pill}. Figure~\ref{fig:fixed-graph} shows the new results:
+performance metrics depicted in Chapter 6, \textit{Caching the Speed Pill} --- indicating that we are \textit{not} trading performance
+for a gain in conciseness. Figure~\ref{fig:fixed-graph} shows the new results.
 
 \figuraBib{Graph3}{Results of FFACT are similar to the final version of FACT.}{}{fig:fixed-graph}{width=.97\textwidth}%
 
+\newpage
+
+\section{Examples and Comparisons}
+\label{sec:examples}
+
+In order to assess how \textit{concise} model can be in FFACT, in comparison with the mathematical descriptions of the models,
+we present comparisons between this dissertation's proposed implementation and the same example in SimulinkSimulink~\footnote{Simulink \href{http://www.mathworks.com/products/simulink/}{\textcolor{blue}{documentation}}.}, Matlab~\footnote{Matlab \href{https://www.mathworks.com/products/matlab.html}{\textcolor{blue}{documentation}}.}, Mathematica~\footnote{Mathematica \href{https://www.wolfram.com/mathematica/}{\textcolor{blue}{documentation}}.}, and \texttt{Yampa}~\footnote{Yampa \href{https://hackage.haskell.org/package/Yampa}{\textcolor{blue}{hackage documentation}}.}. It is worth noting that the last one, \texttt{Yampa}, is also implemented in Haskell as a HEDSL. In each pair of comparisons both conciseness and differences will be considered when implementing the Lorenz Attractor model. Ideally, a system's description should contain the \textit{least} amount of notation noise and artifacts to his mathematical counterpart. It is worth noting that these examples only show \textit{the system's description}, i.e., the \textit{drivers} of the simulations
+are being omitted when not necessary to describe the system.
+
+Figure~\ref{fig:lorenz-simulink} depicts a side-by-side comparison between FFACT and Simulink. The Haskell HEDSL specifies a model in text format, whilst Simulink
+is a visual tool --- you draw a diagram that represents the system, including the feedback loop of integrators, something exposed in Simulink.
+A visual tool can be useful for educational purposes, and a pictorial version of FFACT could be made by an external tool that from a diagram
+it compiles down to the correspondent Haskell code of the HEDSL.
+
+\begin{figure}[ht!]
+  \begin{minipage}{0.45\linewidth}
+     \begin{purespec}
+        lorenzModel = mdo
+          x <- integ (sigma * (y - x)) 1.0
+          y <- integ (x * (rho - z) - y) 1.0
+          z <- integ (x * y - beta * z) 1.0
+          let sigma = 10.0
+              rho = 28.0
+              beta = 8.0 / 3.0
+          return $ sequence [x, y, z]          
+     \end{purespec}
+  \end{minipage}
+  \begin{minipage}{0.5\linewidth}
+      \centering
+      \includegraphics[width=0.95\linewidth]{MastersThesis/img/lorenzSimulink}
+  \end{minipage}
+\caption{Comparison of the Lorenz Attractor Model between FFACT and a Simulink implementation~\cite{Simulink}.}
+\label{fig:lorenz-simulink}
+\end{figure}
+
+Figure ~\ref{fig:lorenz-matlab} shows a comparison between FFACT and Matlab. The main differetiating factor between the two
+implementations is in Matlab the system, constructed via a separate lambda function (named \texttt{f} in the example), has the initial
+conditions of the system at \(t_0\) only added when calling the \textit{driver} of the simulation --- the call of the \texttt{ode45}
+function. In FFACT, the interval for the simulation and which numerical method will be used are completely separate of the system's
+description; a \textit{model}. Furthermore, Matlab's description of the system introduces some notation noise via the use of \texttt{vars}, exposing
+implementation details to the system's designer.
+
+\begin{figure}[ht!]
+  \begin{minipage}{0.45\linewidth}
+     \begin{purespec}
+        lorenzModel = mdo
+          x <- integ (sigma * (y - x)) 1.0
+          y <- integ (x * (rho - z) - y) 1.0
+          z <- integ (x * y - beta * z) 1.0
+          let sigma = 10.0
+              rho = 28.0
+              beta = 8.0 / 3.0
+          return $ sequence [x, y, z]          
+    \end{purespec}
+  \end{minipage} \;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;
+  \begin{minipage}{0.54\linewidth}
+    \begin{matlab}
+       sigma = 10;
+       beta = 8/3;
+       rho = 28;
+       f = @(t,vars) 
+           [sigma*(vars(2) - vars(1)); 
+            vars(1)*(rho - vars(3)) - vars(2); 
+            vars(1)*vars(2) - beta*vars(3)];
+       [t,vars] = ode45(f,[0 50],[1 1 1]);
+    \end{matlab}
+  \end{minipage}
+\caption{Comparison of the Lorenz Attractor Model between FFACT and a Matlab implementation.}
+\label{fig:lorenz-matlab}
+\end{figure}
+
+
+The next comparison is between Mathematica and FFACT, as depicted in Figure~\ref{fig:lorenz-mathematica}.
+Differently than Matlab, Mathematica uses the state variables' names when describing the system. However, just like
+with Matlab, the initial conditions of the system are only provided when calling the driver of the simulation. Moreover,
+there's significant noise in Mathematica's version in comparison to FFACT's version.
+
+\begin{figure}[ht!]
+  \begin{minipage}{0.45\linewidth}
+     \begin{purespec}
+        lorenzModel = mdo
+          x <- integ (sigma * (y - x)) 1.0
+          y <- integ (x * (rho - z) - y) 1.0
+          z <- integ (x * y - beta * z) 1.0
+          let sigma = 10.0
+              rho = 28.0
+              beta = 8.0 / 3.0
+          return $ sequence [x, y, z]          
+    \end{purespec}
+  \end{minipage} \;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;
+  \begin{minipage}{0.54\linewidth}
+    \begin{mathematica}
+       lorenzModel = NonlinearStateSpaceModel[
+          {{sigma (y - x),
+            x (rho - z) - y,
+            x y - beta z}, {}},
+          {x, y, z},
+          {sigma, rho, beta}];
+       soln[t_] = StateResponse[
+          {lorenzModel, {1, 1, 1}},
+          {10, 28, 8/3},
+          {t, 0, 50}];
+    \end{mathematica}
+  \end{minipage}
+\caption{Comparison of the Lorenz Attractor Model between FFACT and a Mathematica implementation.}
+\label{fig:lorenz-mathematica}
+\end{figure}
+
+Finally, Figure~\ref{fig:lorenz-yampa} contrasts FFACT with \texttt{Yampa}, another HEDSL for time modeling and simulation.
+Although \texttt{Yampa} is more powerful and expressive than FFACT --- \texttt{Yampa} can accomodate hybrid simulations with
+both \textit{discrete} and \textit{continuous} time modeling --- its approach introduces some noise in the Lorenz Attractor model.
+The introduction of \texttt{proc}, \texttt{pre}, \texttt{>>>}, \texttt{imIntegral}, and \texttt{-<} all introduce extra burden on the
+system's designer to describe the system. After learning about \texttt{proc-notation}~\cite{Yampa} and Arrows~\footnote{Arrows \href{https://hackage.haskell.org/package/base-4.18.1.0/docs/Control-Arrow.html}{\textcolor{blue}{hackage documentation}}.}, one can describe more complex systems in Yampa.
+
+\begin{figure}[ht!]
+  \begin{minipage}{0.45\linewidth}
+     \begin{purespec}
+        lorenzModel = mdo
+          x <- integ (sigma * (y - x)) 1.0
+          y <- integ (x * (rho - z) - y) 1.0
+          z <- integ (x * y - beta * z) 1.0
+          let sigma = 10.0
+              rho = 28.0
+              beta = 8.0 / 3.0
+          return $ sequence [x, y, z]          
+    \end{purespec}
+  \end{minipage} \;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;
+  \hspace{-2.4cm}
+  \begin{minipage}{0.64\linewidth}
+     \begin{purespec}
+        lorenzModel = proc () -> do
+          rec x <- pre >>> imIntegral 1.0 -< sigma*(y - x)
+              y <- pre >>> imIntegral 1.0 -< x*(rho - z) - y
+              z <- pre >>> imIntegral 1.0 -< (x*y) - (beta*z)
+              let sigma = 10.0
+                  rho = 28.0
+                  beta = 8.0 / 3.0
+          returnA -< (x, y, z)
+    \end{purespec}
+  \end{minipage}
+\caption{Comparison of the Lorenz Attractor Model between FFACT and a Yampa implementation.}
+\label{fig:lorenz-yampa}
+\end{figure}
+
 The function \texttt{integ} alone in FFACT ties the recursion knot previously done via the \texttt{computation} and \texttt{cache} fields from the original integrator data type in FACT.
-Hence, a lot of implementation noise of the DSL is kept away from the user --- the designer of the system --- when using FFACT. With this chapter, we addressed
-the third and final concerned explained in chapter 1, \textit{Introduction}. The final chapter, \textit{Conclusion}, will conclude this work, pointing out limitations of the project, as well as future improvements and final thoughts about the project.
+Hence, a lot of implementation noise of the DSL is kept away from the user --- the designer of the system --- when using FFACT. With this Chapter, we addressed
+the third and final concerned explained in Chapter 1, \textit{Introduction}. The final Chapter, \textit{Conclusion}, will conclude this work, pointing out limitations of the project, as well as future improvements and final thoughts about the project.
