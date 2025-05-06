@@ -37,36 +37,36 @@ By making an executable software capable of running continuous time simulations,
 Furthermore, this implementation is based on \texttt{Aivika}~\footnote{\texttt{Aivika} \href{https://github.com/dsorokin/aivika}{\textcolor{blue}{source code}}.} --- an open source multi-method library for simulating a variety of paradigms, including partial support for physical dynamics, written in Haskell. Our version is modified for our needs, such as demonstrating similarities between the implementation and GPAC, shrinking some functionality in favor of focusing on continuous time modeling, and re-thinking the overall organization of the project for better understanding, alongside code refactoring using other Haskell's abstractions. So, this reduced and refactored version of \texttt{Aivika}, so-called \texttt{FACT}~\footnote{\texttt{FACT} \href{https://github.com/FP-Modeling/fact/releases/tag/3.0}{\textcolor{blue}{source code}}.}, will be a Haskell Embedded Domain-Specific Language (HEDSL) within the model-based engineering domain. The built DSL will explore Haskell's specific features and details, such as the type system and typeclasses, to solve differential equations. Figure \ref{fig:introExample} shows a side-by-side comparison between the original implementation of Lorenz Attractor in FACT, presented in~\cite{Lemos2022}, and its final form, so-called FFACT, for the same physical system.
 
 \begin{figure}[ht!]
-  \begin{minipage}{0.45\linewidth}
+  \begin{minipage}{0.5\linewidth}
     \begin{purespec}
         -- FACT
         lorenzModel = do
-        integX <- createInteg 1.0
-        integY <- createInteg 1.0
-        integZ <- createInteg 1.0
-        let x = readInteg integX
-            y = readInteg integY
-            z = readInteg integZ
-            sigma = 10.0
-            rho = 28.0
-            beta = 8.0 / 3.0
-        updateInteg integX (sigma * (y - x))
-        updateInteg integY (x * (rho - z) - y)
-        updateInteg integZ (x * y - beta * z)
-        return $ sequence [x, y, z]
-    \end{purespec}
-  \end{minipage} \;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;
-  \begin{minipage}{0.45\linewidth}
-    \begin{purespec}
-        -- FFACT
-        lorenzModel = mdo
-          x <- integ (sigma * (y - x)) 1.0
-          y <- integ (x * (rho - z) - y) 1.0
-          z <- integ (x * y - beta * z) 1.0
-          let sigma = 10.0
+          integX <- createInteg 1.0
+          integY <- createInteg 1.0
+          integZ <- createInteg 1.0
+          let x = readInteg integX
+              y = readInteg integY
+              z = readInteg integZ
+              sigma = 10.0
               rho = 28.0
               beta = 8.0 / 3.0
-          return $ sequence [x, y, z]          
+          updateInteg integX (sigma * (y - x))
+          updateInteg integY (x * (rho - z) - y)
+          updateInteg integZ (x * y - beta * z)
+          return $ sequence [x, y, z]
+    \end{purespec}
+  \end{minipage} \;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;
+  \begin{minipage}{0.49\linewidth}
+    \begin{purespec}
+        -- FFACT
+        lorenzModel =
+          mdo x <- integ (sigma * (y - x)) 1.0
+              y <- integ (x * (rho - z) - y) 1.0
+              z <- integ (x * y - beta * z) 1.0
+              let sigma = 10.0
+                  rho = 28.0
+                  beta = 8.0 / 3.0
+              return $ sequence [x, y, z]          
     \end{purespec}
   \end{minipage}
 \caption{The translation between the world of software and the mathematical description of differential equations are more concise and explicit in \texttt{FFACT}.}
