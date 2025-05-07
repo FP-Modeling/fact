@@ -35,8 +35,6 @@ Composition rules that restrict how these units can be connected to one another.
   \item Each variable of integration of an integrator is the input \textit{t}.
 \end{itemize}
 
-During the definition of the DSL, parallels will map the aforementioned basic units and composition rules to the implementation. With this strategy, all the mathematical formalism leveraged for analog computers will drive the implementation in the digital computer. Although we do not formally prove a refinement between the GPAC theory, i.e., our specification, and the final implementation of \texttt{FACT}, is an attempt to build a tool with formalism taken into account; one of the most frequent critiques in the CPS domain, as explained in the previous Chapter.
-
 \section{The Shape of Information}
 \label{sec:types}
 
