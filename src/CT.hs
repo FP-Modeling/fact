@@ -1,4 +1,5 @@
 -- Copyright (c) 2009, 2010, 2011 David Sorokin <david.sorokin@gmail.com>
+-- Copyright (c) 2021-2025 Eduardo Lemos <dudulr10@gmail.com>, Edil Medeiros <j.edil@ene.unb.br>
 -- 
 -- All rights reserved.
 -- 
@@ -31,11 +32,11 @@
 
 -- |
 -- Module     : CT
--- Copyright  : Copyright (c) 2009-2011, David Sorokin <david.sorokin@gmail.com>
+-- Copyright  : Copyright (c) 2025, Eduardo Lemos <dudulr10@gmail.com>, Edil Medeiros <j.edil@ene.unb.br>
 -- License    : BSD3
 -- Maintainer : Eduardo Lemos Rocha <dudulr10@gmail.com>
 -- Stability  : stable
--- Tested with: GHC 8.10.7
+-- Tested with: GHC 9.6.6
 -- |
 {-# LANGUAGE FlexibleInstances #-}
 module CT 
