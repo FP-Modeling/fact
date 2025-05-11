@@ -38,8 +38,8 @@
 
 \orientador{\prof Eduardo Peixoto}{CIC/UnB}%
 \coorientador{\prof José Edil Guimarães}{ENE/UnB}%
-\coordenador{\prof João José Costa Gondim}{CIC/UnB}%
-\diamesano{11}{Feb}{2025}%
+\coordenador{\prof Rodrigo Bonifácio de Almeida}{CIC/UnB}%
+\diamesano{28}{April}{2025}%
 
 \membrobanca{\prof Rodrigo Bonifácio de Almeida}{CIC/UnB}%
 \membrobanca{\prof Denis Loubach}{ITA}%
