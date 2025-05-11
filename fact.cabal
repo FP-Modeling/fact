@@ -1,11 +1,5 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.35.2.
---
--- see: https://github.com/sol/hpack
---
--- hash: 38629f5b144697a3d779463747106f533252dca73ca44e2fe1e3338225eb8e66
-
 name:           fact
 version:        0.1.0.0
 description:    Please see the README on GitHub at <https://github.com/FP-Modeling/fact/blob/main/README.md>
@@ -13,13 +7,11 @@ homepage:       https://github.com/git@github.com:FP-Modeling/fact.git#readme
 bug-reports:    https://github.com/git@github.com:FP-Modeling/fact.git/issues
 author:         Eduardo Lemos Rocha
 maintainer:     dudulr10@gmail.com
-copyright:      2022 EduardoLR10
-license:        MIT
+copyright:      2025 EduardoLR10
 license-file:   LICENSE
 build-type:     Simple
 extra-source-files:
     README.md
-    ChangeLog.md
 
 source-repository head
   type: git

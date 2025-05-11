@@ -34,7 +34,7 @@ oldLorenzSystem = runCTFinal oldLorenzModel 100 lorenzSolver
 \end{code}
 }
 
-Previously, we presented in detail the latter core type of the implementation, the integrator, as well as why it can model an integral when used with the \texttt{CT} type. This Chapter is a follow-up, and its objectives are threefold: to describe how to map a set of differential equations to an executable model, to reveal which functions execute a given example and to present a guided-example as a proof-of-concept.
+Previously, we presented in detail the latter core type of the implementation, the integrator, as well as why it can model an integral when used with the \texttt{CT} type. This Chapter is a follow-up, and its objectives are threefold: to describe how to map a set of differential equations to an executable model, to reveal which functions execute a given example and to present a guided-example as a proof-of-concept. For a simplified guide on how to use the DSL, check the Appendix~\ref{appendix:manual}.
 
 \section{From Models to Models}
 

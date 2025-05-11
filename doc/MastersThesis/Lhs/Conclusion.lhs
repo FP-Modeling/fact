@@ -1,3 +1,6 @@
+Our motivation was to mitigate the high difficulty of modeling
+arbitrary closed feedback loops, using the DSL proposed by Medeiros et al.~\cite{Edil2018}. In their DSL, time-varying signals are abstracted by a function data type that updates the state of the system, and the topology of the system can only be described via a set of composition operators instead of dealing with the signals explicitly. In this work, we tackled this by proposing \texttt{FACT}: a reimplementation of the DSL based on a new implementation abstraction, called \texttt{CT}, whilst maintaining GPAC as the formal inspiration. This new data type holds the state of the system indirectly, thus allowing the user of the DSL to directly manipulate the signals when describing a system of equations. The guiding example used throughout this work, the Lorenz Attractor in Figure~\ref{fig:introExample}, is an example of a system with feedback loops that the former DSL could not express. Despite solving this expressivenness problem, \texttt{FACT} introduced an abstraction leaking, exposing to the users of the DSL internal implementation details. We solved this issue leveraging the monadic fixed-point combinator, resulting \texttt{FFACT} and thus improving the notation and usability. 
+
 Chapter 2 established the foundation of the implementation, introducing
 functional programming (FP) concepts and the necessary types
 to model continuous time simulation --- with continuous time machines (\texttt{CT}) being the main type. Chapter 3 extended its power via
@@ -7,14 +10,8 @@ for it, as well as the available numerical methods for simulation.
 As a follow-up, Chapter 4 raised intuition and practical understanding of \texttt{FACT} via a detailed walkthrough of an example.
 Chapter 5 explained and fixed the mix between different domains in the simulation, e.g., continuous time, discrete time and iterations,
 via an additional linear interpolation when executing a model. Chapter 6 addressed performance concerns via a memoization strategy. Finally,
-Chapter 7 introduced the fixed-point combinator in order to increase conciseness of the HEDSL, bringing more familiarity to systems designers
+Chapter 7 introduced the fixed-point combinator and its monadic counterpart in order to increase conciseness of the HEDSL, bringing more familiarity to systems designers
 experienced with the mathematical descriptions of their systems of interest. This notation enhancement is the defining feature between FACT and FFACT.
-
-\section{Final Thoughts}
-
-When Shannon proposed a formal foundation for the Differential Analyzer~\cite{Shannon}, mathematical abstractions were leveraged to model continuous time. However, after the transistor era, a new set of concepts that lack this formal basis was developed, and some of which crippled our capacity of simulating reality. Later, the need for some formalism made a comeback for modeling physical phenomena with abstractions that take \textit{time} into consideration. Models of computation~\cite{LeeModeling, LeeChallenges, LeeComponent, LeeSangiovanni} and the ForSyDe framework~\cite{Sander2017, Seyed2020} are examples of this change in direction. Nevertheless, Shannon's original idea is now being discussed again with some improvements~\cite{Graca2003, Graca2004, Graca2016} and being transposed to high level programming languages in the hybrid system domain~\cite{Edil2018}.
-
-The \texttt{FACT} EDSL~\footnote{\texttt{FACT} \href{https://github.com/FP-Modeling/fact/releases/tag/3.0}{\textcolor{blue}{source code}}.} follows this path of bringing CPS simulation to the highest level of abstraction, via the Haskell programming language, but still taking into account a formal background inspired by the GPAC model. The software uses advanced functional programming techniques to solve differential equations, mapping the abstractions to FF-GPAC's analog units. Although still limited by the discrete nature of numerical methods, the solution is performant and accurate enough for studies in the cyber-physical domain.
 
 \section{Future Work}
 
